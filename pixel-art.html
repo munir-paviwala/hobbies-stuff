@@ -55,6 +55,23 @@
 
     </div>
 
+    <!-- Lightbox -->
+    <div id="lightbox" class="lightbox">
+        <div class="lightbox-close" id="lightbox-close">&times;</div>
+        <div class="lightbox-content" id="lightbox-content">
+            <img id="lightbox-img" src="" alt="Artwork">
+            <video id="lightbox-video" class="lightbox-video" muted playsinline loop>
+                <source src="" type="video/mp4">
+            </video>
+        </div>
+        <button class="lightbox-info-btn" id="lightbox-info-btn">i</button>
+        <div class="lightbox-info-panel" id="lightbox-info-panel">
+            <div id="lightbox-title" class="placard-title"></div>
+            <div id="lightbox-meta" class="placard-meta"></div>
+            <div id="lightbox-note" class="placard-note"></div>
+        </div>
+    </div>
+
     <script src="js/gallery-data.js"></script>
     <script src="js/app.js"></script>
 </body>

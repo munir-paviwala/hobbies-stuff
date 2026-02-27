@@ -40,5 +40,14 @@ const galleryData = [
         video: "assets/videos/pixilart-1772212424573.mp4",
         note: "A larger canvas - 320 x 180. I wanted to try making more atmospheric art. I guess, this was okay for a first attempt."
     }
+    {
+        id: 6,
+        title: "Peacock",
+        artist: "Munir Paviwala",
+        date: "Feb 27, 2026",
+        image: "assets/peacock.png",
+        video: "assets/videos/peacock.mp4",
+        note: "Wanted a challenge. So went full Indian maximalism. This was so fun to make! Love those frames!"
+    }
 
 ];

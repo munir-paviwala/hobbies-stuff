@@ -120,4 +120,77 @@ document.addEventListener("DOMContentLoaded", () => {
             element.style.opacity = '1';
         }, 400); // Wait for CSS transition (0.4s) to finish before changing text
     }
+
+    // Lightbox Logic
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const lightboxVideo = document.getElementById('lightbox-video');
+    const lightboxInfoBtn = document.getElementById('lightbox-info-btn');
+    const lightboxInfoPanel = document.getElementById('lightbox-info-panel');
+    const lightboxClose = document.getElementById('lightbox-close');
+
+    const lightboxTitle = document.getElementById('lightbox-title');
+    const lightboxMeta = document.getElementById('lightbox-meta');
+    const lightboxNote = document.getElementById('lightbox-note');
+
+    // Open Lightbox
+    document.addEventListener('click', (e) => {
+        // Check if we are clicking a replay button so we don't open the lightbox then
+        if (e.target.classList.contains('replay-btn')) return;
+
+        // Find closest art-canvas element
+        const canvas = e.target.closest('.art-canvas');
+        if (canvas) {
+            const exhibit = canvas.closest('.editorial-exhibit');
+            if (exhibit && lightbox) {
+                const itemData = JSON.parse(exhibit.getAttribute('data-item'));
+
+                // Populate text
+                if (lightboxTitle) lightboxTitle.innerHTML = `<em>${itemData.title}</em>`;
+                if (lightboxMeta) lightboxMeta.innerHTML = `by ${itemData.artist.toUpperCase()} (${itemData.date})`;
+                if (lightboxNote) lightboxNote.innerHTML = itemData.note;
+
+                // Always start with the image so the user can zoom into it
+                lightboxVideo.style.display = 'none';
+                lightboxVideo.pause();
+
+                lightboxImg.style.display = 'block';
+                lightboxImg.src = itemData.image;
+                lightboxImg.alt = itemData.title;
+
+                // Show Lightbox and make sure info panel is hidden to start
+                lightboxInfoPanel.classList.remove('visible');
+                lightbox.classList.add('active');
+            }
+        }
+    });
+
+    // Close Lightbox
+    function closeLightbox() {
+        if (lightbox) {
+            lightbox.classList.remove('active');
+            if (lightboxInfoPanel) lightboxInfoPanel.classList.remove('visible');
+            if (lightboxVideo) lightboxVideo.pause();
+        }
+    }
+
+    if (lightboxClose) {
+        lightboxClose.addEventListener('click', closeLightbox);
+    }
+
+    // Close when clicking outside content (on the dark background)
+    if (lightbox) {
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox || e.target.classList.contains('lightbox-content')) {
+                closeLightbox();
+            }
+        });
+    }
+
+    // Toggle Info Panel
+    if (lightboxInfoBtn && lightboxInfoPanel) {
+        lightboxInfoBtn.addEventListener('click', () => {
+            lightboxInfoPanel.classList.toggle('visible');
+        });
+    }
 });
