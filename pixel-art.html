@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Art Gallery - Munir Paviwala</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- Editorial Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Outfit:wght@300;400;600&family=Press+Start+2P&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+
+<body class="editorial-layout">
+
+    <div class="split-gallery-container">
+
+        <!-- Left Side: Scrolling Art Feed -->
+        <main class="gallery-scroll-area">
+
+            <!-- Opening Spacer to allow greeting to shine -->
+            <div class="intro-spacer">
+                <p class="scroll-prompt fade-in">Scroll to explore. &darr;</p>
+            </div>
+
+            <div id="gallery-container">
+                <!-- Data populated via js -->
+            </div>
+
+            <!-- Bottom padding block so the last item can scroll up high enough -->
+            <div class="scroll-padding"></div>
+        </main>
+
+        <!-- Right Side: Fixed Masthead & Dialog -->
+        <aside class="fixed-editorial-masthead">
+
+            <a href="index.html" class="nav-back-link fade-in">&larr; Back to Box</a>
+
+            <div class="masthead-content">
+                <h1 class="editorial-title">Pixel Art<br>Gallery.</h1>
+                <p class="editorial-author">by Munir Paviwala</p>
+
+                <div class="editorial-context fade-in" id="dialog-text">
+                    Welcome. This is a collection of my 32x32 digital works. Take your time scrolling through the
+                    exhibits on the left.
+                </div>
+            </div>
+
+        </aside>
+
+    </div>
+
+    <script src="js/gallery-data.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>

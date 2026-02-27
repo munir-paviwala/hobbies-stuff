@@ -1,0 +1,386 @@
+/* main.css - Core structure and Editorial Chic styling */
+
+:root {
+    /* Editorial Typography */
+    --font-serif: 'Libre Baskerville', serif;
+    --font-sans: 'Outfit', sans-serif;
+    --font-retro: 'Press Start 2P', cursive;
+
+    /* Editorial Palette */
+    --bg-color: #FDFBF7;
+    /* Warm museum off-white */
+    --text-primary: #1A1A1A;
+    /* Deep charcoal almost black */
+    --text-secondary: #6A6A6A;
+    --border-subtle: #EAE5DE;
+
+    /* Pastel accents brought in minimally from previous theme */
+    --accent-pink: #f6c9d2;
+    --accent-purple: #daaae4;
+    --accent-blue: #708bd4;
+
+    --spacing-xs: 8px;
+    --spacing-sm: 16px;
+    --spacing-md: 32px;
+    --spacing-lg: 64px;
+    --spacing-xl: 120px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    overflow-x: hidden;
+}
+
+/* --- Base Landing Page Updates to match new vibe slightly --- */
+/* (We keep index somewhat retro but cleaner) */
+body:not(.editorial-layout) {
+    font-family: var(--font-retro);
+    background: linear-gradient(to bottom, #f6c9d2, #daaae4, #708bd4);
+    background-attachment: fixed;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    margin: 0 auto;
+    max-width: 800px;
+    text-align: center;
+}
+
+.pixel-box {
+    background: rgba(255, 255, 255, 0.8);
+    border: 2px solid #fff;
+    padding: 20px;
+    text-decoration: none;
+    color: #333;
+    display: inline-block;
+    margin: 10px;
+    border-radius: 4px;
+}
+
+
+/* ========================================================= */
+/* --- EDITORIAL CHIC SPLIT GALLERY (pixel-art.html) --- */
+/* ========================================================= */
+
+.editorial-layout {
+    font-family: var(--font-sans);
+    line-height: 1.6;
+}
+
+.split-gallery-container {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    max-width: 1800px;
+    margin: 0 auto;
+}
+
+/* --- LEFT SIDE: SCROLLING ART FEED --- */
+.gallery-scroll-area {
+    flex: 1 1 55%;
+    height: 100vh;
+    overflow-y: auto;
+    padding: var(--spacing-md) var(--spacing-xl);
+
+    /* Scroll Snapping for slideshow feel */
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+
+    /* Clean, invisible scrollbar */
+    scrollbar-width: none;
+    /* Firefox */
+}
+
+.gallery-scroll-area::-webkit-scrollbar {
+    display: none;
+    /* Chrome/Safari */
+}
+
+.intro-spacer {
+    height: 100vh;
+    /* Full viewport height for intro */
+    display: flex;
+    align-items: flex-end;
+    padding-bottom: var(--spacing-xl);
+    scroll-snap-align: start;
+    /* Snap the intro */
+}
+
+.scroll-prompt {
+    font-family: var(--font-serif);
+    font-style: italic;
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    animation: bounce 2s infinite ease-in-out;
+}
+
+@keyframes bounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(10px);
+    }
+}
+
+#gallery-container {
+    display: flex;
+    flex-direction: column;
+    gap: 30vh;
+    /* Massive spacing between pieces to isolate them */
+}
+
+.scroll-padding {
+    height: 100vh;
+    scroll-snap-align: end;
+}
+
+.editorial-exhibit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* Centered art piece */
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+
+    /* Snap each piece to the center of the screen */
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+}
+
+.editorial-exhibit.in-view {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* The Frame */
+.art-canvas {
+    width: 100%;
+    max-width: 800px;
+    /* Increased from 500px to make art much bigger */
+    aspect-ratio: 1;
+    background: #ffffff;
+    border: 1px solid var(--border-subtle);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: var(--spacing-lg);
+    /* Slightly more padding for the larger frame */
+
+    /* Ultra-soft, highly realistic drop shadow */
+    box-shadow:
+        0 20px 40px rgba(0, 0, 0, 0.05),
+        0 1px 3px rgba(0, 0, 0, 0.02);
+
+    transition: transform 0.5s ease;
+}
+
+.art-canvas:hover {
+    transform: scale(1.02);
+}
+
+.pixel-art-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    image-rendering: pixelated;
+    /* Maintaining crispness against smooth UI */
+}
+
+
+/* --- RIGHT SIDE: FIXED MASTHEAD --- */
+.fixed-editorial-masthead {
+    flex: 0 0 45%;
+    max-width: 600px;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: var(--spacing-xl) var(--spacing-xl) var(--spacing-xl) var(--spacing-lg);
+    border-left: 1px solid var(--border-subtle);
+}
+
+.nav-back-link {
+    position: absolute;
+    top: var(--spacing-md);
+    right: var(--spacing-xl);
+    text-decoration: none;
+    color: var(--text-secondary);
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+    transition: color 0.3s ease;
+}
+
+.nav-back-link:hover {
+    color: var(--text-primary);
+}
+
+.masthead-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.editorial-title {
+    font-family: var(--font-serif);
+    font-size: clamp(3rem, 5vw, 6rem);
+    line-height: 0.95;
+    letter-spacing: -2px;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-xs);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+    transform-origin: top left;
+}
+
+body.scrolled-past .editorial-title {
+    opacity: 0;
+    transform: translateY(-20px);
+    pointer-events: none;
+}
+
+.editorial-author {
+    font-family: var(--font-sans);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-lg);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+body.scrolled-past .editorial-author {
+    opacity: 0;
+    transform: translateY(-20px);
+    pointer-events: none;
+}
+
+.editorial-avatar-container {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: var(--border-subtle);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: var(--spacing-sm);
+}
+
+.minimal-avatar {
+    width: 200%;
+    height: 200%;
+    object-fit: cover;
+    image-rendering: pixelated;
+    object-position: top center;
+}
+
+.editorial-context {
+    font-family: var(--font-sans);
+    font-size: 1.1rem;
+    font-weight: 300;
+    line-height: 1.8;
+    color: var(--text-primary);
+    max-width: 400px;
+
+    /* Smooth fade between text changes */
+    transition: opacity 0.4s ease;
+}
+
+.editorial-context.scrolled-past {
+    opacity: 0;
+    height: 0;
+    overflow: hidden;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+/* Museum Placard Styling */
+.placard-title {
+    font-family: var(--font-serif);
+    font-size: 1.4rem;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.placard-meta {
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.placard-note {
+    font-size: 1.1rem;
+    font-weight: 300;
+    line-height: 1.8;
+}
+
+.fade-in {
+    animation: fadeIn 1.5s ease forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 1024px) {
+    .split-gallery-container {
+        flex-direction: column;
+    }
+
+    .fixed-editorial-masthead {
+        flex: none;
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+        position: relative;
+        border-left: none;
+        border-bottom: 1px solid var(--border-subtle);
+        padding: var(--spacing-lg) var(--spacing-md);
+        background: var(--bg-color);
+        z-index: 10;
+        min-height: 40vh;
+    }
+
+    .gallery-scroll-area {
+        padding: var(--spacing-md);
+    }
+
+    .editorial-title {
+        font-size: 3.5rem;
+    }
+}

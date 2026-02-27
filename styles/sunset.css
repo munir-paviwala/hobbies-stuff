@@ -1,0 +1,89 @@
+/* sunset.css - Pastel Sunset Theme Variables and Specifics */
+
+.theme-sunset {
+    /* Color Palette based on pastel sunset hexes */
+    --bg-color: #f6c9d2;
+    /* Soft pink base */
+
+    /* Pixelated sunset gradient with new pastel colors */
+    --bg-image: linear-gradient(to bottom,
+            #f6c9d2 0%,
+            /* Light pink */
+            #f5bad9 20%,
+            /* Pink */
+            #daaae4 40%,
+            /* Lavender */
+            #bfa4dc 60%,
+            /* Soft Purple */
+            #a49dd4 80%,
+            /* Periwinkle */
+            #708bd4 100%
+            /* Dusk blue */
+        );
+
+    --text-color: #4a403a;
+    /* Dark warm brown for readability on pastel */
+    --text-secondary: #708bd4;
+
+    --primary-accent: #f5b0ec;
+    /* Bright pastel pink */
+    --secondary-accent: #a49dd4;
+
+    --container-bg: rgba(255, 255, 255, 0.6);
+    /* Semi-transparent white to let pastels bleed through */
+    --border-color: #848fdb;
+    /* Soft periwinkle border */
+
+    /* Dialog Box / Pokemon specific variables */
+    --dialog-bg: rgba(255, 255, 255, 0.9);
+    --dialog-border: #708bd4;
+    --dialog-text: #2c3e50;
+
+    --btn-bg: #ffffff;
+    --btn-hover-bg: #f5bad9;
+    --hover-text: #2c3e50;
+
+    --shadow-color: rgba(112, 139, 212, 0.4);
+}
+
+/* Base Overrides for Pastel Theme */
+.theme-sunset {
+    color: var(--text-color);
+}
+
+.theme-sunset .pixel-box {
+    border: 4px solid var(--border-color);
+    box-shadow: 6px 6px 0 var(--shadow-color);
+    background: var(--container-bg);
+    border-radius: 8px;
+    /* Slightly rounded for friendly vibe */
+}
+
+/* Pokemon Dialog Box Specific styling */
+.pokemon-dialog-box {
+    background: var(--dialog-bg);
+    border: 6px solid var(--dialog-border);
+    border-radius: 12px;
+    padding: var(--spacing-lg);
+    box-shadow:
+        inset 0 0 0 4px #fff,
+        /* Inner white stroke */
+        8px 8px 0 var(--shadow-color);
+    position: relative;
+    font-size: 1.2rem;
+    line-height: 1.8;
+    color: var(--dialog-text);
+}
+
+.pokemon-dialog-box::after {
+    /* Inner pixel border effect */
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    right: 4px;
+    bottom: 4px;
+    border: 2px dashed rgba(112, 139, 212, 0.3);
+    pointer-events: none;
+    border-radius: 6px;
+}
