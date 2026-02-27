@@ -178,8 +178,8 @@ body:not(.editorial-layout) {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: var(--spacing-lg);
-    /* Slightly more padding for the larger frame */
+    padding: var(--spacing-xs);
+    /* Very thin or low borders */
 
     /* Ultra-soft, highly realistic drop shadow */
     box-shadow:
@@ -193,11 +193,14 @@ body:not(.editorial-layout) {
     transform: scale(1.02);
 }
 
-.pixel-art-img, .pixel-art-video {
-    max-width: 100%;
-    max-height: 80vh; /* Prevent it from being taller than screen */
-    width: auto;
+.pixel-art-img,
+.pixel-art-video {
+    width: 100%;
+    /* Force small elements (like 32x32) to fill the width */
     height: auto;
+    /* Calculate height dynamically based on intrinsic ratio */
+    max-height: 80vh;
+    /* Prevent it from being taller than screen */
     object-fit: contain;
     image-rendering: pixelated;
     /* Maintaining crispness against smooth UI */
@@ -205,7 +208,8 @@ body:not(.editorial-layout) {
 
 /* Specific to video */
 .pixel-art-video {
-    display: none; /* hidden by default */
+    display: none;
+    /* hidden by default */
 }
 
 /* Play Replay button styling */
