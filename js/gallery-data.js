@@ -15,5 +15,12 @@ const galleryData = [
         image: "assets/ein_blinking.gif",
         note: "Ein is a Pembroke Welsh Corgi from the anime series Cowboy Bebop. He is known for his intelligence, loyalty, and his ability to communicate with humans through a telepathic translator collar. I wanted it to feel like being patted."
     },
-
+    {
+        id: 3,
+        title: "Battery Charging",
+        artist: "Munir Paviwala",
+        date: "Feb 27, 2026",
+        image: "assets/blink-battery.gif",
+        note: "Just a battery charging animation."
+    },
 ];
