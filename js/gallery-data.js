@@ -12,7 +12,7 @@ const galleryData = [
         title: "Ein - Cowboy Bebop",
         artist: "Munir Paviwala",
         date: "Feb 26, 2026",
-        image: "assets/einb_blinking.png",
+        image: "assets/einb_blinking.gif",
         note: "Ein is a Pembroke Welsh Corgi from the anime series Cowboy Bebop. He is known for his intelligence, loyalty, and his ability to communicate with humans through a telepathic translator collar. I wanted it to feel like being patted."
     },
     {
