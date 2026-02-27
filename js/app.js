@@ -9,7 +9,8 @@ document.addEventListener("DOMContentLoaded", () => {
         galleryContainer.innerHTML = galleryData.map(item => `
             <div class="editorial-exhibit" id="exhibit-${item.id}" data-item='${JSON.stringify(item).replace(/'/g, "&#39;")}'>
                 <div class="art-canvas">
-                    <img src="${item.image}" alt="${item.title}" class="pixel-art-img">
+                    <img src="${item.image}" alt="${item.title}" class="pixel-art-img" id="img-${item.id}">
+                    ${item.video ? `<video class="pixel-art-video" id="vid-${item.id}" muted playsinline><source src="${item.video}" type="video/mp4"></video>` : ''}
                 </div>
             </div>
         `).join('');
@@ -27,11 +28,15 @@ document.addEventListener("DOMContentLoaded", () => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     const itemData = JSON.parse(entry.target.getAttribute('data-item'));
-                    const htmlContent = `
+                    let htmlContent = `
                         <div class="placard-title"><em>${itemData.title}</em></div>
                         <div class="placard-meta">by ${itemData.artist.toUpperCase()} (${itemData.date})</div>
                         <div class="placard-note">${itemData.note}</div>
                     `;
+
+                    if (itemData.video) {
+                        htmlContent += `<button class="replay-btn fade-in" data-play-id="${itemData.id}">Play Replay</button>`;
+                    }
                     updateEditorialText(dialogBox, htmlContent);
                 }
             });
@@ -74,6 +79,33 @@ document.addEventListener("DOMContentLoaded", () => {
             introObserver.observe(introSpacer);
         }
     }
+
+    // Video Replay Logic
+    document.addEventListener('click', (e) => {
+        if (e.target && e.target.classList.contains('replay-btn')) {
+            const exhibitId = e.target.getAttribute('data-play-id');
+            const imgEl = document.getElementById(`img-${exhibitId}`);
+            const vidEl = document.getElementById(`vid-${exhibitId}`);
+
+            if (imgEl && vidEl) {
+                // Hide image, show video
+                imgEl.style.display = 'none';
+                vidEl.style.display = 'block';
+
+                // Hide button while playing
+                e.target.style.display = 'none';
+
+                vidEl.play();
+
+                // When video ends, swap back
+                vidEl.onended = () => {
+                    vidEl.style.display = 'none';
+                    imgEl.style.display = 'block';
+                    e.target.style.display = 'inline-flex'; // Bring button back
+                };
+            }
+        }
+    });
 
     // Function to gracefully fade text/HTML in and out
     function updateEditorialText(element, newHTML) {
