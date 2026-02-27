@@ -396,28 +396,81 @@ body.scrolled-past .editorial-author {
 /* --- Responsive Adjustments --- */
 @media (max-width: 1024px) {
     .split-gallery-container {
-        flex-direction: column;
+        flex-direction: column-reverse;
     }
 
     .fixed-editorial-masthead {
         flex: none;
         width: 100%;
         max-width: 100%;
-        height: auto;
-        position: relative;
+        height: 35vh;
+        /* Bottom sheet height */
+        position: fixed;
+        bottom: 0;
+        left: 0;
         border-left: none;
-        border-bottom: 1px solid var(--border-subtle);
-        padding: var(--spacing-lg) var(--spacing-md);
-        background: var(--bg-color);
+        border-top: 1px solid var(--border-subtle);
+        border-bottom: none;
+        padding: var(--spacing-sm) var(--spacing-md);
+        background: rgba(253, 251, 247, 0.95);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
         z-index: 10;
-        min-height: 40vh;
+        justify-content: flex-start;
+        overflow-y: auto;
     }
 
     .gallery-scroll-area {
-        padding: var(--spacing-md);
+        padding: var(--spacing-sm) var(--spacing-sm);
+        height: 100vh;
+        /* still take full height */
+        padding-bottom: 40vh;
+        /* ensure last item clears the bottom sheet */
     }
 
     .editorial-title {
-        font-size: 3.5rem;
+        font-size: 2.2rem;
+    }
+
+    .editorial-author {
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .masthead-content {
+        gap: var(--spacing-xs);
+    }
+
+    .editorial-context,
+    .placard-note {
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+
+    .placard-title {
+        font-size: 1.2rem;
+    }
+
+    .placard-meta {
+        margin-bottom: var(--spacing-xs);
+        padding-bottom: var(--spacing-xs);
+    }
+
+    .intro-spacer {
+        height: 65vh;
+        align-items: center;
+        padding-bottom: 0;
+    }
+
+    #gallery-container {
+        gap: 20vh;
+    }
+
+    .nav-back-link {
+        position: relative;
+        top: 0;
+        right: 0;
+        align-self: flex-start;
+        margin-bottom: var(--spacing-sm);
+        display: block;
     }
 }

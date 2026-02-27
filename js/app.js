@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const textObserverOptions = {
             root: null,
-            rootMargin: '-40% 0px -40% 0px', // Center of viewport
+            rootMargin: '-20% 0px -40% 0px', // Shift trigger area to upper center to accommodate mobile masthead
             threshold: 0
         };
 
