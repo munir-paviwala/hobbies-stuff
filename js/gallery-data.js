@@ -39,7 +39,7 @@ const galleryData = [
         image: "assets/industrial-sunsets-pixilart.png",
         video: "assets/videos/pixilart-1772212424573.mp4",
         note: "A larger canvas - 320 x 180. I wanted to try making more atmospheric art. I guess, this was okay for a first attempt."
-    }
+    },
     {
         id: 6,
         title: "Peacock",
