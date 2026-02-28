@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     const itemData = JSON.parse(entry.target.getAttribute('data-item'));
                     let htmlContent = `
                         <div class="placard-title"><em>${itemData.title}</em></div>
-                        <div class="placard-meta">by ${itemData.artist.toUpperCase()} (${itemData.date})</div>
+                        <div class="placard-meta">Pixel Art &bull; ${itemData.size} &bull; ${itemData.date}</div>
                         <div class="placard-note">${itemData.note}</div>
                     `;
 
@@ -133,6 +133,41 @@ document.addEventListener("DOMContentLoaded", () => {
     const lightboxMeta = document.getElementById('lightbox-meta');
     const lightboxNote = document.getElementById('lightbox-note');
 
+    let currentLightboxIndex = -1;
+
+    function showLightboxItem(index) {
+        if (index < 0 || index >= galleryData.length) return;
+        currentLightboxIndex = index;
+        const itemData = galleryData[index];
+
+        // Populate text
+        if (lightboxTitle) lightboxTitle.innerHTML = `<em>${itemData.title}</em>`;
+        if (lightboxMeta) lightboxMeta.innerHTML = `Pixel Art &bull; ${itemData.size} &bull; ${itemData.date}`;
+        if (lightboxNote) lightboxNote.innerHTML = itemData.note;
+
+        // Always start with the image so the user can zoom into it
+        if (lightboxVideo) {
+            lightboxVideo.style.display = 'none';
+            lightboxVideo.pause();
+        }
+
+        // Image loading state
+        if (lightboxImg) {
+            lightboxImg.style.opacity = '0'; // start hidden for fade effect
+            lightboxImg.style.display = 'block';
+            lightboxImg.src = itemData.image;
+            lightboxImg.alt = itemData.title;
+            lightboxImg.onload = () => {
+                lightboxImg.style.opacity = '1';
+                lightboxImg.style.transition = 'opacity 0.3s ease';
+            };
+        }
+
+        // Show Lightbox and make sure info panel is hidden to start
+        if (lightboxInfoPanel) lightboxInfoPanel.classList.remove('visible');
+        if (lightbox) lightbox.classList.add('active');
+    }
+
     // Open Lightbox
     document.addEventListener('click', (e) => {
         // Check if we are clicking a replay button so we don't open the lightbox then
@@ -142,25 +177,23 @@ document.addEventListener("DOMContentLoaded", () => {
         const canvas = e.target.closest('.art-canvas');
         if (canvas) {
             const exhibit = canvas.closest('.editorial-exhibit');
-            if (exhibit && lightbox) {
+            if (exhibit && lightbox && typeof galleryData !== 'undefined') {
                 const itemData = JSON.parse(exhibit.getAttribute('data-item'));
+                const index = galleryData.findIndex(item => item.id === itemData.id);
+                showLightboxItem(index);
+            }
+        }
+    });
 
-                // Populate text
-                if (lightboxTitle) lightboxTitle.innerHTML = `<em>${itemData.title}</em>`;
-                if (lightboxMeta) lightboxMeta.innerHTML = `by ${itemData.artist.toUpperCase()} (${itemData.date})`;
-                if (lightboxNote) lightboxNote.innerHTML = itemData.note;
-
-                // Always start with the image so the user can zoom into it
-                lightboxVideo.style.display = 'none';
-                lightboxVideo.pause();
-
-                lightboxImg.style.display = 'block';
-                lightboxImg.src = itemData.image;
-                lightboxImg.alt = itemData.title;
-
-                // Show Lightbox and make sure info panel is hidden to start
-                lightboxInfoPanel.classList.remove('visible');
-                lightbox.classList.add('active');
+    // Keyboard Navigation
+    document.addEventListener('keydown', (e) => {
+        if (lightbox && lightbox.classList.contains('active')) {
+            if (e.key === 'Escape') {
+                closeLightbox();
+            } else if (e.key === 'ArrowLeft') {
+                if (currentLightboxIndex > 0) showLightboxItem(currentLightboxIndex - 1);
+            } else if (e.key === 'ArrowRight') {
+                if (currentLightboxIndex < galleryData.length - 1) showLightboxItem(currentLightboxIndex + 1);
             }
         }
     });
