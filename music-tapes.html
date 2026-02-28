@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Munir's Mixtapes</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Press+Start+2P&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/sunset.css">
+    <link rel="stylesheet" href="styles/tapes.css">
+</head>
+
+<body class="theme-sunset">
+    <div class="screen-overlay"></div>
+    <div class="container tape-page-container">
+
+        <header class="header page-header-tapes">
+            <h1 class="main-title">MUNIR'S MIXTAPES</h1>
+            <p class="instruction-text">Tap a cassette to start playing!</p>
+        </header>
+
+        <!-- The Boombox Player -->
+        <div class="boombox-player pixel-box" id="boombox-player">
+            <div class="boombox-screen">
+                <div class="scrolling-text" id="now-playing-text">NO TAPE INSERTED</div>
+            </div>
+            <div class="boombox-controls">
+                <button id="btn-play" class="boombox-btn" disabled>▶</button>
+                <button id="btn-pause" class="boombox-btn" disabled>⏸</button>
+                <button id="btn-stop" class="boombox-btn" disabled>⏹</button>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="progress-bar"></div>
+            </div>
+        </div>
+
+        <!-- The Cassette Shelf -->
+        <main class="cassette-shelf" id="cassette-shelf">
+            <!-- Tapes injected by JS -->
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2026 Munir Paviwala</p>
+        </footer>
+    </div>
+
+    <!-- Audio element -->
+    <audio id="audio-player"></audio>
+
+    <script src="js/tapes-data.js"></script>
+    <script src="js/tapes.js"></script>
+</body>
+
+</html>
