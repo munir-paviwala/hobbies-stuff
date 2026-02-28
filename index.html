@@ -35,6 +35,56 @@
             <p>&copy; 2026 Munir Paviwala</p>
         </footer>
     </div>
+
+    <script>
+        // The secret code
+        const secretCode = "hello";
+        let inputBuffer = "";
+
+        const container = document.querySelector('.container');
+        // Hide by default with a smooth fade in
+        container.style.opacity = '0';
+        container.style.pointerEvents = 'none';
+        container.style.transition = 'opacity 1.5s ease';
+
+        function unlock() {
+            container.style.opacity = '1';
+            container.style.pointerEvents = 'auto';
+        }
+
+        // Desktop: Keyboard listener for "konami" style code
+        window.addEventListener('keydown', (e) => {
+            // only track characters
+            if (e.key.length === 1) {
+                inputBuffer += e.key.toLowerCase();
+                // Keep buffer length to secretCode length
+                if (inputBuffer.length > secretCode.length) {
+                    inputBuffer = inputBuffer.substring(inputBuffer.length - secretCode.length);
+                }
+                if (inputBuffer === secretCode) {
+                    unlock();
+                }
+            }
+        });
+
+        // Mobile: 5 quick taps anywhere on the screen
+        let tapCount = 0;
+        let tapTimeout;
+        window.addEventListener('touchstart', (e) => {
+            // Only count taps if container is hidden
+            if (container.style.opacity === '0') {
+                tapCount++;
+                clearTimeout(tapTimeout);
+                if (tapCount >= 5) {
+                    unlock();
+                    tapCount = 0;
+                }
+                tapTimeout = setTimeout(() => {
+                    tapCount = 0;
+                }, 600); // 600ms timeframe to keep tapping
+            }
+        });
+    </script>
 </body>
 
 </html>
