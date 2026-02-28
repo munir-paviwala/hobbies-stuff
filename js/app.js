@@ -67,13 +67,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Watch the intro spacer to reset the text to greeting if scrolled to very top
         const introSpacer = document.querySelector('.intro-spacer');
+        // Capture whatever text is currently in the HTML so you can edit it freely there!
+        const initialGreetingHTML = dialogBox ? dialogBox.innerHTML : "";
+
         if (introSpacer) {
             const introObserver = new IntersectionObserver((entries) => {
                 const isTop = entries[0].isIntersecting;
                 document.body.classList.toggle('scrolled-past', !isTop);
 
                 if (isTop) {
-                    updateEditorialText(dialogBox, "Welcome. This is a collection of my 32x32 digital works. Take your time scrolling through the exhibits on the left.");
+                    updateEditorialText(dialogBox, initialGreetingHTML);
                 }
             }, { threshold: 0.1 });
             introObserver.observe(introSpacer);
