@@ -13,7 +13,7 @@ const galleryData = [
         artist: "32x32 pixel canvas - Munir Paviwala",
         date: "Feb 26, 2026",
         image: "assets/ein_blinking.gif",
-        note: "Ein is a pet from the anime series Cowboy Bebop. I wanted this animation to feel like Ein was being patted."
+        note: "Ein is a pet dog from the anime series Cowboy Bebop. I wanted this animation to feel like Ein was being patted."
     },
     {
         id: 3,
@@ -21,7 +21,7 @@ const galleryData = [
         artist: "32x32 pixel canvas - Munir Paviwala",
         date: "Feb 27, 2026",
         image: "assets/blink-battery.gif",
-        note: "Just a battery charging animation."
+        note: "Just a battery animation. Idk lamest in collection. but still... I need stuff to add. So I will add this. Meh!"
     },
     {
         id: 4,
@@ -29,7 +29,7 @@ const galleryData = [
         artist: "320x180 pixel canvas - Munir Paviwala",
         date: "Feb 27, 2026",
         image: "assets/night-sky-rainbow.gif",
-        note: "Just a night sky rainbow - with some sparkles and blinks. But more as a re-imagination of a static I saw on Pinterest."
+        note: "Just a night sky rainbow - with some sparkles and blinks. A re-imagination of a static image I saw on Pinterest."
     },
     {
         id: 5,
@@ -47,7 +47,7 @@ const galleryData = [
         date: "Feb 27, 2026",
         image: "assets/peacock.png",
         video: "assets/videos/peacock.mp4",
-        note: "Wanted a challenge. So went full into Indian maximalism. This was so fun to make! Love those frames!"
+        note: "Wanted a challenge. So went full into Indian maximalism. This was so fun to make! Loved making those frames!"
     }
 
 ];
