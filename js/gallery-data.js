@@ -54,6 +54,15 @@ const galleryData = [
         image: "assets/gallery/peacock.png",
         video: "assets/videos/peacock.mp4",
         note: "Wanted a challenge. So went full into Indian maximalism. This was so fun to make! Loved making those frames!"
+    },
+    {
+        id: 7,
+        title: "Bouncy Ball intro in Textile pattern",
+        artist: "Munir Paviwala",
+        date: "Feb 28, 2026",
+        size: "320x180px",
+        image: "assets/gallery/bouncy-ball-hey.gif",
+        note: "Continue the indian maximalism theme. A basic textile pattern and some animation of a bouncy ball."
     }
 
 ];
