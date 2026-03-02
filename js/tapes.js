@@ -2,12 +2,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const shelf = document.getElementById('cassette-shelf');
     const audioPlayer = document.getElementById('audio-player');
     const nowPlayingText = document.getElementById('now-playing-text');
-    const btnPlay = document.getElementById('btn-play');
-    const btnPause = document.getElementById('btn-pause');
-    const btnStop = document.getElementById('btn-stop');
+    const btnRewind = document.getElementById('btn-rewind');
+    const btnPlayPause = document.getElementById('btn-play-pause');
+    const btnFastForward = document.getElementById('btn-fast-forward');
     const progressBar = document.getElementById('progress-bar');
 
     let currentTapeId = null;
+    let isPlaying = false;
 
     // 1. Render Tapes
     tapesData.forEach(tape => {
@@ -65,46 +66,60 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Enable buttons
-        btnPlay.disabled = false;
-        btnPause.disabled = false;
-        btnStop.disabled = false;
+        btnRewind.disabled = false;
+        btnPlayPause.disabled = false;
+        btnFastForward.disabled = false;
 
         // Try playing
         if (tape.file) {
-            audioPlayer.play().catch(e => console.log('Audio play failed:', e));
+            audioPlayer.play().then(() => {
+                isPlaying = true;
+                btnPlayPause.textContent = '⏸';
+            }).catch(e => console.log('Audio play failed:', e));
         } else {
             console.log('No audio file provided for this tape.');
             progressBar.style.width = '0%';
+            isPlaying = true;
+            btnPlayPause.textContent = '⏸';
         }
     }
 
     // Controls
-    btnPlay.addEventListener('click', () => {
-        if (currentTapeId) {
-            const el = document.querySelector(`.cassette-tape[data-id="${currentTapeId}"]`);
-            if (el) el.classList.add('playing');
+    btnPlayPause.addEventListener('click', () => {
+        if (!currentTapeId) return;
 
+        if (isPlaying) {
+            // Pause
+            audioPlayer.pause();
+            isPlaying = false;
+            btnPlayPause.textContent = '▶';
+
+            const el = document.querySelector(`.cassette-tape[data-id="${currentTapeId}"]`);
+            if (el) el.classList.remove('playing');
+        } else {
+            // Play
             if (audioPlayer.src && !audioPlayer.src.endsWith(window.location.href)) {
                 audioPlayer.play().catch(e => console.log(e));
             }
+            isPlaying = true;
+            btnPlayPause.textContent = '⏸';
+
+            const el = document.querySelector(`.cassette-tape[data-id="${currentTapeId}"]`);
+            if (el) el.classList.add('playing');
         }
     });
 
-    btnPause.addEventListener('click', () => {
-        audioPlayer.pause();
-        // Stop spinning
-        if (currentTapeId) {
-            const el = document.querySelector(`.cassette-tape[data-id="${currentTapeId}"]`);
-            if (el) el.classList.remove('playing');
+    // Seek back 10 seconds
+    btnRewind.addEventListener('click', () => {
+        if (audioPlayer.src) {
+            audioPlayer.currentTime = Math.max(0, audioPlayer.currentTime - 10);
         }
     });
 
-    btnStop.addEventListener('click', () => {
-        audioPlayer.pause();
-        audioPlayer.currentTime = 0;
-        if (currentTapeId) {
-            const el = document.querySelector(`.cassette-tape[data-id="${currentTapeId}"]`);
-            if (el) el.classList.remove('playing');
+    // Seek forward 10 seconds
+    btnFastForward.addEventListener('click', () => {
+        if (audioPlayer.src) {
+            audioPlayer.currentTime = Math.min(audioPlayer.duration || 0, audioPlayer.currentTime + 10);
         }
     });
 
@@ -123,5 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (el) el.classList.remove('playing');
         }
         progressBar.style.width = '0%';
+        isPlaying = false;
+        btnPlayPause.textContent = '▶';
     });
 });

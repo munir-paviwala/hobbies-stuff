@@ -1,0 +1,252 @@
+/* crush.css - Specific styles for the Tessa Violet "Crush" page */
+
+:root {
+    --crush-yellow: #ffcc00;
+    --crush-yellow-glow: rgba(255, 204, 0, 0.6);
+    --crush-dark: #111111;
+}
+
+body.theme-crush {
+    /* Create a gradient that spans a very tall height to reveal yellow on scroll */
+    background: linear-gradient(to bottom, #000000 0%, #080800 20%, #332900 50%, #cca300 85%, var(--crush-yellow) 100%);
+    color: #ffffff;
+    min-height: 250vh;
+    /* Force a long scroll to show the gradient transition */
+    background-attachment: scroll;
+    /* Let the gradient scroll with the page */
+    margin: 0;
+    padding: 0;
+    font-family: 'Outfit', sans-serif;
+    /* Using a modern font for the body text */
+}
+
+/* Adjust the container for the crush page */
+.crush-container {
+    padding-top: 4rem;
+    padding-bottom: 20rem;
+    /* Give plenty of space to scroll into the pure yellow */
+    max-width: 800px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+}
+
+/* Header Styling */
+.crush-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    animation: fadeInDown 1s ease-out;
+}
+
+.crush-header h1 {
+    font-family: 'Press Start 2P', monospace;
+    /* Keep the retro feel for headers */
+    font-size: 1.5rem;
+    color: var(--crush-yellow);
+    text-shadow: 2px 2px 0px #000, 0 0 15px var(--crush-yellow-glow);
+    line-height: 1.6;
+    margin-top: 1rem;
+}
+
+.back-link {
+    font-family: 'Press Start 2P', monospace;
+    color: #aaa;
+    text-decoration: none;
+    font-size: 0.8rem;
+    transition: color 0.3s, text-shadow 0.3s;
+    display: inline-block;
+    margin-bottom: 1rem;
+}
+
+.back-link:hover {
+    color: var(--crush-yellow);
+    text-shadow: 0 0 8px var(--crush-yellow-glow);
+}
+
+/* Art Section */
+.art-section {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 4rem;
+    animation: fadeInUp 1.2s ease-out;
+}
+
+.pixel-art-wrapper {
+    background: rgba(0, 0, 0, 0.5);
+    padding: 1rem;
+    border: 2px solid var(--crush-yellow);
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px var(--crush-yellow-glow);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.pixel-art-wrapper:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.9), 0 0 30px var(--crush-yellow);
+}
+
+.crush-art {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    image-rendering: pixelated;
+    /* Crucial for pixel art */
+    border-radius: 4px;
+}
+
+.art-caption {
+    margin-top: 1rem;
+    text-align: center;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.9rem;
+    color: #ddd;
+    font-weight: 300;
+    letter-spacing: 0.5px;
+}
+
+/* Text Section */
+.text-section.text-box {
+    background: rgba(17, 17, 17, 0.7);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 204, 0, 0.3);
+    border-radius: 12px;
+    padding: 2.5rem;
+    line-height: 1.8;
+    font-size: 1.1rem;
+    color: #eee;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    animation: fadeIn 1.5s ease-out 0.5s both;
+}
+
+.text-section p {
+    margin-bottom: 1.5rem;
+}
+
+.text-section p:last-child {
+    margin-bottom: 0;
+}
+
+.text-section h2 {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 1rem;
+    color: var(--crush-yellow);
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+    text-shadow: 1px 1px 0px #000;
+}
+
+.text-section h2:first-of-type {
+    margin-top: 0;
+}
+
+/* Spacer to make sure we can scroll for a while to see the gradient change */
+.spacer-for-scroll {
+    height: 100vh;
+    /* This makes the page extra long so the user can scroll 
+       and see the background turn completely yellow */
+}
+
+/* Floating Player */
+.floating-player {
+    position: fixed;
+    bottom: 30px;
+    left: 30px;
+    width: 300px;
+    background: var(--crush-dark);
+    border: 2px solid var(--crush-yellow);
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8), 0 0 15px var(--crush-yellow-glow);
+    z-index: 1000;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+    animation: slideInLeft 1s ease-out 1s both;
+}
+
+.floating-player:hover {
+    transform: scale(1.05);
+}
+
+.player-header {
+    background: var(--crush-yellow);
+    color: var(--crush-dark);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.6rem;
+    padding: 8px 10px;
+    text-align: center;
+    letter-spacing: 1px;
+}
+
+.floating-player iframe {
+    display: block;
+    width: 100%;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .floating-player {
+        bottom: 15px;
+        left: 15px;
+        width: 200px;
+    }
+
+    .floating-player iframe {
+        height: 112px;
+    }
+
+    .crush-header h1 {
+        font-size: 1.1rem;
+    }
+
+    .text-section.text-box {
+        padding: 1.5rem;
+    }
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
