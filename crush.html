@@ -16,19 +16,9 @@
 <body class="theme-crush">
     <div class="screen-overlay"></div>
 
-    <!-- Floating YouTube Player -->
-    <div class="floating-player">
-        <div class="player-header">Now Playing</div>
-        <!-- SiAuAJBZuGs is the video ID for Tessa Violet - Crush -->
-        <iframe src="https://www.youtube.com/embed/SiAuAJBZuGs?autoplay=1&loop=1&playlist=SiAuAJBZuGs&mute=0"
-            title="Tessa Violet - Crush" frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowfullscreen></iframe>
-    </div>
-
     <div class="container crush-container">
         <header class="crush-header">
-            <h1>The Aesthetic of the song - Crush by Tessa Violet</h1>
+            <h1>The Aesthetic of Crush (Tessa Violet)</h1>
         </header>
 
         <main class="crush-content">
@@ -37,7 +27,7 @@
                     <img src="assets/tessa-page-assets/tessa-pixel-art.png" alt="Tessa Violet Crush Pixel Art by Munir"
                         class="crush-art">
                     <div class="art-caption">
-                        <p>Made by Munir Paviwala - Pixel Art - 1 March 2026 - 320x180px</p>
+                        <p>Made by Munir Paviwala ∘ Pixel Art ∘ 1 March 2026 ∘ 320x180px</p>
                     </div>
                 </div>
             </section>
@@ -45,14 +35,14 @@
             <section class="text-section text-box">
                 <h2>The Sound</h2>
                 <p>
-                    Think syrupy synth melodies meets crisp electronic percussion. It's a "neon yellow" soundscape—slow
+                    Syrupy synth melodies meets crisp electronic percussion. It's a "neon yellow" soundscape—slow
                     enough to breathe, but upbeat enough to move to. It hits that rare sweet spot between a chill-out
                     track and a morning energizer.
                 </p>
                 <h2>The Vision</h2>
                 <p>
-                    Set against the soul-crushing monochrome of a standard supermarket, the visual is a total system
-                    shock. We're talking vibrant yellow hair, bags, and shoes slicing through the grey-scale aisles. The
+                    Set against the soul-crushing greys of a standard supermarket, the visual is a total system
+                    shock. We're talking vibrant yellow hair, bags, and shoes slicing through the grey aisles. The
                     editing uses a rhythmic, GIF-like back-and-forth movement that turns every frame into a loopable
                     moment of art.
                 </p>
@@ -60,8 +50,19 @@
                 <p>
                     If you're looking for a track that feels like sunshine in a concrete jungle, this is it.
                 </p>
-                <div class="spacer-for-scroll"></div>
             </section>
+
+            <div id="video-dock" class="video-dock">
+                <!-- Floating player docks here -->
+                <div class="floating-player" id="floating-player">
+                    <div class="player-header">Now Playing</div>
+                    <iframe
+                        src="https://www.youtube.com/embed/SiAuAJBZuGs?autoplay=1&loop=1&playlist=SiAuAJBZuGs&mute=0"
+                        title="Tessa Violet - Crush" frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowfullscreen></iframe>
+                </div>
+            </div>
         </main>
 
         <footer class="footer">
@@ -71,21 +72,22 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const floatingPlayer = document.querySelector('.floating-player');
-            const spacer = document.querySelector('.spacer-for-scroll');
+            const floatingPlayer = document.getElementById('floating-player');
+            const dock = document.getElementById('video-dock');
 
             window.addEventListener('scroll', () => {
-                // Determine point where the text essentially ends visually
-                const revealPoint = window.innerHeight * 0.4;
-                const spacerTop = spacer.getBoundingClientRect().top;
+                const dockRect = dock.getBoundingClientRect();
 
-                // If the spacer box hits our reveal point, make the video the centerpiece
-                if (spacerTop < revealPoint) {
+                // When we scroll close to the dock, snap the player in
+                if (dockRect.top < window.innerHeight - 150) {
                     floatingPlayer.classList.add('centerpiece');
                 } else {
                     floatingPlayer.classList.remove('centerpiece');
                 }
             });
+
+            // Trigger once on page load
+            window.dispatchEvent(new Event('scroll'));
         });
     </script>
 </body>

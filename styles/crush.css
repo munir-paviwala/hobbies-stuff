@@ -23,8 +23,8 @@ body.theme-crush {
 /* Adjust the container for the crush page */
 .crush-container {
     padding-top: 4rem;
-    padding-bottom: 20rem;
-    /* Give plenty of space to scroll into the pure yellow */
+    padding-bottom: 4rem;
+    /* Reduced space because the video dock natively takes up the bottom */
     max-width: 800px;
     margin: 0 auto;
     position: relative;
@@ -143,11 +143,14 @@ body.theme-crush {
     margin-top: 0;
 }
 
-/* Spacer to make sure we can scroll for a while to see the gradient change */
-.spacer-for-scroll {
-    height: 50vh;
-    /* This makes the page extra long so the user can scroll 
-       and see the background turn completely yellow */
+.video-dock {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    margin-top: 3rem;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 /* Floating Player */
@@ -171,17 +174,19 @@ body.theme-crush {
 }
 
 .floating-player.centerpiece {
-    bottom: 50vh;
-    left: 50vw;
-    width: 90vw;
-    max-width: 900px;
-    transform: translate(-50%, 50%);
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 60px var(--crush-yellow);
+    position: relative;
+    bottom: auto;
+    left: auto;
+    width: 100%;
+    max-width: 100%;
+    transform: none;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8), 0 0 30px var(--crush-yellow);
+    animation: none;
     border-width: 4px;
 }
 
 .floating-player.centerpiece:hover {
-    transform: translate(-50%, 50%) scale(1.02);
+    transform: translateY(-5px) scale(1.02);
 }
 
 .player-header {
