@@ -63,6 +63,14 @@ const galleryData = [
         size: "320x180px",
         image: "assets/gallery/bouncy-ball-hey.gif",
         note: "Continue the indian maximalism theme. A basic textile pattern and some animation of a bouncy ball."
-    }
+    },
+    {
+        id: 8,
+        title: "A golden sunset",
+        artist: "Munir Paviwala",
+        date: "Mar 2, 2026",
+        size: "320x180px",
+        image: "assets/gallery/birds-at-sunset.gif",
+        note: "A simple sunset to learn making clouds. Also to gain more confidence with color shades and light."
 
 ];
