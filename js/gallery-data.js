@@ -72,5 +72,5 @@ const galleryData = [
         size: "320x180px",
         image: "assets/gallery/birds-at-sunset.gif",
         note: "A simple sunset to learn making clouds. Also to gain more confidence with color shades and light."
-
+    }
 ];
