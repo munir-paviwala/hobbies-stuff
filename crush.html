@@ -20,8 +20,7 @@
     <div class="floating-player">
         <div class="player-header">Now Playing</div>
         <!-- SiAuAJBZuGs is the video ID for Tessa Violet - Crush -->
-        <iframe width="300" height="169"
-            src="https://www.youtube.com/embed/SiAuAJBZuGs?autoplay=1&loop=1&playlist=SiAuAJBZuGs&mute=0"
+        <iframe src="https://www.youtube.com/embed/SiAuAJBZuGs?autoplay=1&loop=1&playlist=SiAuAJBZuGs&mute=0"
             title="Tessa Violet - Crush" frameborder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             allowfullscreen></iframe>
@@ -69,6 +68,26 @@
             <p>&copy; 2026 Munir Paviwala</p>
         </footer>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const floatingPlayer = document.querySelector('.floating-player');
+            const spacer = document.querySelector('.spacer-for-scroll');
+
+            window.addEventListener('scroll', () => {
+                // Determine point where the text essentially ends visually
+                const revealPoint = window.innerHeight * 0.4;
+                const spacerTop = spacer.getBoundingClientRect().top;
+
+                // If the spacer box hits our reveal point, make the video the centerpiece
+                if (spacerTop < revealPoint) {
+                    floatingPlayer.classList.add('centerpiece');
+                } else {
+                    floatingPlayer.classList.remove('centerpiece');
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>
