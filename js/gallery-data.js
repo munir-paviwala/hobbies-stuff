@@ -87,7 +87,7 @@ const galleryData = [
         title: "A way of life: Notifications!",
         artist: "Munir Paviwala",
         date: "Mar 3, 2026",
-        size: "320x180px",
+        size: "180x180px",
         image: "assets/gallery/notifications.gif",
         note: "If I wanted to write a history of my life, I could do that from notifications alone."
     }
