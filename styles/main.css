@@ -145,6 +145,19 @@ body:not(.editorial-layout) {
     /* Massive spacing between pieces to isolate them */
 }
 
+.watermark-top-right {
+    position: fixed;
+    top: var(--spacing-md);
+    right: var(--spacing-xl);
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    z-index: 100;
+    opacity: 0.7;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
 .scroll-padding {
     height: 100vh;
     scroll-snap-align: end;
@@ -595,6 +608,12 @@ body.scrolled-past .editorial-author {
     .placard-meta {
         margin-bottom: var(--spacing-xs);
         padding-bottom: var(--spacing-xs);
+    }
+
+    .watermark-top-right {
+        top: var(--spacing-sm);
+        right: var(--spacing-md);
+        font-size: 0.8rem;
     }
 
     .intro-spacer {

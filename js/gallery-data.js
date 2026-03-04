@@ -72,5 +72,23 @@ const galleryData = [
         size: "320x180px",
         image: "assets/gallery/birds-at-sunset.gif",
         note: "A simple sunset to learn making clouds. Also to gain more confidence with color shades and light."
+    },
+    {
+        id: 9,
+        title: "Tessa Violet - Crush",
+        artist: "Munir Paviwala",
+        date: "Mar 1, 2026",
+        size: "320x180px",
+        image: "assets/tessa-page-assets/tessa-pixel-art.png",
+        note: 'A pixel art of Tessa Violet from her song Crush. I wanted to capture the essence of the song in a pixel art. <br><br> <a href="crush.html" style="color: inherit; text-decoration: underline;">See the accompanying piece here.</a>'
+    },
+    {
+        id: 10,
+        title: "A way of life: Notifications!",
+        artist: "Munir Paviwala",
+        date: "Mar 3, 2026",
+        size: "320x180px",
+        image: "assets/gallery/notifications.gif",
+        note: "If I wanted to write a history of my life, I could do that from notifications alone."
     }
 ];
