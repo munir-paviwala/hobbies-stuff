@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Margins - Munir Paviwala</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- Editorial Fonts & Handwritings -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Outfit:wght@300;400;600&family=Press+Start+2P&family=Caveat:wght@400..700&family=Permanent+Marker&display=swap"
+        rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/margins.css">
+</head>
+
+<body class="margins-layout">
+
+    <header class="margins-header">
+        <h1>The Margins.</h1>
+        <p>A collection of scraps, doodles and other fun adventures.</p>
+    </header>
+
+    <main class="corkboard-container" id="corkboard">
+        <!-- JS will dynamically inject the scattered polaroids here -->
+    </main>
+
+    <!-- Intermediate Stack View -->
+    <div id="stack-view" class="stack-view-overlay">
+        <div class="stack-view-close" id="stack-view-close">&times;</div>
+        <div class="stack-view-title" id="stack-view-title"></div>
+        <div class="stack-view-container" id="stack-view-container">
+            <!-- Photos added dynamically -->
+        </div>
+    </div>
+
+    <!-- Lightbox Modal -->
+    <div id="lightbox" class="lightbox margins-lightbox">
+        <div class="lightbox-close" id="lightbox-close">&times;</div>
+        <div class="lightbox-content" id="lightbox-content">
+            <img id="lightbox-img" src="" alt="Artwork">
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/margins-data.js"></script>
+    <script src="js/margins.js"></script>
+</body>
+
+</html>

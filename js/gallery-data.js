@@ -24,6 +24,7 @@ const galleryData = [
         date: "Feb 27, 2026",
         size: "32x32px",
         image: "assets/gallery/blink-battery.gif",
+        status: "trash",
         note: "Just a battery animation. Idk lamest in collection. but still... I need stuff to add. So I will add this. Meh!"
     },
     {
@@ -90,5 +91,15 @@ const galleryData = [
         size: "180x180px",
         image: "assets/gallery/notifications.gif",
         note: "If I wanted to write a history of my life, I could do that from notifications alone."
+    },
+    {
+        id: 11,
+        title: "Clouds",
+        artist: "Munir Paviwala",
+        date: "Mar 10, 2026",
+        size: "320x180px",
+        image: "assets/gallery/failed_clouds.gif",
+        status: "trash",
+        note: "Failed attempt at making clouds. I wanted to try making something for background art."
     }
 ];

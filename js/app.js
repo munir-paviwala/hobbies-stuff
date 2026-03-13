@@ -5,8 +5,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const dialogBox = document.getElementById('dialog-text');
 
     if (galleryContainer && typeof galleryData !== 'undefined') {
-        // Render Exhibits
-        galleryContainer.innerHTML = galleryData.map(item => `
+        // Filter collections
+        const wowItems = galleryData.filter(item => item.status !== 'trash');
+        const trashItems = galleryData.filter(item => item.status === 'trash');
+
+        // Render Wow Exhibits
+        galleryContainer.innerHTML = wowItems.map(item => `
             <div class="editorial-exhibit" id="exhibit-${item.id}" data-item='${JSON.stringify(item).replace(/'/g, "&#39;")}'>
                 <div class="art-canvas">
                     <img src="${item.image}" alt="${item.title}" class="pixel-art-img" id="img-${item.id}">
@@ -14,6 +18,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
             </div>
         `).join('');
+
+        // Render Scraps (Trash items)
+        const scrapsContainer = document.getElementById('scraps-container');
+        if (scrapsContainer && trashItems.length > 0) {
+            scrapsContainer.innerHTML = trashItems.map(item => `
+                <div class="scrap-thumbnail" id="scrap-${item.id}" data-item='${JSON.stringify(item).replace(/'/g, "&#39;")}'>
+                    <img src="${item.image}" alt="${item.title}" class="scrap-img">
+                </div>
+            `).join('');
+        }
 
         // Intersection Observer for graceful fading
         const exhibits = document.querySelectorAll('.editorial-exhibit');
@@ -176,10 +190,10 @@ document.addEventListener("DOMContentLoaded", () => {
         // Check if we are clicking a replay button so we don't open the lightbox then
         if (e.target.classList.contains('replay-btn')) return;
 
-        // Find closest art-canvas element
-        const canvas = e.target.closest('.art-canvas');
+        // Find closest art-canvas or scrap-thumbnail element
+        const canvas = e.target.closest('.art-canvas') || e.target.closest('.scrap-thumbnail');
         if (canvas) {
-            const exhibit = canvas.closest('.editorial-exhibit');
+            const exhibit = canvas.closest('.editorial-exhibit') || canvas;
             if (exhibit && lightbox && typeof galleryData !== 'undefined') {
                 const itemData = JSON.parse(exhibit.getAttribute('data-item'));
                 const index = galleryData.findIndex(item => item.id === itemData.id);
@@ -227,6 +241,13 @@ document.addEventListener("DOMContentLoaded", () => {
     if (lightboxInfoBtn && lightboxInfoPanel) {
         lightboxInfoBtn.addEventListener('click', () => {
             lightboxInfoPanel.classList.toggle('visible');
+        });
+    }
+
+    const panelCloseBtn = document.getElementById('panel-close-btn');
+    if (panelCloseBtn && lightboxInfoPanel) {
+        panelCloseBtn.addEventListener('click', () => {
+            lightboxInfoPanel.classList.remove('visible');
         });
     }
 });

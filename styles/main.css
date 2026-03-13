@@ -162,9 +162,48 @@ body:not(.editorial-layout) {
     height: 100vh;
     scroll-snap-align: end;
     display: flex;
-    justify-content: center;
-    align-items: flex-start;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
     padding-top: 10vh;
+}
+
+/* --- SCRAPS / TRASH GRID --- */
+.scraps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    gap: 12px;
+    width: 100%;
+    max-width: 600px;
+    margin-top: var(--spacing-lg);
+    padding: var(--spacing-md);
+    background: rgba(0, 0, 0, 0.02);
+    border: 1px dashed var(--border-subtle);
+    border-radius: 8px;
+}
+
+.scrap-thumbnail {
+    aspect-ratio: 1;
+    overflow: hidden;
+    cursor: pointer;
+    background: #fff;
+    border: 1px solid var(--border-subtle);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.scrap-thumbnail:hover {
+    transform: scale(4) rotate(0deg);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    z-index: 100;
+    position: relative;
+    border-radius: 4px;
+}
+
+.scrap-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    image-rendering: pixelated;
 }
 
 .end-gallery-text {
@@ -211,11 +250,16 @@ body:not(.editorial-layout) {
         0 20px 40px rgba(0, 0, 0, 0.05),
         0 1px 3px rgba(0, 0, 0, 0.02);
 
-    transition: transform 0.5s ease;
+    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s ease;
 }
 
 .art-canvas:hover {
-    transform: scale(1.02);
+    transform: scale(1.15);
+    box-shadow: 
+        0 30px 60px rgba(0, 0, 0, 0.12),
+        0 4px 12px rgba(0, 0, 0, 0.08);
+    position: relative;
+    z-index: 10;
 }
 
 .pixel-art-img,
@@ -525,6 +569,23 @@ body.scrolled-past .editorial-author {
     display: flex;
     flex-direction: column;
     justify-content: center;
+}
+
+.panel-close-btn {
+    position: absolute;
+    top: var(--spacing-lg);
+    right: var(--spacing-lg);
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 2.5rem;
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.3s ease;
+}
+
+.panel-close-btn:hover {
+    color: var(--text-primary);
 }
 
 .lightbox-info-panel.visible {
