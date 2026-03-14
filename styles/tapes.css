@@ -289,15 +289,26 @@
 }
 
 @media (max-width: 768px) {
+    .tape-page-container {
+        height: auto;
+        min-height: 100vh;
+    }
     .cassette-shelf {
         grid-template-columns: repeat(2, 1fr);
         gap: var(--spacing-md);
+        overflow-y: visible;
     }
 }
 
 @media (max-width: 600px) {
     .cassette-shelf {
         grid-template-columns: repeat(1, 1fr);
-        gap: var(--spacing-sm);
+        gap: var(--spacing-md);
+    }
+    .cassette-tape {
+        min-height: 160px;
+    }
+    .tape-name {
+        font-size: 1.4rem;
     }
 }
