@@ -74,7 +74,8 @@ document.addEventListener("DOMContentLoaded", () => {
             
             // Clicking an unfurled photo opens the actual Lightbox
             imgEl.addEventListener('click', () => {
-                showLightboxImage(photoUrl, itemData.title);
+                // Pass the whole array and the current index to enable navigation
+                showLightboxImage(photoUrl, itemData.title, itemData.photos, i);
             });
 
             stackViewContainer.appendChild(imgEl);
@@ -94,7 +95,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- LIGHTBOX LOGIC --- //
 
-    function showLightboxImage(imageUrl, altText) {
+    let currentLightboxPhotos = [];
+    let currentLightboxIndex = -1;
+    let currentLightboxTitle = "";
+
+    const lightboxPrev = document.getElementById('lightbox-prev');
+    const lightboxNext = document.getElementById('lightbox-next');
+
+    function showLightboxImage(imageUrl, altText, photoArray = null, index = -1) {
+        currentLightboxPhotos = photoArray;
+        currentLightboxIndex = index;
+        currentLightboxTitle = altText;
+        
+        // Show or hide navigation buttons depending on if we have a stack
+        if (lightboxPrev && lightboxNext) {
+            if (photoArray && photoArray.length > 1) {
+                lightboxPrev.style.display = 'flex';
+                lightboxNext.style.display = 'flex';
+            } else {
+                lightboxPrev.style.display = 'none';
+                lightboxNext.style.display = 'none';
+            }
+        }
+
         if (lightboxImg) {
             lightboxImg.style.opacity = '0'; 
             lightboxImg.style.display = 'block';
@@ -112,6 +135,47 @@ document.addEventListener("DOMContentLoaded", () => {
         if (lightbox) {
             lightbox.classList.remove('active');
         }
+        currentLightboxPhotos = [];
+        currentLightboxIndex = -1;
+    }
+
+    function navigateLightbox(direction) {
+        if (!currentLightboxPhotos || currentLightboxPhotos.length <= 1 || currentLightboxIndex === -1) return;
+        
+        currentLightboxIndex += direction;
+        
+        // Wrap around logic
+        if (currentLightboxIndex < 0) {
+            currentLightboxIndex = currentLightboxPhotos.length - 1;
+        } else if (currentLightboxIndex >= currentLightboxPhotos.length) {
+            currentLightboxIndex = 0;
+        }
+        
+        const nextUrl = currentLightboxPhotos[currentLightboxIndex];
+        
+        // We call showLightboxImage again to handle the transition, but we skip resetting the state completely
+        // to avoid blinking buttons. We just update the image src.
+        if (lightboxImg) {
+            lightboxImg.style.opacity = '0';
+            setTimeout(() => {
+                lightboxImg.src = nextUrl;
+                lightboxImg.alt = currentLightboxTitle || "Artwork";
+            }, 100); // 100ms fade down
+        }
+    }
+
+    if (lightboxPrev) {
+        lightboxPrev.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent closing lightbox
+            navigateLightbox(-1);
+        });
+    }
+
+    if (lightboxNext) {
+        lightboxNext.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent closing lightbox
+            navigateLightbox(1);
+        });
     }
 
     if (lightboxClose) lightboxClose.addEventListener('click', closeLightbox);
@@ -143,6 +207,14 @@ document.addEventListener("DOMContentLoaded", () => {
             // Otherwise close Stack View if it's open
             else if (stackView && stackView.classList.contains('active')) {
                 closeStackView();
+            }
+        } else if (e.key === 'ArrowLeft') {
+            if (lightbox && lightbox.classList.contains('active')) {
+                navigateLightbox(-1);
+            }
+        } else if (e.key === 'ArrowRight') {
+            if (lightbox && lightbox.classList.contains('active')) {
+                navigateLightbox(1);
             }
         }
     });
