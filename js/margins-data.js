@@ -22,7 +22,7 @@ const marginsData = [
             "assets/margins/post_it_1.jpg",
             "assets/margins/post_it_2.jpg"
         ],
-        note: "Three quick sketches of the people sitting across from me at the cafe today. Kept it loose."
+        note: "Post-it doodles - just for fun."
     },
     {
         id: 3,
@@ -41,6 +41,6 @@ const marginsData = [
             "assets/margins/milk_flower1.jpg",
             "assets/margins/milk_flower2.jpg"
         ],
-        note: "Just part of some doodle series."
+        note: "Doodles on milk bottle."
     },
 ];
