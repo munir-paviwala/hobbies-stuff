@@ -101,5 +101,43 @@ const galleryData = [
         image: "assets/gallery/failed_clouds.gif",
         status: "trash",
         note: "Failed attempt at making clouds. I wanted to try making something for background art."
+    },
+    {
+        id: 12,
+        title: "Flower only",
+        artist: "Munir Paviwala",
+        date: "Mar 14, 2026",
+        size: "32x32px",
+        status: "trash",
+        image: "assets/gallery/flower-only.png",
+        note: ""
+    },
+    {
+        id: 13,
+        title: "Grass BG failed for Sarthak",
+        artist: "Munir Paviwala",
+        date: "Mar 14, 2026",
+        size: "480x270px",
+        status: "trash",
+        image: "assets/gallery/grass-bg.gif",
+        note: ""
+    },
+    {
+        id: 14,
+        title: "Grass BG for Sarthak - Attempt 2",
+        artist: "Munir Paviwala",
+        date: "Mar 16, 2026",
+        size: "480x270px",
+        image: "assets/gallery/grass_bg_MAR16.gif",
+        note: "Was trying something but didn't really work, but sort of worked. Attempt 1 in trash at the end."
+    },
+    {
+        id: 15,
+        title: "Wave of Flowers - Retro",
+        artist: "Munir Paviwala",
+        date: "Mar 10-17, 2026",
+        size: "320x180px",
+        image: "assets/gallery/wave-flower-export.gif",
+        note: "Indian textile inspo - but retro palette. Made this on call with Dhairya withnessing it"
     }
 ];
