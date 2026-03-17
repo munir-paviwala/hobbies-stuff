@@ -95,6 +95,23 @@ document.addEventListener("DOMContentLoaded", () => {
             }, { threshold: 0.1 });
             introObserver.observe(introSpacer);
         }
+
+        // Watch the scrapyard at the bottom to hide the last art piece's text
+        const scrapyardArea = document.querySelector('.scroll-padding');
+        if (scrapyardArea) {
+            const scrapyardObserver = new IntersectionObserver((entries) => {
+                const isBottom = entries[0].isIntersecting;
+                if (isBottom) {
+                    const fallbackHTML = `
+                         <div class="placard-title" style="margin-top: 2rem;"><em>The Scrapyard</em></div>
+                         <div class="placard-meta">Experiments & Failed Attempts</div>
+                         <div class="placard-note">Click any scrap to view it up close.</div>
+                     `;
+                    updateEditorialText(dialogBox, fallbackHTML);
+                }
+            }, { threshold: 0.3 }); // Trigger when 30% of the scrapyard block is visible
+            scrapyardObserver.observe(scrapyardArea);
+        }
     }
 
     // Video Replay Logic

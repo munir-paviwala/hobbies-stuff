@@ -7,8 +7,7 @@
     --font-retro: 'Press Start 2P', cursive;
 
     /* Editorial Palette */
-    --bg-color: #FDFBF7;
-    /* Warm museum off-white */
+    --bg-color: #F4F1EA; /* Slightly darker, warmer oatmeal off-white for the scroll side */
     --text-primary: #1A1A1A;
     /* Deep charcoal almost black */
     --text-secondary: #6A6A6A;
@@ -42,10 +41,13 @@ body {
 
 /* --- Base Landing Page Updates to match new vibe slightly --- */
 /* (We keep index somewhat retro but cleaner) */
-body.landing-page {
+body:not(.editorial-layout) {
     font-family: var(--font-retro);
     background: linear-gradient(to bottom, #f6c9d2, #daaae4, #708bd4);
     background-attachment: fixed;
+}
+
+body.landing-page {
     height: 100vh;
     display: flex;
     justify-content: center;
@@ -119,11 +121,17 @@ body.landing-page {
 }
 
 .scroll-prompt {
-    font-family: var(--font-serif);
-    font-style: italic;
-    color: var(--text-secondary);
-    font-size: 1.2rem;
-    animation: bounce 2s infinite ease-in-out;
+    font-family: var(--font-sans);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--text-primary);
+    background: rgba(255,255,255,0.6);
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-size: 0.9rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    animation: bounce 2.5s infinite ease-in-out;
 }
 
 @keyframes bounce {
@@ -242,13 +250,14 @@ body.landing-page {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: var(--spacing-xs);
+    padding: var(--spacing-sm);
     cursor: pointer;
 
-    /* Ultra-soft, highly realistic drop shadow */
+    /* Stronger, floating drop shadow to pop from background */
     box-shadow:
-        0 20px 40px rgba(0, 0, 0, 0.05),
-        0 1px 3px rgba(0, 0, 0, 0.02);
+        0 35px 70px rgba(0, 0, 0, 0.15),
+        0 10px 25px rgba(0, 0, 0, 0.1),
+        0 0 0 1px rgba(0, 0, 0, 0.05);
 
     transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s ease;
 }
@@ -256,8 +265,9 @@ body.landing-page {
 .art-canvas:hover {
     transform: scale(1.05);
     box-shadow: 
-        0 30px 60px rgba(0, 0, 0, 0.12),
-        0 4px 12px rgba(0, 0, 0, 0.08);
+        0 40px 80px rgba(0, 0, 0, 0.12),
+        0 15px 30px rgba(0, 0, 0, 0.08),
+        0 0 0 1px rgba(0, 0, 0, 0.03);
     position: relative;
     z-index: 10;
 }
@@ -329,7 +339,9 @@ body.landing-page {
     flex-direction: column;
     justify-content: center;
     padding: var(--spacing-xl) var(--spacing-xl) var(--spacing-xl) var(--spacing-lg);
-    border-left: 1px solid var(--border-subtle);
+    border-left: 1px solid #d4d0c6; /* A slightly darker, defined 1px line */
+    background-color: #ebe9e2; /* Darker, grounded tone as requested */
+    /* Removed box-shadow to prevent the "is it a shadow or not" confusion */
 }
 
 
@@ -345,7 +357,7 @@ body.landing-page {
     font-size: clamp(3rem, 5vw, 6rem);
     line-height: 0.95;
     letter-spacing: -2px;
-    color: var(--text-primary);
+    color: #3a3a3a; /* Softer dark grey to reduce attention */
     margin-bottom: var(--spacing-xs);
     transition: opacity 0.6s ease, transform 0.6s ease;
     transform-origin: top left;
@@ -407,7 +419,7 @@ body.scrolled-past .editorial-author {
     font-size: 1.1rem;
     font-weight: 300;
     line-height: 1.8;
-    color: var(--text-primary);
+    color: #555555; /* Even softer for context text */
     max-width: 400px;
 
     /* Smooth fade between text changes */
@@ -663,7 +675,12 @@ body.scrolled-past .editorial-author {
         border-top-right-radius: 24px;
         box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.05);
         padding: var(--spacing-md) var(--spacing-md);
-        background: rgba(253, 251, 247, 0.95);
+        background: rgba(235, 229, 219, 0.95);
+        background-image: 
+            radial-gradient(rgba(0,0,0,0.02) 1px, transparent 1px),
+            radial-gradient(rgba(0,0,0,0.02) 1px, transparent 1px);
+        background-size: 20px 20px;
+        background-position: 0 0, 10px 10px;
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
         z-index: 10;

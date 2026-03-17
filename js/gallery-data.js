@@ -109,8 +109,8 @@ const galleryData = [
         date: "Mar 14, 2026",
         size: "32x32px",
         status: "trash",
-        image: "assets/gallery/flower-only.png",
-        note: ""
+        image: "assets/gallery/flower_only.png",
+        note: "."
     },
     {
         id: 13,
@@ -119,8 +119,8 @@ const galleryData = [
         date: "Mar 14, 2026",
         size: "480x270px",
         status: "trash",
-        image: "assets/gallery/grass-bg.gif",
-        note: ""
+        image: "assets/gallery/grass_bg.gif",
+        note: "."
     },
     {
         id: 14,
