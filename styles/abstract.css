@@ -1,0 +1,175 @@
+/* Base styles */
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #030816; /* Deep dark blue */
+    overflow: hidden; /* No scrolling, immersive canvas */
+    font-family: 'Inter', system-ui, sans-serif;
+    color: white;
+}
+
+/* The interactive canvas */
+#discovery-canvas {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    display: grid;
+    /* Grid templates are dynamically calculated in JS for an absolute perfect fit */
+    gap: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Flashlight overlay: covers everything with a radial gradient "hole" where cursor is */
+#flashlight-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    z-index: 10; /* Above the inactive grid items */
+    pointer-events: none; /* Let clicks pass through to items */
+    background: #030816; /* Fallback */
+    background: radial-gradient(
+        circle 250px at var(--cursor-x, -1000px) var(--cursor-y, -1000px), 
+        transparent 0%, 
+        rgba(3,8,22, 0.95) 60%, 
+        rgba(3,8,22, 1) 100%
+    );
+    transition: background 0.1s;
+}
+
+/* The actual items in the grid */
+.grid-item {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    border-radius: 4px;
+    overflow: hidden;
+    z-index: 5; /* Under the dark overlay */
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    background: rgba(255,255,255,0.02); /* Slight default bg */
+    border: 1px solid rgba(0, 0, 0, 0.8); /* Replaces gap for exact width math */
+    box-sizing: border-box;
+}
+
+.grid-item:hover {
+    transform: scale(1.05);
+}
+
+.grid-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    user-select: none;
+    pointer-events: none;
+}
+
+/* When activated, bring it above the flashlight overlay */
+.grid-item.active {
+    z-index: 20; 
+    box-shadow: 0 0 30px rgba(255, 100, 150, 0.4);
+    /* The active pulsing is now handled precisely by JavaScript in sync with the audio beat */
+    transform: scale(1.03);
+    filter: brightness(1.1) drop-shadow(0 0 15px rgba(255,100,150,0.3));
+    transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.1s ease;
+}
+
+/* Help Button */
+.help-btn {
+    position: fixed;
+    top: 25px;
+    right: 30px;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: rgba(3, 8, 22, 0.7);
+    border: 1px solid rgba(255,173,210,0.3);
+    color: #ffadd2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 50;
+    backdrop-filter: blur(10px);
+    transition: all 0.2s;
+}
+
+.help-btn:hover {
+    background: rgba(255,173,210,0.1);
+    transform: scale(1.1);
+}
+
+/* Info overlay */
+.info-panel {
+    position: fixed;
+    top: 85px;
+    right: 30px;
+    left: auto;
+    z-index: 30;
+    background: rgba(3, 8, 22, 0.85);
+    backdrop-filter: blur(15px);
+    padding: 20px 25px;
+    border: 1px solid rgba(255,173,210,0.2);
+    border-radius: 12px;
+    pointer-events: auto;
+    max-width: 300px;
+    transition: opacity 0.3s;
+}
+
+.info-panel:hover {
+    background: rgba(3, 8, 22, 0.8);
+}
+
+.info-panel h1 {
+    margin: 0 0 8px 0;
+    font-size: 1.3rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    background: -webkit-linear-gradient(45deg, #ffadd2, #ffd8e6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.info-panel p {
+    margin: 0 0 15px 0;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    color: #8892b0;
+}
+
+.back-link {
+    display: inline-block;
+    color: #ffadd2;
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    padding-bottom: 2px;
+    border-bottom: 1px solid rgba(255,173,210,0.3);
+    transition: border-color 0.2s, color 0.2s;
+}
+
+.back-link:hover {
+    border-color: #ffadd2;
+    color: #fff;
+}
+
+/* Responsive tweaks for UI panels */
+@media (max-width: 768px) {
+    .help-btn {
+        top: 20px;
+        right: 20px;
+    }
+    .info-panel {
+        top: 80px;
+        right: 20px;
+        left: 20px;
+        max-width: none;
+    }
+}
