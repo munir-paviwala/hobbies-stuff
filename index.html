@@ -12,7 +12,12 @@
     <link rel="stylesheet" href="styles/sunset.css">
 </head>
 
-<body class="theme-sunset landing-page">
+<body class="landing-page" style="transition: color 1.5s ease; background-color: #f6c9d2;">
+    <!-- Raw Image layer -->
+    <div class="art-background" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; background-image: url('assets/pattern-vibes/cooler_pattern_mar25.png'); background-size: cover; background-position: center; pointer-events: none;"></div>
+    
+    <!-- Sunset tint layer, hidden initially -->
+    <div id="sunset-tint" class="theme-sunset" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: var(--bg-image); mix-blend-mode: multiply; opacity: 0; transition: opacity 1.5s ease; pointer-events: none;"></div>
     <div class="screen-overlay"></div>
     <div class="container">
         <header class="header">
@@ -42,6 +47,7 @@
 
         <footer class="footer">
             <p>&copy; 2026 Munir Paviwala</p>
+            <div class="credit-box" style="margin-top: 10px; font-size: 0.55rem; color: var(--text-secondary); background: rgba(255, 255, 255, 0.4); padding: 5px 10px; border-radius: 4px; display: inline-block;">Background art designed by Munir Paviwala</div>
         </footer>
     </div>
 
@@ -59,6 +65,8 @@
         function unlock() {
             container.style.opacity = '1';
             container.style.pointerEvents = 'auto';
+            document.body.classList.add('theme-sunset');
+            document.getElementById('sunset-tint').style.opacity = '0.5';
         }
 
         // Desktop: Keyboard listener for "konami" style code

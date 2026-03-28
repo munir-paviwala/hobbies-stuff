@@ -13,13 +13,21 @@ body, html {
 /* The interactive canvas */
 #discovery-canvas {
     position: relative;
-    width: 100vw;
-    height: 100vh;
+    width: 90vw;
+    height: 85vh;
+    margin: 50px auto 0 auto; /* Center it with spacing from top */
     display: grid;
     /* Grid templates are dynamically calculated in JS for an absolute perfect fit */
-    gap: 0;
-    padding: 0;
+    gap: 18px; /* Distinct space between keys */
+    padding: 30px; /* Internal board body */
     box-sizing: border-box;
+    /* Physical board hardware aesthetics */
+    background: #11141c; 
+    border-radius: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.08); /* Metallic rim */
+    box-shadow: 
+        inset 0 0 60px rgba(0, 0, 0, 0.8), /* Inner cavern shadow */
+        0 30px 60px rgba(0, 0, 0, 0.9); /* Heavy drop shadow for the whole board */
 }
 
 /* Flashlight overlay: covers everything with a radial gradient "hole" where cursor is */
@@ -44,17 +52,26 @@ body, html {
     width: 100%;
     height: 100%;
     cursor: pointer;
-    border-radius: 4px;
+    border-radius: 8px; /* Softer, rounder corners */
     overflow: hidden;
     z-index: 5; /* Under the dark overlay */
-    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.1s ease;
     background: rgba(255,255,255,0.02); /* Slight default bg */
-    border: 1px solid rgba(0, 0, 0, 0.8); /* Replaces gap for exact width math */
+    border: 2px solid rgba(255, 255, 255, 0.2); 
+    box-shadow: 
+        inset 0 4px 6px rgba(255, 255, 255, 0.3), /* Highlight top */
+        inset 0 -4px 6px rgba(0, 0, 0, 0.4), /* Shadow bottom */
+        0 6px 10px rgba(0, 0, 0, 0.6); /* Drop shadow for unpressed state */
     box-sizing: border-box;
+    transform: translateY(0);
 }
 
 .grid-item:hover {
-    transform: scale(1.05);
+    transform: scale(1.02);
+    box-shadow: 
+        inset 0 4px 6px rgba(255, 255, 255, 0.4), 
+        inset 0 -4px 6px rgba(0, 0, 0, 0.5), 
+        0 8px 15px rgba(0, 0, 0, 0.8);
 }
 
 .grid-item img {
@@ -69,11 +86,14 @@ body, html {
 /* When activated, bring it above the flashlight overlay */
 .grid-item.active {
     z-index: 20; 
-    box-shadow: 0 0 30px rgba(255, 100, 150, 0.4);
-    /* The active pulsing is now handled precisely by JavaScript in sync with the audio beat */
-    transform: scale(1.03);
-    filter: brightness(1.1) drop-shadow(0 0 15px rgba(255,100,150,0.3));
-    transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.1s ease;
+    /* Physical depressed button state */
+    transform: translateY(4px) scale(0.98) !important;
+    box-shadow: 
+        inset 0 2px 4px rgba(0, 0, 0, 0.8), /* Inverted shadow for pressed feel */
+        inset 0 -2px 4px rgba(255, 255, 255, 0.1),
+        0 0 30px rgba(255, 255, 255, 0.5); /* Outer glow from the audio */
+    filter: brightness(1.2) drop-shadow(0 0 15px rgba(255,255,255,0.3));
+    transition: transform 0.05s ease, filter 0.1s ease, box-shadow 0.05s ease;
 }
 
 /* Help Button */

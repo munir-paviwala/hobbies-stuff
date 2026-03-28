@@ -25,13 +25,31 @@
     </div>
 
     <script>
-        // Data for patterns
-        const assetsBase = 'assets/pattern-vibes/';
-        const patterns = [
-            { id: 1, png: 'pattern_Mar25.png', gif: 'pattern_Mar25.gif' }, 
-            { id: 2, png: 'trippy_pattern_mar25.png', gif: 'trippy_pattern_mar25.gif' },
-            { id: 3, png: 'cooler_pattern_mar25.png', gif: 'electric_pattern_mar25.gif' } 
+        const basePalette = [
+            '16171a', '7f0622', 'd62411', 'ff8426', 'ffd100', 'fafdff',
+            'ff80a4', 'ff2674', '94216a', '430067', '234975', '68aed4',
+            'bfff3c', '10d275', '007899', '002859', 'ffd100'
         ];
+
+        // Shuffle palette randomly on load
+        function getShuffledPalette() {
+            return [...basePalette].sort(() => Math.random() - 0.5);
+        }
+        
+        function hexToRgb(hex) {
+            const r = parseInt(hex.substring(0, 2), 16);
+            const g = parseInt(hex.substring(2, 4), 16);
+            const b = parseInt(hex.substring(4, 6), 16);
+            return {r, g, b};
+        }
+        
+        function generateUniqueShade(hexCode) {
+            let {r, g, b} = hexToRgb(hexCode);
+            // Jitter the color slightly to make unique shades
+            const vary = () => Math.floor(Math.random() * 51) - 25; // +/- 25
+            const clamp = (val) => Math.max(0, Math.min(255, val));
+            return `rgb(${clamp(r + vary())}, ${clamp(g + vary())}, ${clamp(b + vary())})`;
+        }
         
         // Pentatonic scale notes (C major pentatonic: C, D, E, G, A in various octaves for depth)
         const scale = [
@@ -55,25 +73,24 @@
             }
         }
 
-        function playNote(frequency) {
+        function playNote(frequency, profile) {
             if (!audioCtx) return;
             const osc = audioCtx.createOscillator();
             const gainNode = audioCtx.createGain();
 
-            // Mix of sine and triangle for a synth bell sound
-            osc.type = Math.random() > 0.5 ? 'sine' : 'triangle'; 
-            osc.frequency.value = frequency;
+            osc.type = profile.type; 
+            osc.frequency.value = frequency * profile.octave;
 
-            // Envelope to make it sound like a chime/bell
             gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
-            gainNode.gain.linearRampToValueAtTime(Math.random() * 0.2 + 0.1, audioCtx.currentTime + 0.05); // Attack
-            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 2.5); // Decay/Release
+            // Clean, sweeping chord tone
+            gainNode.gain.linearRampToValueAtTime(0.12, audioCtx.currentTime + 0.1); 
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 3.0); 
+            
+            osc.start();
+            osc.stop(audioCtx.currentTime + 3.5); 
 
             osc.connect(gainNode);
             gainNode.connect(audioCtx.destination);
-            
-            osc.start();
-            osc.stop(audioCtx.currentTime + 3);
         }
 
         // Help button logic
@@ -87,59 +104,71 @@
 
         // Polyrhythmic Settings
         const BPM = 120;
-        const beatDurationMs = (60 / BPM) * 1000; // 500ms
-        const possibleBeatMultipliers = [1, 2, 3, 4]; // Loop lengths in beats
+        const beatDurationMs = (60 / BPM) * 1000;
+        const possibleBeatMultipliers = [1, 2, 3, 4]; // Restoring tight, overlapping loops
         
-        // Prevent chaos: FIFO queue for active keys
-        const MAX_ACTIVE_KEYS = 8;
-        const activeKeysList = [];
+        // Track active keys grouped by their color family
+        const colorActiveKeys = {};
+        const MAX_PER_COLOR = 3; // Enforce distinct harmony limits
+        
+        // Synth mapping for each color family in the user's palette
+        const synthProfiles = {
+            '16171a': { type: 'triangle', octave: 0.5 }, // Deep dark - sub bass
+            '7f0622': { type: 'triangle', octave: 0.5 }, // Dark red - gritty bass
+            'd62411': { type: 'triangle', octave: 1 },   // Bright red - mid 
+            'ff8426': { type: 'triangle', octave: 1 },   // Orange - warm mid
+            'ffd100': { type: 'sine', octave: 2 },       // Yellow - bright high chime
+            'fafdff': { type: 'sine', octave: 3 },       // White - whisper high chime
+            'ff80a4': { type: 'triangle', octave: 2 },   // Light pink - soft bell
+            'ff2674': { type: 'sine', octave: 1.5 },     // Pink - mid chime
+            '94216a': { type: 'triangle', octave: 0.75 },// Purple - sub
+            '430067': { type: 'triangle', octave: 0.5 }, // Deep purp - heavy
+            '234975': { type: 'triangle', octave: 0.75 },// Dark blue - mellow hum
+            '68aed4': { type: 'sine', octave: 2 },       // Light blue - clear chime
+            'bfff3c': { type: 'sine', octave: 2 },       // Lime - clear arpeggio
+            '10d275': { type: 'triangle', octave: 1 },   // Green - woody tone
+            '007899': { type: 'sine', octave: 1 },       // Teal - glass bell
+            '002859': { type: 'triangle', octave: 0.5 }  // Navy - warm drone
+        };
 
         // Fill grid
-        // Force an 11x8 grid on desktop (or proportional 6x10 on mobile)
-        const cols = window.innerWidth < 768 ? 6 : 11;
-        const rows = window.innerWidth < 768 ? 10 : 8;
+        // Force an 8x6 grid on desktop (or proportional 4x6 on mobile) for tighter visual spacing and less overload
+        const cols = window.innerWidth < 768 ? 4 : 8;
+        const rows = window.innerHeight < 768 ? 6 : 6;
         const numItems = cols * rows;  
         
         // Force foolproof perfect CSS Grid fit to window dimensions
-        canvas.style.gridTemplateColumns = `repeat(${cols}, ${100/cols}vw)`;
-        canvas.style.gridTemplateRows = `repeat(${rows}, ${100/rows}vh)`; 
+        // With grid gaps added, using 1fr instead of viewport units allows CSS engine to correctly constrain items
+        canvas.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+        canvas.style.gridTemplateRows = `repeat(${rows}, 1fr)`; 
+        
+        const runtimePalette = getShuffledPalette();
         
         for (let i = 0; i < numItems; i++) {
-            const row = Math.floor(i / cols);
-            const col = i % cols;
             
-            // Cluster the patterns based on grid position for "discovery"
-            let patternIndex = 0;
-            if (row < rows/2 && col < cols/2) patternIndex = 0;
-            else if (row >= rows/2 && col < cols/2) patternIndex = 1;
-            else patternIndex = 2;
+            // Pull a base hex code cyclically from the newly shuffled palette
+            const baseColorHex = runtimePalette[i % runtimePalette.length];
+            const uniqueShade = generateUniqueShade(baseColorHex);
             
-            // Add slight randomness to blend the edges of clusters
-            if (Math.random() < 0.25) {
-                patternIndex = Math.floor(Math.random() * patterns.length);
-            }
+            // Assign a specific synth profile based on the color's family
+            const currentProfile = synthProfiles[baseColorHex] || {type: 'sine', octave: 1};
             
-            const pattern = patterns[patternIndex];
-            const randomNote = scale[Math.floor(Math.random() * scale.length)];
+            // Explicitly tie the pitch to the color's position in the palette array so diverse colors = beautiful chords
+            const colorIndex = basePalette.indexOf(baseColorHex);
+            const scaleIndex = colorIndex !== -1 ? (colorIndex % scale.length) : Math.floor(Math.random() * scale.length);
+            const chosenNote = scale[scaleIndex];
             
             // Assign this block a specific rhythm loop length (e.g. loops every 2 beats)
             const beatMulti = possibleBeatMultipliers[Math.floor(Math.random() * possibleBeatMultipliers.length)];
             const loopIntervalMs = beatDurationMs * beatMulti;
-            const maxLoops = Math.max(10, Math.floor(16 / beatMulti)); // Ensure it plays enough times
+            // Ensure long, satisfying loops that gradually fade away
+            const maxLoops = Math.max(10, Math.floor(16 / beatMulti)); 
             
             const item = document.createElement('div');
             item.className = 'grid-item';
             
-            const img = document.createElement('img');
-            img.src = assetsBase + pattern.png;
-            img.dataset.png = assetsBase + pattern.png;
-            img.dataset.gif = assetsBase + pattern.gif;
-            
-            // Random slight rotation or flip to break up perfect repetition
-            const transformations = ['scaleX(-1)', 'scaleY(-1)', 'rotate(90deg)', 'rotate(180deg)', 'rotate(270deg)', 'none'];
-            img.style.transform = transformations[Math.floor(Math.random() * transformations.length)];
-            
-            item.appendChild(img);
+            // Instead of an image, assign the random shade directly to the background
+            item.style.backgroundColor = uniqueShade;
             
             let loopTimer = null;
 
@@ -148,9 +177,6 @@
                 if (item.classList.contains('active')) return;
 
                 item.classList.add('active');
-                
-                const cacheBuster = '?v=' + Date.now() + Math.random();
-                img.src = img.dataset.gif + cacheBuster;
                 
                 let loopCount = 0;
                 
@@ -161,33 +187,40 @@
                     item.classList.remove('active');
                     item.style.transform = '';
                     item.style.filter = '';
-                    img.src = img.dataset.png;
                     
                     // Remove from tracking list if it exists
-                    const idx = activeKeysList.findIndex(k => k.item === item);
-                    if (idx !== -1) activeKeysList.splice(idx, 1);
+                    if (colorActiveKeys[baseColorHex]) {
+                        const idx = colorActiveKeys[baseColorHex].findIndex(k => k.item === item);
+                        if (idx !== -1) colorActiveKeys[baseColorHex].splice(idx, 1);
+                    }
                 };
                 
-                // Track this active key to enforce our chaos cap
-                activeKeysList.push({ item, settleDown });
-                if (activeKeysList.length > MAX_ACTIVE_KEYS) {
-                    const oldest = activeKeysList.shift();
-                    oldest.settleDown(); // peacefully turn off the oldest!
+                // Track this active key to enforce our chaos cap grouped by specific color
+                if (!colorActiveKeys[baseColorHex]) {
+                    colorActiveKeys[baseColorHex] = [];
+                }
+                colorActiveKeys[baseColorHex].push({ item, settleDown });
+                
+                // Truncate oldest pattern IF we exceed the max for this specific color
+                if (colorActiveKeys[baseColorHex].length > MAX_PER_COLOR) {
+                    const oldest = colorActiveKeys[baseColorHex].shift();
+                    oldest.settleDown(); 
                 }
                 
                 // The rhythmic step execution
                 const triggerStep = () => {
-                    playNote(randomNote);
+                    playNote(chosenNote, currentProfile);
                     
                     // Visual thump mapping to the beat!
                     item.style.transform = 'scale(1.1)';
+                    // We increase brightness to make the color pop when triggered
                     item.style.filter = 'brightness(1.5) drop-shadow(0 0 30px rgba(255,255,255,0.6))';
                     
                     // Settle back to active resting state
                     setTimeout(() => {
                         if (item.classList.contains('active')) {
                             item.style.transform = 'scale(1.03)';
-                            item.style.filter = 'brightness(1.1) drop-shadow(0 0 15px rgba(255,100,150,0.3))';
+                            item.style.filter = 'brightness(1.15) drop-shadow(0 0 15px rgba(255,255,255,0.2))';
                         }
                     }, 150); // fast visual decay
                     
