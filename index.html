@@ -10,44 +10,126 @@
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/sunset.css">
+    <style>
+        body { overflow: hidden; /* Prevent dragging elements out of bounds from scrolling */ }
+        
+        /* Tiny absolute positioned footer */
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            color: rgba(255, 255, 255, 0.4);
+            padding: 6px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.65rem;
+            font-family: monospace;
+            z-index: 100;
+            box-sizing: border-box;
+        }
+        .footer p, .footer .credit-box {
+            margin: 0; padding: 0; background: none !important; border: none; display: inline;
+        }
+        
+        /* Clean 2-Column Grid Layout */
+        .nav-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-top: 5vh;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            justify-content: center;
+            justify-items: center;
+        }
+        @media (max-width: 600px) {
+            .nav-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Soft, buoyant pool-pad buttons substituting the rigid pixel boxes */
+        .nav-grid a.pool-pad {
+            background: rgba(255, 255, 255, 0.85);
+            color: #111;
+            padding: 12px 24px;
+            border-radius: 20px;
+            text-align: center;
+            text-decoration: none;
+            font-weight: bold;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,1);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: max-content;
+            transition: background 0.3s ease, filter 0.3s ease;
+            position: relative; 
+            will-change: transform;
+            cursor: pointer;
+        }
+        .nav-grid a.pool-pad:hover {
+            background: #fff;
+            filter: brightness(1.2);
+        }
+        
+        /* Static Cymatic Wave Medium Dots */
+        .medium-dot {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            pointer-events: none;
+            will-change: transform, opacity;
+        }
+        
+        /* Ensure physics target doesn't glitch layout */
+        .header { will-change: transform; position: relative; }
+    </style>
 </head>
 
 <body class="landing-page" style="transition: color 1.5s ease; background-color: #f6c9d2;">
-    <!-- Raw Image layer -->
-    <div class="art-background" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; background-image: url('assets/pattern-vibes/cooler_pattern_mar25.png'); background-size: cover; background-position: center; pointer-events: none;"></div>
+    <!-- Raw Image layer scaled slightly up to hide displacement edge bleed -->
+    <div class="art-background" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: url('assets/pattern-vibes/cooler_pattern_mar25.png'); background-size: cover; background-position: center; z-index: -2; pointer-events: none;"></div>
     
     <!-- Sunset tint layer, hidden initially -->
     <div id="sunset-tint" class="theme-sunset" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: var(--bg-image); mix-blend-mode: multiply; opacity: 0; transition: opacity 1.5s ease; pointer-events: none;"></div>
     <div class="screen-overlay"></div>
     <div class="container">
-        <header class="header">
-            <h1>Munir's Hobby Box</h1>
+        <header class="header" style="background: rgba(255, 255, 255, 0.6); padding: 20px 30px; border-radius: 12px; display: inline-block; margin-bottom: 2rem; backdrop-filter: blur(8px); border: 1px solid rgba(0, 0, 0, 0.1);">
+            <h1 style="margin: 0; padding-bottom: 5px; color: #111;">Munir's Hobbies Box</h1>
+            <p style="margin: 0; color: #333;">Welcome to my website-as-art collection of multimedia art.</p>
         </header>
 
-        <nav class="nav-menu">
-            <a href="https://munir-paviwala.github.io/musicProject" class="nav-link pixel-box">
+        <nav class="nav-grid">
+            <a href="https://munir-paviwala.github.io/musicProject" class="nav-link pool-pad">
                 Music Project
             </a>
-            <a href="music-tapes.html" class="nav-link pixel-box">
+            <a href="music-tapes.html" class="nav-link pool-pad">
                 Munir's Music Tapes
             </a>
-            <a href="pixel-art.html" class="nav-link pixel-box">
+            <a href="pixel-art.html" class="nav-link pool-pad">
                 Pixel Art Collection
             </a>
-            <a href="margins.html" class="nav-link pixel-box">
+            <a href="margins.html" class="nav-link pool-pad">
                 The Margins (Daily Art & Doodles)
             </a>
-            <a href="crush.html" class="nav-link pixel-box">
+            <a href="crush.html" class="nav-link pool-pad">
                 The Aesthetics of Crush (Tessa Violet)
             </a>
-            <a href="abstract.html" class="nav-link pixel-box">
-                Discovery Sequencer: Abstract Art
+            <a href="abstract.html" class="nav-link pool-pad">
+                Pentatonic Color Board
             </a>
         </nav>
 
         <footer class="footer">
             <p>&copy; 2026 Munir Paviwala</p>
-            <div class="credit-box" style="margin-top: 10px; font-size: 0.55rem; color: var(--text-secondary); background: rgba(255, 255, 255, 0.4); padding: 5px 10px; border-radius: 4px; display: inline-block;">Background art designed by Munir Paviwala</div>
+            <div class="credit-box">Background art designed by Munir Paviwala</div>
         </footer>
     </div>
 
@@ -67,6 +149,7 @@
             container.style.pointerEvents = 'auto';
             document.body.classList.add('theme-sunset');
             document.getElementById('sunset-tint').style.opacity = '0.5';
+            setTimeout(initPhysics, 100); // Start the physics engine immediately after revealing!
         }
 
         // Desktop: Keyboard listener for "konami" style code
@@ -101,6 +184,157 @@
                 }, 600); // 600ms timeframe to keep tapping
             }
         });
+        
+        // --- Custom Physics & Water Engine ---
+        let mouseX = window.innerWidth / 2;
+        let mouseY = window.innerHeight / 2;
+        
+        window.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        const artBg = document.querySelector('.art-background');
+        
+        // --- Static Cymatic Medium Engine ---
+        // Generates a perfectly spaced grid of tiny dots that compress statically away from the mouse. Infinite performance!
+        const cymaticContainer = document.createElement('div');
+        cymaticContainer.id = 'cymatic-layer';
+        cymaticContainer.style.cssText = 'position: fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index: -1;';
+        document.body.appendChild(cymaticContainer);
+        
+        const mediumGrid = [];
+        const spacing = window.innerWidth < 768 ? 50 : 40; 
+        const cols = Math.ceil(window.innerWidth / spacing);
+        const rows = Math.ceil(window.innerHeight / spacing);
+        
+        // Center the entire grid perfectly onto the screen
+        const offsetX = (window.innerWidth - (cols * spacing)) / 2;
+        const offsetY = (window.innerHeight - (rows * spacing)) / 2;
+        
+        for (let x = 0; x <= cols; x++) {
+            for (let y = 0; y <= rows; y++) {
+                const dot = document.createElement('div');
+                dot.className = 'medium-dot';
+                const px = offsetX + x * spacing;
+                const py = offsetY + y * spacing;
+                
+                dot.style.left = px + 'px';
+                dot.style.top = py + 'px';
+                cymaticContainer.appendChild(dot);
+                
+                mediumGrid.push({ el: dot, ox: px, oy: py });
+            }
+        }
+        
+        function renderMediumWave() {
+            mediumGrid.forEach(dot => {
+                const dx = dot.ox - mouseX;
+                const dy = dot.oy - mouseY;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                
+                if (dist < 200) { // Mouse compression radius
+                    // Press dots away smoothly
+                    const force = Math.pow((200 - dist) / 200, 2) * 25; 
+                    const tx = (dx / dist) * force;
+                    const ty = (dy / dist) * force;
+                    // Scale them up slightly for impact and physical presence
+                    dot.el.style.transform = `translate3d(${tx}px, ${ty}px, 0) scale(${1 + force/10})`;
+                    dot.el.style.opacity = Math.min(1, 0.4 + force/20).toString();
+                } else {
+                    dot.el.style.transform = 'translate3d(0, 0, 0) scale(1)';
+                    dot.el.style.opacity = '1';
+                }
+            });
+            requestAnimationFrame(renderMediumWave);
+        }
+        renderMediumWave();
+        
+        // Background panning beneath the SVG filter creates an amazing flowing water illusion
+        function animateWaterRipple() {
+            // Calmed, extremely subtle 3D parallax pan so it drifts rather than shakes
+            const dx = (mouseX - window.innerWidth/2) * 0.005;
+            const dy = (mouseY - window.innerHeight/2) * 0.005;
+            // The displacement map is static, moving the background pixels through it makes them wave!
+            artBg.style.transform = `scale(1.08) translate(${-dx}px, ${-dy}px)`;
+            requestAnimationFrame(animateWaterRipple);
+        }
+        animateWaterRipple();
+
+        // Object physics state array
+        const physicsObjects = [];
+        let physicsEnabled = false;
+
+        function initPhysics() {
+            if (physicsEnabled) return; // Prevent double firing
+            const header = document.querySelector('.header');
+            const pads = document.querySelectorAll('.pool-pad');
+            
+            // Header is tightly tethered (heavy spring, high friction)
+            physicsObjects.push({
+                el: header,
+                x: 0, y: 0, vx: 0, vy: 0,
+                spring: 0.1, friction: 0.8,
+                randomOffset: Math.random() * 100
+            });
+
+            // Each pool pad gets analyzed depending on constraints
+            pads.forEach(pad => {
+                physicsObjects.push({
+                    el: pad,
+                    x: 0, y: 0, vx: 0, vy: 0,
+                    spring: 0.015, friction: 0.94,
+                    randomOffset: Math.random() * 100
+                });
+            });
+            
+            physicsEnabled = true;
+            physicsLoop();
+        }
+
+        function physicsLoop() {
+            if (!physicsEnabled) return;
+            const time = Date.now() * 0.001; // Scale down for sine math
+            
+            physicsObjects.forEach(obj => {
+                const rect = obj.el.getBoundingClientRect();
+                // Because CSS translate updates getBoundingClientRect, we approximate center from its resting layout by subtracting its delta
+                const restingCenterX = (rect.left - obj.x) + (rect.width / 2);
+                const restingCenterY = (rect.top - obj.y) + (rect.height / 2);
+                
+                // Mouse repulsive force calculation (from its absolute resting center)
+                const dxCurrent = (restingCenterX + obj.x) - mouseX;
+                const dyCurrent = (restingCenterY + obj.y) - mouseY;
+                const dist = Math.sqrt(dxCurrent*dxCurrent + dyCurrent*dyCurrent);
+                
+                if (dist < 120) {
+                    // Gentle, playful budge that keeps them easy and reliable to click without escaping bounds
+                    const force = Math.pow((120 - dist) / 120, 2); 
+                    obj.vx += (dxCurrent / dist) * force * 0.4;
+                    obj.vy += (dyCurrent / dist) * force * 0.4;
+                }
+                
+                // Spring force eagerly ripping it back to coordinate 0,0
+                obj.vx += -obj.x * obj.spring;
+                obj.vy += -obj.y * obj.spring;
+                
+                // Glide friction
+                obj.vx *= obj.friction;
+                obj.vy *= obj.friction;
+                
+                obj.x += obj.vx;
+                obj.y += obj.vy;
+                
+                // Aquatic bobbing math
+                const bobY = Math.sin(time * 2 + obj.randomOffset) * 15; // Vertical heaving
+                const rockRot = Math.sin(time + obj.randomOffset) * 3; // Subtle rolling
+                
+                // Apply the math to the DOM element instantly
+                obj.el.style.transform = `translate(${obj.x}px, ${obj.y + bobY}px) rotate(${rockRot}deg)`;
+            });
+            
+            requestAnimationFrame(physicsLoop);
+        }
     </script>
 </body>
 
