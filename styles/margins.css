@@ -1,6 +1,7 @@
 /* The Margins - Messy Desk Aesthetic */
 .margins-layout {
     background-color: #f0eadd; /* Slightly darker/more textured look than the museum off-white */
+    /* Subtle dot or cross texture */
     background-image: 
         radial-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
         radial-gradient(rgba(0,0,0,0.05) 1px, transparent 1px);
