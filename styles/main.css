@@ -795,6 +795,8 @@ body.scrolled-past .editorial-author {
         max-width: 100%;
         border-top-left-radius: 0;
         height: auto;
+        max-height: 50vh;
+        overflow-y: auto;
         bottom: 0;
         transform: translateY(110%);
     }
