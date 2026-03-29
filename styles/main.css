@@ -43,8 +43,10 @@ body {
 /* (We keep index somewhat retro but cleaner) */
 body:not(.editorial-layout) {
     font-family: var(--font-retro);
-    background: linear-gradient(to bottom, #f6c9d2, #daaae4, #708bd4);
+    background-image: url('../assets/pattern-vibes/for_background_mar29.png');
+    background-repeat: repeat;
     background-attachment: fixed;
+    background-size: cover;
 }
 
 body.landing-page {
