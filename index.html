@@ -89,7 +89,18 @@
         }
         
         /* Ensure physics target doesn't glitch layout */
-        .header { will-change: transform; position: relative; }
+        .header { 
+            will-change: transform; 
+            position: relative; 
+            max-width: 90%;
+            box-sizing: border-box;
+        }
+        @media (max-width: 600px) {
+            .header { padding: 15px !important; }
+            .header h1 { font-size: 1.1rem; line-height: 1.4; word-break: break-word; }
+            .header p { font-size: 0.85rem; }
+            .nav-grid a.pool-pad { font-size: 0.85rem; white-space: normal; }
+        }
     </style>
 </head>
 
@@ -122,7 +133,7 @@
             <a href="crush.html" class="nav-link pool-pad">
                 The Aesthetics of Crush (Tessa Violet)
             </a>
-            <a href="abstract.html" class="nav-link pool-pad">
+            <a href="pentatonic-color-board.html" class="nav-link pool-pad">
                 Pentatonic Color Board
             </a>
         </nav>

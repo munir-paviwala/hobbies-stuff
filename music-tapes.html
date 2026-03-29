@@ -29,13 +29,15 @@
                 <div class="scrolling-text" id="now-playing-text">NO TAPE INSERTED</div>
             </div>
             <div class="boombox-controls">
-                <button id="btn-rewind" class="boombox-btn" disabled>⏪</button>
-                <button id="btn-play-pause" class="boombox-btn" disabled>▶</button>
-                <button id="btn-fast-forward" class="boombox-btn" disabled>⏩</button>
+                <button id="btn-prev" class="boombox-btn" disabled title="Previous Tape">⏮</button>
+                <button id="btn-play-pause" class="boombox-btn" disabled title="Play/Pause">▶</button>
+                <button id="btn-next" class="boombox-btn" disabled title="Next Tape">⏭</button>
+                <button id="btn-loop" class="boombox-btn" disabled title="Toggle Loop">🔁</button>
             </div>
-            <div class="progress-bar-container">
+            <div class="progress-bar-container" id="progress-container" style="cursor: pointer; position: relative;">
                 <div class="progress-bar-fill" id="progress-bar"></div>
             </div>
+            <div class="audio-timer" id="audio-timer" style="font-family: var(--font-retro); font-size: 0.6rem; color: #8fce00; text-align: right; width: 100%; max-width: 400px; margin-top: 4px; text-shadow: 0 0 5px rgba(143, 206, 0, 0.5);">0:00 / 0:00</div>
         </div>
 
         <!-- The Cassette Shelf -->

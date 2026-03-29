@@ -162,12 +162,23 @@
     .polaroid-scrap {
         max-width: 90%;
         margin-bottom: var(--spacing-md);
+        /* Force reset rotational and spatial scatter on mobile for a clean column scroll */
+        transform: rotate(0deg) translate(0, 0) !important;
+    }
+    
+    .polaroid-scrap:hover {
+        transform: scale(1.02) !important;
     }
 
     .corkboard-container {
         padding: var(--spacing-sm);
         gap: var(--spacing-sm);
         flex-direction: column;
+    }
+
+    .stack-view-container {
+        justify-content: flex-start;
+        padding-bottom: 40px;
     }
 }
 

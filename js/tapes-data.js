@@ -32,11 +32,5 @@ const tapesData = [
         title: 'slowJamsRelax-y',
         file: 'assets/audio/slowJamsRelax-y.m4a',
         color: '#3165ddff'
-    },
-    {
-        id: 'tape6',
-        title: 'Empty Tape (Side B)',
-        file: '',
-        color: '#03C03C'
     }
 ];

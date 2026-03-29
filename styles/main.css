@@ -176,42 +176,62 @@ body.landing-page {
     padding-top: 10vh;
 }
 
-/* --- SCRAPS / TRASH GRID --- */
 .scraps-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-    gap: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
     width: 100%;
-    max-width: 600px;
+    max-width: 800px;
     margin-top: var(--spacing-lg);
     padding: var(--spacing-md);
-    background: rgba(0, 0, 0, 0.02);
-    border: 1px dashed var(--border-subtle);
-    border-radius: 8px;
+    background: transparent;
+    border: none;
 }
 
 .scrap-thumbnail {
-    aspect-ratio: 1;
+    height: 120px; /* Fixed height, variable width to respect aspect ratio */
+    width: auto;
     overflow: hidden;
     cursor: pointer;
-    background: #fff;
-    border: 1px solid var(--border-subtle);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background: rgba(255, 255, 255, 0.85); /* pool-pad vibe */
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 24px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1), inset 0 2px 4px rgba(255,255,255,1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, filter 0.3s ease;
+    padding: 10px;
+    will-change: transform;
+    
+    /* Subtle bobbing animation */
+    animation: gentle-bob 4s ease-in-out infinite alternate;
+}
+
+/* Staggered animation delays so they don't bob identically */
+.scrap-thumbnail:nth-child(2n) { animation-delay: 0.5s; animation-duration: 4.5s; }
+.scrap-thumbnail:nth-child(3n) { animation-delay: 1.2s; animation-duration: 3.8s; }
+.scrap-thumbnail:nth-child(4n) { animation-delay: 2.1s; animation-duration: 4.2s; }
+
+@keyframes gentle-bob {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-8px); }
 }
 
 .scrap-thumbnail:hover {
-    transform: scale(4) rotate(0deg);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    transform: scale(2) translateY(-4px) !important;
+    animation: none; /* Stop bobbing and pop on hover */
+    box-shadow: 0 15px 40px rgba(0,0,0,0.2), inset 0 2px 4px rgba(255,255,255,1);
+    filter: brightness(1.1);
     z-index: 100;
     position: relative;
-    border-radius: 4px;
+    background: #fff;
 }
 
 .scrap-img {
-    width: 100%;
     height: 100%;
-    object-fit: cover;
+    width: auto;
+    object-fit: contain;
     image-rendering: pixelated;
+    border-radius: 12px;
 }
 
 .end-gallery-text {
@@ -659,21 +679,21 @@ body.scrolled-past .editorial-author {
     }
 
     .fixed-editorial-masthead {
-        flex: none;
+        flex: 0 0 40vh;
         width: 100%;
         max-width: 100%;
-        height: auto;
+        height: 40vh;
         max-height: 40vh;
         /* Bottom sheet height */
-        position: fixed;
-        bottom: 0;
+        position: relative;
+        bottom: auto;
         left: 0;
         border-left: none;
         border-top: 1px solid var(--border-subtle);
         border-bottom: none;
         border-top-left-radius: 24px;
         border-top-right-radius: 24px;
-        box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.05);
+        box-shadow: none;
         padding: var(--spacing-md) var(--spacing-md);
         background: rgba(235, 229, 219, 0.95);
         background-image: 
@@ -690,10 +710,10 @@ body.scrolled-past .editorial-author {
 
     .gallery-scroll-area {
         padding: var(--spacing-sm) var(--spacing-sm);
-        height: 100vh;
-        /* still take full height */
-        padding-bottom: 40vh;
+        height: 60vh;
+        flex: 1 1 60vh;
         /* ensure last item clears the bottom sheet */
+        padding-bottom: var(--spacing-xl);
     }
 
     .pixel-art-img,
@@ -735,7 +755,7 @@ body.scrolled-past .editorial-author {
     }
 
     .intro-spacer {
-        height: 65vh;
+        height: 100%;
         align-items: center;
         padding-bottom: 0;
     }
