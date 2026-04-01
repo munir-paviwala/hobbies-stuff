@@ -139,5 +139,84 @@ const galleryData = [
         size: "320x180px",
         image: "assets/gallery/wave-flower-export.gif",
         note: "Indian textile inspo - but retro palette. Made this on call with Dhairya withnessing it"
+    },
+    {
+        id: 16,
+        title: "Cooler Pattern",
+        artist: "Munir Paviwala",
+        date: "Mar 25, 2026",
+        size: "320x180px",
+        status: "trash",
+        image: "assets/pattern-vibes/cooler_pattern_mar25.png",
+        note: "Pattern vibes scrapyard"
+    },
+    {
+        id: 17,
+        title: "Electric Pattern",
+        artist: "Munir Paviwala",
+        date: "Mar 25, 2026",
+        size: "320x180px",
+        status: "trash",
+        image: "assets/pattern-vibes/electric_pattern_mar25.gif",
+        note: "Pattern vibes scrapyard"
+    },
+    {
+        id: 18,
+        title: "First step of the Pattern",
+        artist: "Munir Paviwala",
+        date: "Mar 25, 2026",
+        size: "320x180px",
+        status: "trash",
+        image: "assets/pattern-vibes/pattern_Mar25.gif",
+        note: "Pattern vibes scrapyard"
+    },
+    {
+        id: 19,
+        title: "Pattern (Static)",
+        artist: "Munir Paviwala",
+        date: "Mar 25, 2026",
+        size: "320x180px",
+        status: "trash",
+        image: "assets/pattern-vibes/pattern_Mar25.png",
+        note: "Pattern vibes scrapyard"
+    },
+    {
+        id: 20,
+        title: "Trippy Pattern",
+        artist: "Munir Paviwala",
+        date: "Mar 25, 2026",
+        size: "320x180px",
+        status: "trash",
+        image: "assets/pattern-vibes/trippy_pattern_mar25.gif",
+        note: "Pattern vibes scrapyard"
+    },
+    {
+        id: 21,
+        title: "Trippy Pattern (Static)",
+        artist: "Munir Paviwala",
+        date: "Mar 25, 2026",
+        size: "320x180px",
+        status: "trash",
+        image: "assets/pattern-vibes/trippy_pattern_mar25.png",
+        note: "Pattern vibes scrapyard"
+    },
+    {
+        id: 22,
+        title: "Rajai (Single Move)",
+        artist: "Munir Paviwala",
+        date: "March 27, 2026",
+        size: "320x180px",
+        status: "trash",
+        image: "assets/gallery/rajai_singlemove.gif",
+        note: "A single move version of Rajai."
+    },
+    {
+        id: 23,
+        title: "Rajai (Opposite Moves)",
+        artist: "Munir Paviwala",
+        date: "March 27, 2026",
+        size: "320x180px",
+        image: "assets/gallery/rajai_opp.gif",
+        note: "Inspired from Rajai - with the Indian Maximalist textile pattern. Simple, yet trippy somehow."
     }
 ];
