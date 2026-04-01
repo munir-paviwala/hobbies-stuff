@@ -9,7 +9,11 @@ const marginsData = [
             "assets/margins/dhakkan2.jpg",
             "assets/margins/dhakkan3.jpg",
             "assets/margins/dhakkan4.jpg",
-            "assets/margins/dhakkan5.jpg"
+            "assets/margins/dhakkan5.jpg",
+            "assets/margins/dhakkan_part2_1.jpg",
+            "assets/margins/dhakkan_part2_2.jpg",
+            "assets/margins/dhakkan_part2_3.jpg",
+            "assets/margins/dhakkan_part2_4.jpg"
         ],
         note: "Playing with the dhakkan labels."
     },
@@ -34,13 +38,38 @@ const marginsData = [
     },
     {
         id: 4,
-        title: "Milk Bottle Flowers",
+        title: "Milk Bottle Doodles",
         date: "March, 2026",
         type: "stack",
         photos: [
             "assets/margins/milk_flower1.jpg",
-            "assets/margins/milk_flower2.jpg"
+            "assets/margins/milk_flower2.jpg",
+            "assets/margins/milkBottle2.jpg"
         ],
         note: "Doodles on milk bottle."
     },
+    {
+        id: 5,
+        title: "Bookmarks",
+        date: "March, 2026",
+        type: "stack",
+        photos: [
+            "assets/margins/bookmark1.jpg",
+            "assets/margins/bookmark2.jpg",
+            "assets/margins/bookmark3.jpg",
+            "assets/margins/bookmark4.jpg"
+        ],
+        note: "Bookmark series."
+    },
+    {
+        id: 6,
+        title: "Envelope Doodles",
+        date: "March, 2026",
+        type: "stack",
+        photos: [
+            "assets/margins/envalope1.jpg",
+            "assets/margins/envalope2.jpg"
+        ],
+        note: "Envelope doodles."
+    }
 ];
