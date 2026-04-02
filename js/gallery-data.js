@@ -218,5 +218,14 @@ const galleryData = [
         size: "320x180px",
         image: "assets/gallery/rajai_opp.gif",
         note: "Inspired from Rajai - with the Indian Maximalist textile pattern. Simple, yet trippy somehow."
+    },
+    {
+        id: 24,
+        title: "Bubble gum clouds)",
+        artist: "Munir Paviwala",
+        date: "April 1, 2026",
+        size: "320x180px",
+        image: "assets/gallery/bubblegum-clouds.gif",
+        note: "Just simple clouds using bubble gum palette. Repetitive, but I like it."
     }
 ];
