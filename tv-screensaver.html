@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TV Screensaver</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/tv-screensaver.css">
+</head>
+<body class="crt-flicker">
+    
+    <div id="instruction-screen">
+        <p>This is a TV screensaver version of my gallery.</p>
+        <p>I just wanted to look at my art in the vibe as if it is playing on some old TV.</p>
+        <p>Turn on this page, and turn full screen to enjoy.</p>
+        <p style="color: #888; font-size: 0.8em; margin-top: 40px;">[ CLICK TO TURN ON ]</p>
+    </div>
+
+    <!-- The Grid fills the full viewport -->
+    <div id="tv-grid">
+        <!-- Driven by JS dynamically! -->
+    </div>
+
+    <div class="bottom-controls">
+        <div class="chaos-dial">
+            <button id="chaos-down" class="help-button">-</button>
+            <span id="chaos-counter">1</span>
+            <button id="chaos-up" class="help-button">+</button>
+        </div>
+        <button id="help-btn" class="help-button">EXIT</button>
+    </div>
+
+    <!-- Template for spawning new screen instances efficiently -->
+    <template id="screen-template">
+        <div class="tv-screen">
+            <div class="image-container">
+                <img class="current-image" src="" alt="Art">
+            </div>
+            <div class="vcr-osd">
+                <span class="vcr-play">PLAY ►</span>
+                <span class="vcr-title"></span>
+            </div>
+            <div class="crt-overlay"></div>
+        </div>
+    </template>
+
+    <script src="js/gallery-data.js"></script>
+    <script src="js/tv-screensaver.js"></script>
+</body>
+</html>

@@ -221,11 +221,11 @@ const galleryData = [
     },
     {
         id: 24,
-        title: "Bubble gum clouds)",
+        title: "Bubblegum clouds",
         artist: "Munir Paviwala",
         date: "April 1, 2026",
         size: "320x180px",
-        image: "assets/gallery/bubblegum-clouds.gif",
+        image: "assets/gallery/bubblegum_clouds.png",
         note: "Just simple clouds using bubble gum palette. Repetitive, but I like it."
     }
 ];
