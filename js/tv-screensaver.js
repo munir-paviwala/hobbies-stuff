@@ -66,7 +66,22 @@ function renderGrid() {
     
     const template = document.getElementById('screen-template');
     for(let i = 0; i < count; i++) {
-        gridContainer.appendChild(template.content.cloneNode(true));
+        const node = template.content.cloneNode(true);
+
+        // Give each screen's CRT overlay its own random timing so they never sync
+        const overlay = node.querySelector('.crt-overlay');
+        const flickerDur  = (0.1  + Math.random() * 0.25).toFixed(3);   // 0.10–0.35s
+        const flickerDel  = (Math.random() * 0.3).toFixed(3);            // 0–0.30s phase offset
+        const driftDur    = (6    + Math.random() * 10).toFixed(1);      // 6–16s scanline crawl
+        const driftDel    = (Math.random() * -10).toFixed(1);            // negative = already mid-drift
+        const flickerLo   = (0.88 + Math.random() * 0.1).toFixed(2);    // dimming floor 0.88–0.98
+        overlay.style.setProperty('--flicker-dur',   `${flickerDur}s`);
+        overlay.style.setProperty('--flicker-delay', `${flickerDel}s`);
+        overlay.style.setProperty('--drift-dur',      `${driftDur}s`);
+        overlay.style.setProperty('--drift-delay',    `${driftDel}s`);
+        overlay.style.setProperty('--flicker-lo',     flickerLo);
+
+        gridContainer.appendChild(node);
     }
     
     // Update counter

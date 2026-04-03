@@ -68,13 +68,23 @@ body, html {
 }
 
 .crt-flicker {
-    animation: flicker 0.15s infinite;
+    /* Animation params are overridden per-screen via inline style in JS */
+    animation:
+        flicker var(--flicker-dur, 0.15s) var(--flicker-delay, 0s) infinite,
+        scanDrift var(--drift-dur, 8s) var(--drift-delay, 0s) infinite linear;
 }
 
 @keyframes flicker {
-    0% { opacity: 0.95; }
-    50% { opacity: 1; }
-    100% { opacity: 0.98; }
+    0%   { opacity: var(--flicker-lo, 0.93); }
+    45%  { opacity: 1; }
+    50%  { opacity: var(--flicker-lo, 0.93); }
+    100% { opacity: 1; }
+}
+
+/* Each screen's scanlines drift at their own pace */
+@keyframes scanDrift {
+    0%   { background-position: 0 0; }
+    100% { background-position: 0 4px; } /* shift by exactly one scanline height */
 }
 
 #instruction-screen {
