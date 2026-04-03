@@ -1,25 +1,48 @@
 let currentGlobalTimer = null;
-let lastImageId = null;
-let isFirstImage = true;
-let chaosLevel = 1; // 1 to 5. 5 is max chaos
+let chaosLevel = 1;
 
 const validImages = galleryData.filter(item => item.image && item.status !== "trash");
 
-function getRandomArt() {
-    if (isFirstImage) {
-        isFirstImage = false;
+// --- Shuffled Playlist ---
+// Instead of pure random (which allows A→B→A repeats), we shuffle the full
+// list into a queue. Each call pops the next item. When the queue empties
+// we reshuffle and refill, guaranteeing every piece is seen before any repeat.
+let playQueue = [];
+let lastPlayedId = null;
+
+function fisherYatesShuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+}
+
+function refillQueue() {
+    let shuffled = fisherYatesShuffle(validImages);
+    // If the new queue starts with the same item we just showed, rotate it to the end
+    if (lastPlayedId !== null && shuffled.length > 1 && shuffled[0].id === lastPlayedId) {
+        shuffled.push(shuffled.shift());
+    }
+    playQueue = shuffled;
+}
+
+function getNextArt(forceFirst = false) {
+    // Always start with Bouncy Ball on fresh boot
+    if (forceFirst) {
         const intro = validImages.find(img => img.title.toLowerCase().includes('bouncy ball'));
         if (intro) {
-            lastImageId = intro.id;
+            // Remove it from queue so it doesn't show up again right away
+            playQueue = playQueue.filter(img => img.id !== intro.id);
+            lastPlayedId = intro.id;
             return intro;
         }
     }
-    let art;
-    do {
-        art = validImages[Math.floor(Math.random() * validImages.length)];
-    } while (art.id === lastImageId && validImages.length > 1);
-    
-    lastImageId = art.id;
+
+    if (playQueue.length === 0) refillQueue();
+    const art = playQueue.shift();
+    lastPlayedId = art.id;
     return art;
 }
 
@@ -61,15 +84,15 @@ function renderGrid() {
 }
 
 // Synchronously apply the same image to all screens but smoothly offset their loading times
-function showNextImage(immediate = false) {
-    if (chaosLevel === 5) return; // Break out if we entered chaos mode
+function showNextImage(forceFirst = false) {
+    if (chaosLevel === 5) return;
     
-    const art = getRandomArt();
+    const art = getNextArt(forceFirst);
     const screens = document.querySelectorAll('.tv-screen');
     
     screens.forEach(screen => {
         // Create an organic "staggered turn-on" effect randomly up to 500ms so they aren't robotic
-        const organicDelay = immediate ? 0 : Math.random() * 500;
+        const organicDelay = forceFirst ? 0 : Math.random() * 500;
         
         setTimeout(() => {
             const container = screen.querySelector('.image-container');
@@ -88,8 +111,8 @@ function showNextImage(immediate = false) {
                 imgEl.src = art.image;
                 imgEl.alt = art.title;
                 container.style.opacity = '1';
-            }, immediate ? 0 : 500); 
-        }, organicDelay);
+            }, forceFirst ? 0 : 500); 
+        }, forceFirst ? 0 : Math.random() * 500);
     });
 
     const nextDuration = Math.random() * (12000 - 5000) + 5000;
@@ -143,13 +166,16 @@ document.getElementById('instruction-screen').addEventListener('click', () => {
         elem.requestFullscreen().catch((err) => console.log(err));
     }
 
-    isFirstImage = true;
-    chaosLevel = 1;
+    // Reset playlist from scratch
+    playQueue = [];
+    lastPlayedId = null;
+    refillQueue();
     
     // Set initial button states
     document.getElementById('chaos-down').disabled = true;
     
     renderGrid();
+    showNextImage(true); // boot with Bouncy Ball first
 });
 
 // Chaos Dial Interaction
@@ -175,3 +201,14 @@ document.getElementById('help-btn').addEventListener('click', () => {
         document.exitFullscreen().catch(err => console.log(err));
     }
 });
+
+// Touch support: tap anywhere to briefly reveal hidden bottom controls for 3s
+let touchRevealTimer = null;
+document.addEventListener('touchstart', (e) => {
+    // Don't trigger if they tapped a button directly
+    if (e.target.closest('.bottom-controls')) return;
+    const controls = document.querySelector('.bottom-controls');
+    controls.style.opacity = '1';
+    clearTimeout(touchRevealTimer);
+    touchRevealTimer = setTimeout(() => { controls.style.opacity = '0'; }, 3000);
+}, { passive: true });
