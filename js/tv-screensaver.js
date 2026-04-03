@@ -2,6 +2,8 @@ let currentGlobalTimer = null;
 let chaosLevel = 1;
 
 const validImages = galleryData.filter(item => item.image && item.status !== "trash");
+// Chaos level 5 gets everything — including the scrapyard
+const allImages = galleryData.filter(item => item.image);
 
 // --- Shuffled Playlist ---
 // Instead of pure random (which allows A→B→A repeats), we shuffle the full
@@ -130,7 +132,9 @@ function showNextImage(forceFirst = false) {
         }, forceFirst ? 0 : Math.random() * 500);
     });
 
-    const nextDuration = Math.random() * (12000 - 5000) + 5000;
+    // Skewed: floor=6s, ceiling=12s, average≈10s (max-of-two biases toward upper end)
+    const skew = Math.max(Math.random(), Math.random());
+    const nextDuration = 6000 + skew * 6000;
     currentGlobalTimer = setTimeout(() => showNextImage(false), nextDuration);
 }
 
@@ -145,7 +149,8 @@ function startMaximumChaos() {
                 if (chaosLevel !== 5) {
                     return; // exit loop if they turned it down
                 }
-                const art = validImages[Math.floor(Math.random() * validImages.length)];
+                // Level 5 pulls from the full pool including scrapyard trash
+                const art = allImages[Math.floor(Math.random() * allImages.length)];
                 const container = screen.querySelector('.image-container');
                 const imgEl = screen.querySelector('.current-image');
                 const vcrEl = screen.querySelector('.vcr-osd');
@@ -163,8 +168,9 @@ function startMaximumChaos() {
                     container.style.opacity = '1';
                 }, 500); // gentle crossfade
                 
-                // Normal reading speed timer, just running completely independent
-                const nextDuration = Math.random() * (12000 - 5000) + 5000;
+                // Skewed: floor=6s, ceiling=12s, average≈10s
+                const skew = Math.max(Math.random(), Math.random());
+                const nextDuration = 6000 + skew * 6000;
                 setTimeout(runChaosLoop, nextDuration); 
             }
             runChaosLoop();
