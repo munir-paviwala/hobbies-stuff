@@ -48,17 +48,34 @@ function getNextArt(forceFirst = false) {
     return art;
 }
 
+// Target screen counts per chaos level
+const CHAOS_COUNTS = [1, 4, 9, 16, 16];
+
+// Given how many screens we want, find the col/row split whose aspect ratio
+// best matches the current viewport — so portrait phones get tall grids, etc.
+function getOptimalGrid(targetCount) {
+    const aspect = window.innerWidth / window.innerHeight;
+    let bestCols = 1, bestRows = targetCount, bestDiff = Infinity;
+    for (let cols = 1; cols <= targetCount; cols++) {
+        const rows = Math.ceil(targetCount / cols);
+        const diff = Math.abs((cols / rows) - aspect);
+        if (diff < bestDiff) {
+            bestDiff = diff;
+            bestCols = cols;
+            bestRows = rows;
+        }
+    }
+    return { cols: bestCols, rows: bestRows, count: bestCols * bestRows };
+}
+
 // Spawns nodes and sets CSS grid shape
 function renderGrid() {
     const gridContainer = document.getElementById('tv-grid');
-    gridContainer.innerHTML = ''; // clear existing
+    gridContainer.innerHTML = '';
     clearTimeout(currentGlobalTimer);
     
-    let cols, rows, count;
-    if (chaosLevel === 1) { cols = 1; rows = 1; count = 1; }
-    else if (chaosLevel === 2) { cols = 2; rows = 2; count = 4; }
-    else if (chaosLevel === 3) { cols = 3; rows = 3; count = 9; }
-    else if (chaosLevel >= 4) { cols = 4; rows = 4; count = 16; }
+    const targetCount = CHAOS_COUNTS[chaosLevel - 1];
+    const { cols, rows, count } = getOptimalGrid(targetCount);
     
     // Toggle multi-screen specific styles
     gridContainer.classList.toggle('cctv-mode', chaosLevel > 1);
@@ -72,11 +89,11 @@ function renderGrid() {
 
         // Give each screen's CRT overlay its own random timing so they never sync
         const overlay = node.querySelector('.crt-overlay');
-        const flickerDur  = (0.1  + Math.random() * 0.25).toFixed(3);   // 0.10–0.35s
-        const flickerDel  = (Math.random() * 0.3).toFixed(3);            // 0–0.30s phase offset
-        const driftDur    = (6    + Math.random() * 10).toFixed(1);      // 6–16s scanline crawl
-        const driftDel    = (Math.random() * -10).toFixed(1);            // negative = already mid-drift
-        const flickerLo   = (0.88 + Math.random() * 0.1).toFixed(2);    // dimming floor 0.88–0.98
+        const flickerDur  = (0.1  + Math.random() * 0.25).toFixed(3);
+        const flickerDel  = (Math.random() * 0.3).toFixed(3);
+        const driftDur    = (6    + Math.random() * 10).toFixed(1);
+        const driftDel    = (Math.random() * -10).toFixed(1);
+        const flickerLo   = (0.88 + Math.random() * 0.1).toFixed(2);
         overlay.style.setProperty('--flicker-dur',   `${flickerDur}s`);
         overlay.style.setProperty('--flicker-delay', `${flickerDel}s`);
         overlay.style.setProperty('--drift-dur',      `${driftDur}s`);
@@ -86,8 +103,8 @@ function renderGrid() {
         gridContainer.appendChild(node);
     }
     
-    // Update counter
-    document.getElementById('chaos-counter').textContent = chaosLevel;
+    // Update counter — level 5 is labelled MAX
+    document.getElementById('chaos-counter').textContent = chaosLevel === 5 ? 'MAX' : chaosLevel;
 
     // Update buttons
     document.getElementById('chaos-up').disabled = (chaosLevel === 5);
@@ -96,7 +113,7 @@ function renderGrid() {
     if (chaosLevel === 5) {
         startMaximumChaos();
     } else {
-        showNextImage(true); // force immediate show
+        showNextImage(true);
     }
 }
 
