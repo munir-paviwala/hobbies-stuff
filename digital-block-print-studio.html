@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Outfit:wght@300;400;500;600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Rozha+One&family=Outfit:wght@300;400;500;600&display=swap"
         rel="stylesheet">
     <style>
         *,
@@ -75,10 +75,9 @@
         }
 
         .intro-title {
-            font-family: 'Playfair Display', serif;
+            font-family: 'Rozha One', serif;
             color: var(--indigo);
-            font-size: 2.2rem;
-            font-style: italic;
+            font-size: 2.8rem;
             margin-bottom: 18px;
             line-height: 1.2;
         }
@@ -95,11 +94,11 @@
             display: inline-block;
             color: var(--indigo);
             line-height: 2.1;
-            font-size: 1rem;
+            font-size: 1.05rem;
             background: rgba(26, 35, 126, 0.05);
-            padding: 14px 20px;
-            border-radius: 8px;
-            border-left: 3px solid rgba(26, 35, 126, 0.25);
+            padding: 18px 28px;
+            border-radius: 12px;
+            border: 1px dashed rgba(26, 35, 126, 0.25);
             margin-bottom: 28px;
         }
 
@@ -131,7 +130,7 @@
 
         /* ── Left Stamp Panel ── */
         .stamp-panel {
-            width: 380px;
+            width: 420px;
             flex-shrink: 0;
             background: var(--panel);
             border-right: 2px solid var(--border);
@@ -150,9 +149,8 @@
         }
 
         .panel-title {
-            font-family: 'Playfair Display', serif;
-            font-style: italic;
-            font-size: 1.15rem;
+            font-family: 'Rozha One', serif;
+            font-size: 1.25rem;
             color: var(--indigo);
         }
 
@@ -193,8 +191,8 @@
             display: grid;
             grid-template-columns: repeat(10, 1fr);
             grid-template-rows: repeat(10, 1fr);
-            width: 320px;
-            height: 320px;
+            width: 360px;
+            height: 360px;
             border: 2px solid var(--border-active);
             border-radius: 4px;
             cursor: crosshair;
@@ -205,8 +203,8 @@
         }
 
         .sc {
-            width: 32px;
-            height: 32px;
+            width: 36px;
+            height: 36px;
             border: 0.5px solid rgba(0, 0, 0, 0.06);
             background: var(--stamp-empty);
             transition: filter 0.08s;
@@ -554,16 +552,15 @@
         <div class="intro-box">
             <h1 class="intro-title">Digital Block Print Studio</h1>
             <p class="intro-text">
-                My attempt at bringing Indian block printing to the browser — the kind where a woodcarver stamps the
-                same motif across cloth again and again, creating something bigger than the sum of its parts.
+                Welcome to your own little digital textile workshop! Instead of carving wood and dipping it in dye, we're placing pixels to weave endless patterns. Let's make something beautiful.
                 <br><br>
-                We've loaded a starter <em>leaf motif</em> to show you the ropes. Hit <strong>Print to Fabric</strong>
-                to tile it, then draw over it and make it yours.
+                We've left a little <em>desert blossom</em> here to get you started. Go ahead and hit <strong>Print to Fabric</strong>
+                to see how it multiplies on the cloth.
             </p>
             <div class="intro-steps">
-                <strong>1.</strong> The left grid is your <em>stamp</em> — draw your motif there<br>
-                <strong>2.</strong> Pick a pattern mode above the big canvas<br>
-                <strong>3.</strong> Hit <strong>🪷 Print to Fabric</strong> to tile it across the cloth
+                ✨ Paint your motif in the small editor on the left.<br>
+                🎨 Pick a pattern from the top bar (each one weaves the fabric differently!).<br>
+                🪷 Hit <strong>Print to Fabric</strong> to tile it across the cloth!
             </div>
             <button id="intro-start-btn" class="intro-start-btn">Let's Print 🪷</button>
         </div>
@@ -664,8 +661,8 @@
 
         const IS_MOBILE = window.innerWidth < 680;
         const GRIDS = {
-            small: { cols: IS_MOBILE ? 5 : 10, rows: IS_MOBILE ? 5 : 8, px: IS_MOBILE ? 8 : 8 },
-            large: { cols: IS_MOBILE ? 8 : 20, rows: IS_MOBILE ? 8 : 15, px: IS_MOBILE ? 6 : 5 },
+            small: { cols: IS_MOBILE ? 5 : 10, rows: IS_MOBILE ? 5 : 8, px: IS_MOBILE ? 8 : 10 },
+            large: { cols: IS_MOBILE ? 8 : 20, rows: IS_MOBILE ? 8 : 12, px: IS_MOBILE ? 6 : 8 },
         };
         let grid = GRIDS.small;
         let scatterMap = [];
@@ -949,15 +946,15 @@
         // ── Downloads ─────────────────────────
         document.getElementById('dl-stamp-btn').addEventListener('click', () => {
             const off = document.createElement('canvas');
-            off.width = 320; off.height = 320;
+            off.width = 360; off.height = 360;
             const ctx = off.getContext('2d');
-            ctx.clearRect(0, 0, 320, 320);
+            ctx.clearRect(0, 0, 360, 360);
             for (let i = 0; i < STAMP_W * STAMP_H; i++) {
                 const color = stampData[i];
                 if (!color) continue;
                 const px = i % STAMP_W, py = Math.floor(i / STAMP_W);
                 ctx.fillStyle = color;
-                ctx.fillRect(px * 32, py * 32, 32, 32);
+                ctx.fillRect(px * 36, py * 36, 36, 36);
             }
             const link = document.createElement('a');
             link.download = 'block-print-stamp.png';
@@ -990,24 +987,23 @@
             introOverlay.style.display = 'none';
         }
 
-        // ── Starter Stamp: diagonal leaf ───────
-        // Works beautifully across ALL 6 tiling modes
+        // ── Starter Stamp: desert blossom ───────
         (function loadStarterStamp() {
-            const G = '#4CAF50'; // Mehndi Green — leaf
-            const Y = '#FFC107'; // Temple Gold  — vein
-            const R = '#BF360C'; // Sindoor Red  — stem
+            const Y = '#FFC107'; // Temple Gold
+            const R = '#BF360C'; // Sindoor Red
+            const M = '#880E4F'; // Deep Maroon
             const _ = null;
             const rows = [
-                [_, _, _, _, _, _, _, G, G, _],
-                [_, _, _, _, _, _, G, Y, G, _],
-                [_, _, _, _, _, G, Y, Y, G, _],
-                [_, _, _, _, G, G, Y, G, _, _],
-                [_, _, _, G, Y, G, G, _, _, _],
-                [_, _, G, Y, G, _, _, _, _, _],
-                [_, G, Y, G, _, _, _, _, _, _],
-                [R, G, G, _, _, _, _, _, _, _],
-                [R, R, _, _, _, _, _, _, _, _],
-                [R, _, _, _, _, _, _, _, _, _],
+                [_, _, _, _, M, M, _, _, _, _],
+                [_, _, _, M, R, R, M, _, _, _],
+                [_, _, M, R, Y, Y, R, M, _, _],
+                [_, M, R, Y, M, M, Y, R, M, _],
+                [M, R, Y, M, R, R, M, Y, R, M],
+                [M, R, Y, M, R, R, M, Y, R, M],
+                [_, M, R, Y, M, M, Y, R, M, _],
+                [_, _, M, R, Y, Y, R, M, _, _],
+                [_, _, _, M, R, R, M, _, _, _],
+                [_, _, _, _, M, M, _, _, _, _]
             ];
             rows.forEach((row, y) => row.forEach((color, x) => {
                 stampData[y * STAMP_W + x] = color;
