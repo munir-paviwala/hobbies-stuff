@@ -191,9 +191,18 @@
 }
 
 .cassette-tape.playing {
-    border-color: var(--primary-accent);
+    border-color: #8fce00; /* Neon green to match the player LCD */
     transform: translateY(2px) scale(0.98);
-    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.4);
+    box-shadow: 0 0 20px rgba(143, 206, 0, 0.6), inset 0 0 10px rgba(143, 206, 0, 0.3);
+}
+
+.cassette-tape.playing .tape-label {
+    border-color: #8fce00;
+}
+
+.cassette-tape.playing .tape-name {
+    color: #8fce00;
+    text-shadow: 0 0 5px rgba(143, 206, 0, 0.3);
 }
 
 /* The label sticker */

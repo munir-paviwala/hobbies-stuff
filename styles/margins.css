@@ -109,11 +109,14 @@
 }
 
 .polaroid-scrap:hover {
-    /* Straighten, slightly scale up, and elevate */
-    transform: rotate(0deg) scale(1.05) translate(var(--rand-x), var(--rand-y)) !important;
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), 0 10px 20px rgba(0, 0, 0, 0.3);
+    /* "Pick up" the photo: straighten it, pull it off the scatter, and zoom it way in */
+    transform: rotate(0deg) scale(1.15) !important;
+    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.4), 0 15px 30px rgba(0, 0, 0, 0.3);
     z-index: 100;
     position: relative;
+    /* Adding a subtle glow to suggest it's interactable */
+    outline: 2px solid rgba(255, 255, 255, 0.8);
+    outline-offset: -2px;
 }
 
 /* Fan out the stack slightly on hover */
@@ -206,23 +209,46 @@
     opacity: 1;
 }
 
-.stack-view-close {
+.stack-view-close, .margins-lightbox .lightbox-close {
     position: absolute;
     top: var(--spacing-md);
-    right: var(--spacing-xl);
+    right: var(--spacing-md);
     color: #fff;
-    font-size: 3rem;
+    font-size: 2.5rem;
     font-family: var(--font-sans);
     cursor: pointer;
     line-height: 1;
-    z-index: 502;
-    transition: color 0.3s ease;
+    z-index: 1002;
+    transition: all 0.3s ease;
+    background: rgba(0, 0, 0, 0.4);
+    width: 60px;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(5px);
 }
 
-.stack-view-close:hover {
-    color: #f6c9d2;
-    /* Pink accent */
+.stack-view-close:hover, .margins-lightbox .lightbox-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
 }
+
+.stack-view-hint {
+    font-family: 'Caveat', cursive;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.5rem;
+    margin-bottom: var(--spacing-md);
+    animation: gentle-bob-horizontal 2s ease-in-out infinite alternate;
+}
+
+@keyframes gentle-bob-horizontal {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(10px); }
+}
+
 
 .stack-view-title {
     font-family: 'Permanent Marker', cursive;

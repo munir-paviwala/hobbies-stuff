@@ -18,9 +18,10 @@ document.addEventListener("DOMContentLoaded", () => {
         // Procedurally generate polaroids on the desk
         marginsData.forEach((item, index) => {
             
-            const randRotation = (Math.random() * 16) - 8;
-            const randX = (Math.random() * 30) - 15;
-            const randY = (Math.random() * 30) - 15;
+            // Larger scatter bounds to make it look truly messy, not just a bumpy grid
+            const randRotation = (Math.random() * 30) - 15; // -15 to +15 deg
+            const randX = (Math.random() * 120) - 60; // -60 to +60 px
+            const randY = (Math.random() * 120) - 60; // -60 to +60 px
 
             const polaroid = document.createElement('div');
             polaroid.className = 'polaroid-scrap';
