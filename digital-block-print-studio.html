@@ -348,12 +348,17 @@
         /* Mode bar */
         .mode-bar {
             display: flex;
-            align-items: center;
-            gap: 7px;
+            flex-direction: column;
+            gap: 10px;
             padding: 12px 18px;
             border-bottom: 1.5px solid var(--border);
-            flex-wrap: wrap;
             background: rgba(255, 255, 255, 0.5);
+        }
+
+        .mode-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .mode-label {
@@ -361,7 +366,63 @@
             color: var(--indigo-dim);
             text-transform: uppercase;
             letter-spacing: 0.16em;
-            margin-right: 4px;
+        }
+
+        .switch-mode-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--indigo);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .switch-mode-label input {
+            display: none;
+        }
+
+        .switch-mode-label .slider {
+            position: relative;
+            display: inline-block;
+            width: 32px;
+            height: 18px;
+            background-color: rgba(26, 35, 126, 0.2);
+            border-radius: 20px;
+            transition: .3s;
+        }
+
+        .switch-mode-label .slider:before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            border-radius: 50%;
+            transition: .3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .switch-mode-label input:checked + .slider {
+            background-color: var(--indigo);
+        }
+
+        .switch-mode-label input:checked + .slider:before {
+            transform: translateX(14px);
+        }
+
+        .mode-group {
+            display: none;
+            flex-wrap: wrap;
+            gap: 7px;
+        }
+        
+        .mode-group.active {
+            display: flex;
         }
 
         .mode-btn {
@@ -394,8 +455,7 @@
             font-size: 0.78rem;
             color: var(--text-muted);
             font-style: italic;
-            align-self: center;
-            margin-left: 4px;
+            align-self: flex-start;
         }
 
         /* Action strip */
@@ -612,13 +672,30 @@
         <main class="fabric-panel">
 
             <div class="mode-bar">
-                <span class="mode-label">Pattern</span>
-                <button class="mode-btn active" data-mode="grid">Grid</button>
-                <button class="mode-btn" data-mode="brick">Brick</button>
-                <button class="mode-btn" data-mode="mirror-h">Mirror ↔</button>
-                <button class="mode-btn" data-mode="mirror-all">Mirror ✦</button>
-                <button class="mode-btn" data-mode="diagonal">Diagonal</button>
-                <button class="mode-btn" data-mode="scatter">Scatter</button>
+                <div class="mode-header-row">
+                    <span class="mode-label">Classic Patterns</span>
+                    <label class="switch-mode-label">
+                        <input type="checkbox" id="advanced-mode-toggle">
+                        <span class="slider"></span>
+                        <span class="switch-text">Magic Modes</span>
+                    </label>
+                </div>
+                <div class="mode-group active" id="classic-group">
+                    <button class="mode-btn active" data-mode="grid">Grid</button>
+                    <button class="mode-btn" data-mode="brick">Brick</button>
+                    <button class="mode-btn" data-mode="mirror-h">Mirror ↔</button>
+                    <button class="mode-btn" data-mode="mirror-all">Mirror ✦</button>
+                    <button class="mode-btn" data-mode="diagonal">Diagonal</button>
+                    <button class="mode-btn" data-mode="scatter">Scatter</button>
+                </div>
+                <div class="mode-group" id="advanced-group">
+                    <button class="mode-btn" data-mode="pinwheel">Pinwheel</button>
+                    <button class="mode-btn" data-mode="half-drop-check">Check</button>
+                    <button class="mode-btn" data-mode="saree-border">Border</button>
+                    <button class="mode-btn" data-mode="ogee-wave">Ogee Wave</button>
+                    <button class="mode-btn" data-mode="mandala">Mandala</button>
+                    <button class="mode-btn" data-mode="vintage-scatter">Vintage</button>
+                </div>
                 <span class="mode-desc" id="mode-desc">Classic block print — perfect uniform repeat</span>
             </div>
 
@@ -839,14 +916,33 @@
             'mirror-all': '4-way reflection — mandala & rangoli tiling',
             'diagonal': 'Each row shifts diagonally — woven diamond feel',
             'scatter': 'Random 90° rotations — organic, hand-stamped',
+            'pinwheel': 'Sequential 90° rotation — interlocking labyrinth',
+            'half-drop-check': 'Interleaved spacing — classic gingham check',
+            'saree-border': 'Densely frames edges with an empty center',
+            'ogee-wave': 'Sine wave ripple — flowing textile flow',
+            'mandala': 'Concentric circles — traditional umbrella & rangoli centerpieces',
+            'vintage-scatter': 'Variable pressure and scale — worn, hand-printed feel'
         };
-        document.querySelectorAll('.mode-btn').forEach(btn => {
+
+        const patternBtns = document.querySelectorAll('.mode-btn');
+        patternBtns.forEach(btn => {
             btn.addEventListener('click', () => {
-                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                patternBtns.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 currentMode = btn.dataset.mode;
                 document.getElementById('mode-desc').textContent = MODE_DESCS[currentMode];
+                renderFabric();
             });
+        });
+
+        document.getElementById('advanced-mode-toggle').addEventListener('change', (e) => {
+            const isAdvanced = e.target.checked;
+            document.getElementById('classic-group').classList.toggle('active', !isAdvanced);
+            document.getElementById('advanced-group').classList.toggle('active', isAdvanced);
+            document.querySelector('.mode-label').textContent = isAdvanced ? 'Magic Patterns' : 'Classic Patterns';
+            
+            const firstBtn = isAdvanced ? document.querySelector('#advanced-group .mode-btn') : document.querySelector('#classic-group .mode-btn');
+            firstBtn.click();
         });
 
         // ── Fabric Canvas ─────────────────────
@@ -878,12 +974,14 @@
                     fabricCtx.fillRect(x, y, 1, 1);
         }
 
-        function drawStampAt(ctx, x, y, stampPx, flipH, flipV, rotateDeg) {
+        function drawStampAt(ctx, x, y, stampPx, flipH, flipV, rotateDeg, scale = 1, opacity = 1) {
             if (!stampData.some(c => c !== null)) return;
             const sw = STAMP_W * stampPx, sh = STAMP_H * stampPx;
             ctx.save();
+            ctx.globalAlpha = opacity;
             ctx.translate(x + sw / 2, y + sh / 2);
             if (rotateDeg) ctx.rotate(rotateDeg * Math.PI / 180);
+            if (scale !== 1) ctx.scale(scale, scale);
             if (flipH) ctx.scale(-1, 1);
             if (flipV) ctx.scale(1, -1);
             ctx.translate(-sw / 2, -sh / 2);
@@ -900,7 +998,44 @@
         function generateScatter(n) {
             scatterMap = [];
             const opts = [0, 90, 180, 270];
-            for (let i = 0; i < n; i++) scatterMap.push(opts[Math.floor(Math.random() * 4)]);
+            for (let i = 0; i < n; i++) {
+                scatterMap.push({
+                    rotation: opts[Math.floor(Math.random() * 4)],
+                    scale: 0.85 + Math.random() * 0.3,
+                    opacity: 0.65 + Math.random() * 0.35
+                });
+            }
+        }
+
+        function renderMandala(stampPx, sw, sh) {
+            const cx = fabricCanvas.width / 2;
+            const cy = fabricCanvas.height / 2;
+            const maxRadius = Math.max(cx, cy) * 1.5;
+            // Snugging up the radius to reduce empty space between rings
+            const radiusStep = Math.max(sw, sh) * 0.75;
+            
+            fabricCtx.save();
+            fabricCtx.beginPath();
+            fabricCtx.rect(0, 0, fabricCanvas.width, fabricCanvas.height);
+            fabricCtx.clip();
+
+            drawStampAt(fabricCtx, cx - sw/2, cy - sh/2, stampPx, false, false, 0);
+
+            let currentRadius = radiusStep;
+            while(currentRadius < maxRadius) {
+                const circ = 2 * Math.PI * currentRadius;
+                const numStamps = Math.floor(circ / (Math.max(sw, sh) * 1.1));
+                if (numStamps > 0) {
+                    for (let i = 0; i < numStamps; i++) {
+                        const angle = (i / numStamps) * Math.PI * 2;
+                        const bx = cx + Math.cos(angle) * currentRadius;
+                        const by = cy + Math.sin(angle) * currentRadius;
+                        drawStampAt(fabricCtx, bx - sw/2, by - sh/2, stampPx, false, false, (angle * 180 / Math.PI) + 90);
+                    }
+                }
+                currentRadius += radiusStep;
+            }
+            fabricCtx.restore();
         }
 
         function renderFabric() {
@@ -908,29 +1043,84 @@
             const sw = STAMP_W * stampPx, sh = STAMP_H * stampPx;
             setCanvasSize();
             drawFabricBackground();
-            if (currentMode === 'scatter') generateScatter((cols + 2) * (rows + 1));
+
+            if (currentMode === 'mandala') {
+                renderMandala(stampPx, sw, sh);
+                return;
+            }
+
+            if (currentMode === 'scatter' || currentMode === 'vintage-scatter') {
+                generateScatter((cols + 4) * (rows + 4));
+            }
+
             fabricCtx.save();
             fabricCtx.beginPath();
             fabricCtx.rect(0, 0, fabricCanvas.width, fabricCanvas.height);
             fabricCtx.clip();
-            for (let row = 0; row < rows; row++) {
+            
+            // To get rid of empty space around the Ogee wave, we need to loop through more rows
+            // and squish them closer together (0.7x height) so the wave rows overlap continuously.
+            let loopRows = (currentMode === 'ogee-wave') ? Math.ceil(rows * 1.5) + 1 : rows;
+            for (let row = 0; row < loopRows; row++) {
                 let rowOffsetX = 0;
                 if (currentMode === 'brick' && row % 2 === 1) rowOffsetX = sw / 2;
                 if (currentMode === 'diagonal') rowOffsetX = (row % 4) * (sw / 4);
+                
                 const startCol = rowOffsetX > 0 ? -1 : 0;
                 for (let col = startCol; col <= cols; col++) {
-                    const x = col * sw + rowOffsetX;
-                    const y = row * sh;
+                    let x = col * sw + rowOffsetX;
+                    let y = (currentMode === 'ogee-wave') ? row * (sh * 0.7) : row * sh;
+
                     if (x + sw < 0 || x >= fabricCanvas.width) continue;
-                    if (y + sh < 0 || y >= fabricCanvas.height) continue;
-                    let flipH = false, flipV = false, rotate = 0;
+                    
+                    let flipH = false, flipV = false, rotate = 0, scaleVal = 1, opacityVal = 1;
+                    
                     if (currentMode === 'mirror-h') flipH = col % 2 === 1;
                     if (currentMode === 'mirror-all') { flipH = col % 2 === 1; flipV = row % 2 === 1; }
+                    
                     if (currentMode === 'scatter') {
-                        const si = Math.abs((col + 1) + row * (cols + 2)) % scatterMap.length;
-                        rotate = scatterMap[si];
+                        const si = Math.abs((col + 2) + row * (cols + 4)) % scatterMap.length;
+                        rotate = scatterMap[si].rotation;
                     }
-                    drawStampAt(fabricCtx, x, y, stampPx, flipH, flipV, rotate);
+                    if (currentMode === 'vintage-scatter') {
+                        const si = Math.abs((col + 2) + row * (cols + 4)) % scatterMap.length;
+                        rotate = scatterMap[si].rotation;
+                        scaleVal = scatterMap[si].scale;
+                        opacityVal = scatterMap[si].opacity;
+                    }
+
+                    if (currentMode === 'pinwheel') {
+                        const groupCol = col % 2;
+                        const groupRow = row % 2;
+                        if (groupRow === 0 && groupCol === 0) rotate = 0;
+                        if (groupRow === 0 && groupCol === 1) rotate = 90;
+                        if (groupRow === 1 && groupCol === 1) rotate = 180;
+                        if (groupRow === 1 && groupCol === 0) rotate = 270;
+                    }
+
+                    if (currentMode === 'half-drop-check') {
+                        if ((col + row) % 2 === 1) continue;
+                    }
+
+                    if (currentMode === 'ogee-wave') {
+                        y += Math.sin((col / cols) * Math.PI * 4) * (sh * 0.6);
+                    }
+                    if (y + sh < 0 && currentMode !== 'ogee-wave') continue;
+                    if (y >= fabricCanvas.height && currentMode !== 'ogee-wave') continue;
+
+                    if (currentMode === 'saree-border') {
+                        const borderCols = IS_MOBILE ? 1 : 2;
+                        const borderRows = IS_MOBILE ? 1 : 2;
+                        let isBorder = (col < borderCols) || (col >= cols - borderCols) || (row < borderRows) || (row >= rows - borderRows);
+                        if (!isBorder) continue;
+                        
+                        if (col < borderCols) rotate = 90;
+                        else if (col >= cols - borderCols) rotate = 270;
+                        else if (row < borderRows) rotate = 180;
+                        else rotate = 0;
+                    }
+
+                    drawStampAt(fabricCtx, x, y, stampPx, flipH, flipV, rotate, scaleVal, opacityVal);
                 }
             }
             fabricCtx.restore();
