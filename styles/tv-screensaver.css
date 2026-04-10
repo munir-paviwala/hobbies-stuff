@@ -194,3 +194,14 @@ body, html {
     color: #fff;
     border-color: #fff;
 }
+
+/* Subtle Channel Change Effect for Gallery Mode */
+.tv-screen.channel-change {
+    animation: old-tv-channel-roll 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@keyframes old-tv-channel-roll {
+    0% { filter: contrast(1) brightness(1) sepia(0); transform: translateY(0); }
+    30% { filter: contrast(3) brightness(1.3) sepia(50%) hue-rotate(-20deg); transform: translateY(-3px) scaleY(1.01); }
+    100% { filter: contrast(1) brightness(1) sepia(0); transform: translateY(0); }
+}

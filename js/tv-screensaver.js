@@ -1,6 +1,11 @@
 let currentGlobalTimer = null;
 let chaosLevel = 1;
 
+let isGalleryMode = false;
+let galleryIndex = 0;
+let secretPasscode = "tvmode";
+let typedKeys = "";
+
 const validImages = galleryData.filter(item => item.image && item.status !== "trash");
 // Chaos level 5 gets everything — including the scrapyard
 const allImages = galleryData.filter(item => item.image);
@@ -74,7 +79,8 @@ function renderGrid() {
     gridContainer.innerHTML = '';
     clearTimeout(currentGlobalTimer);
     
-    const targetCount = CHAOS_COUNTS[chaosLevel - 1];
+    // In gallery mode we force 1 screen
+    const targetCount = isGalleryMode ? 1 : CHAOS_COUNTS[chaosLevel - 1];
     const { cols, rows, count } = getOptimalGrid(targetCount);
     
     // Toggle multi-screen specific styles
@@ -110,7 +116,9 @@ function renderGrid() {
     document.getElementById('chaos-up').disabled = (chaosLevel === 5);
     document.getElementById('chaos-down').disabled = (chaosLevel === 1);
 
-    if (chaosLevel === 5) {
+    if (isGalleryMode) {
+        renderGalleryArt(true);
+    } else if (chaosLevel === 5) {
         startMaximumChaos();
     } else {
         showNextImage(true);
@@ -119,7 +127,7 @@ function renderGrid() {
 
 // Synchronously apply the same image to all screens but smoothly offset their loading times
 function showNextImage(forceFirst = false) {
-    if (chaosLevel === 5) return;
+    if (chaosLevel === 5 || isGalleryMode) return;
     
     const art = getNextArt(forceFirst);
     const screens = document.querySelectorAll('.tv-screen');
@@ -140,6 +148,11 @@ function showNextImage(forceFirst = false) {
             // VCR OSD fades in on swap - always green
             vcrEl.style.opacity = '0.8';
             setTimeout(() => { vcrEl.style.opacity = '0'; }, 3000);
+
+            if (!forceFirst && Math.random() < 0.25) {
+                screen.classList.add('channel-change');
+                setTimeout(() => screen.classList.remove('channel-change'), 300);
+            }
 
             setTimeout(() => {
                 imgEl.src = art.image;
@@ -178,6 +191,11 @@ function startMaximumChaos() {
                 
                 vcrEl.style.opacity = '0.8';
                 setTimeout(() => { vcrEl.style.opacity = '0'; }, 3000);
+                
+                if (Math.random() < 0.25) {
+                    screen.classList.add('channel-change');
+                    setTimeout(() => screen.classList.remove('channel-change'), 300);
+                }
                 
                 setTimeout(() => {
                     imgEl.src = art.image;
@@ -245,8 +263,82 @@ let touchRevealTimer = null;
 document.addEventListener('touchstart', (e) => {
     // Don't trigger if they tapped a button directly
     if (e.target.closest('.bottom-controls')) return;
-    const controls = document.querySelector('.bottom-controls');
+    const controls = isGalleryMode ? document.getElementById('controls-gallery') : document.getElementById('controls-screensaver');
     controls.style.opacity = '1';
     clearTimeout(touchRevealTimer);
     touchRevealTimer = setTimeout(() => { controls.style.opacity = '0'; }, 3000);
 }, { passive: true });
+
+// --- Gallery Mode Subsystem ---
+function renderGalleryArt(isBoot) {
+    const art = validImages[galleryIndex];
+    document.getElementById('art-counter').textContent = `${galleryIndex + 1}/${validImages.length}`;
+    
+    const screen = document.querySelector('.tv-screen');
+    const container = screen.querySelector('.image-container');
+    const imgEl = screen.querySelector('.current-image');
+    const vcrEl = screen.querySelector('.vcr-osd');
+    const vcrTitle = screen.querySelector('.vcr-title');
+    
+    if (!isBoot) {
+        container.style.opacity = '0';
+        screen.classList.add('channel-change');
+        setTimeout(() => screen.classList.remove('channel-change'), 300);
+    }
+    
+    setTimeout(() => {
+        vcrTitle.textContent = art.title;
+        imgEl.src = art.image;
+        imgEl.alt = art.title;
+        
+        vcrEl.style.opacity = '0.8';
+        setTimeout(() => { vcrEl.style.opacity = '0'; }, 3000);
+        
+        container.style.opacity = '1';
+    }, isBoot ? 0 : 250);
+}
+
+function toggleGalleryMode() {
+    isGalleryMode = !isGalleryMode;
+    const ssControls = document.getElementById('controls-screensaver');
+    const galControls = document.getElementById('controls-gallery');
+    
+    if (isGalleryMode) {
+        clearTimeout(currentGlobalTimer);
+        ssControls.style.display = 'none';
+        galControls.style.display = 'flex';
+        galleryIndex = 0;
+        renderGrid(); // Routes to renderGalleryArt
+    } else {
+        ssControls.style.display = 'flex';
+        galControls.style.display = 'none';
+        renderGrid();
+    }
+}
+
+document.addEventListener('keydown', (e) => {
+    if (/^[a-zA-Z]$/.test(e.key)) {
+        typedKeys += e.key.toLowerCase();
+        if (typedKeys.length > secretPasscode.length) {
+            typedKeys = typedKeys.slice(-secretPasscode.length);
+        }
+        if (typedKeys === secretPasscode) {
+            typedKeys = "";
+            toggleGalleryMode();
+        }
+    }
+});
+
+document.getElementById('gallery-exit-btn').addEventListener('click', () => {
+    toggleGalleryMode();
+});
+
+document.getElementById('next-btn').addEventListener('click', () => {
+    galleryIndex = (galleryIndex + 1) % validImages.length;
+    renderGalleryArt();
+});
+
+document.getElementById('prev-btn').addEventListener('click', () => {
+    galleryIndex = (galleryIndex - 1 + validImages.length) % validImages.length;
+    renderGalleryArt();
+});
