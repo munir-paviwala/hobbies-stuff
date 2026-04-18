@@ -517,6 +517,18 @@
                     gain.gain.setValueAtTime(0.2, now);
                     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
                     osc.start(now); osc.stop(now + 0.38);
+
+                } else if (type === 'sheep_in') {
+                    // Tiny beep for sheep entering pen
+                    let osc = ac.createOscillator();
+                    let gain = ac.createGain();
+                    osc.connect(gain); gain.connect(ac.destination);
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(740, now);
+                    osc.frequency.setValueAtTime(980, now + 0.05);
+                    gain.gain.setValueAtTime(0.03, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+                    osc.start(now); osc.stop(now + 0.12);
                 }
             } catch (e) { /* Audio not available — silent fail */ }
         }
@@ -756,7 +768,8 @@
                             speedX: Math.random() * 0.003 + 0.001,
                             speedY: Math.random() * 0.003 + 0.001
                         });
-                        if (this.bubbles.length > 40) this.bubbles.shift();
+                        // Fewer bubbles max to help performance
+                        if (this.bubbles.length > 25) this.bubbles.shift();
                     }
 
                     // Boredom escape — after 60s no interaction, nudge the player
@@ -786,7 +799,8 @@
                         p.alpha -= 0.04;
                         if (p.alpha <= 0) this.trail.splice(i, 1);
                     }
-                    if (pointer.x !== -1000 && Math.random() < 0.4) {
+                    // Cursor trail — reduce spawn rate to help performance
+                    if (pointer.x !== -1000 && Math.random() < 0.25) {
                         this.trail.push({
                             x: pointer.x + (Math.random() - 0.5) * 10,
                             y: pointer.y + (Math.random() - 0.5) * 10,
@@ -805,11 +819,11 @@
                         if (s.y < -10) { s.y = height + 10; s.x = Math.random() * width; }
                     }
 
-                    // Zen Warnings State
-                    if (this.bubbles.length >= 40) {
+                    // Zen Warnings State - updated thresholds
+                    if (this.bubbles.length >= 25) {
                         this.messageAlpha = Math.min(1, this.messageAlpha + 0.02);
                         this.messageText = "The garden is full... softly let them be.";
-                    } else if (this.bubbles.length >= 25) {
+                    } else if (this.bubbles.length >= 15) {
                         this.messageAlpha = Math.min(1, this.messageAlpha + 0.02);
                         this.messageText = "Breathe... play with the bubbles you have.";
                     } else {
@@ -856,10 +870,16 @@
                         b.x += b.vx;
                         b.y += b.vy;
 
-                        if (b.x - b.r < 0) { b.x = b.r; b.vx *= -0.8; }
-                        if (b.x + b.r > width) { b.x = width - b.r; b.vx *= -0.8; }
-                        if (b.y - b.r < 0) { b.y = b.r; b.vy *= -0.8; }
-                        if (b.y + b.r > height) { b.y = height - b.r; b.vy *= -0.8; }
+                        // Repel from borders to prevent corner settling
+                        if (b.x < 100) b.vx += 0.02;
+                        if (b.x > width - 100) b.vx -= 0.02;
+                        if (b.y < 100) b.vy += 0.02;
+                        if (b.y > height - 100) b.vy -= 0.02;
+
+                        if (b.x - b.r < 0) { b.x = b.r; b.vx *= -0.8; b.vy += (Math.random() - 0.5) * 0.5;}
+                        if (b.x + b.r > width) { b.x = width - b.r; b.vx *= -0.8; b.vy += (Math.random() - 0.5) * 0.5;}
+                        if (b.y - b.r < 0) { b.y = b.r; b.vy *= -0.8; b.vx += (Math.random() - 0.5) * 0.5;}
+                        if (b.y + b.r > height) { b.y = height - b.r; b.vy *= -0.8; b.vx += (Math.random() - 0.5) * 0.5;}
 
                         const speed = Math.sqrt(b.vx * b.vx + b.vy * b.vy);
                         if (speed > 12) { b.vx = (b.vx / speed) * 12; b.vy = (b.vy / speed) * 12; }
@@ -1130,7 +1150,10 @@
 
                         const distToPen = Math.sqrt(Math.pow(b.x - penX, 2) + Math.pow(b.y - penY, 2));
                         if (distToPen < penR - b.r) {
-                            b.inPen = true;
+                            if (!b.inPen) {
+                                playSound('sheep_in');
+                                b.inPen = true;
+                            }
                             b.vx = 0;
                             b.vy = 0;
                             b.penOffsetX = b.x - penX;
@@ -1643,13 +1666,13 @@
                     this.setCursor(pointer.clicked && this.pullEnergy > 0.05);
 
                     // Pull energy: drains while holding, recharges when released
-                    // 2.5s full hold, 3s full recharge
+                    // 4s full hold, 2.5s full recharge
                     const isActivelyPulling = pointer.clicked && this.pullEnergy > 0;
                     if (isActivelyPulling) {
-                        this.pullEnergy = Math.max(0, this.pullEnergy - dt / 2500);
+                        this.pullEnergy = Math.max(0, this.pullEnergy - dt / 4000);
                         this.energyDraining = true;
                     } else {
-                        this.pullEnergy = Math.min(1.0, this.pullEnergy + dt / 3000);
+                        this.pullEnergy = Math.min(1.0, this.pullEnergy + dt / 2500);
                         if (this.pullEnergy >= 1.0) this.energyDraining = false;
                     }
 
