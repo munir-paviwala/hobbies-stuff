@@ -453,6 +453,74 @@
         window.addEventListener('resize', resize);
         resize();
 
+        // --- Web Audio Sound System (no files — pure synth) ---
+        let audioCtx = null;
+        function getAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            return audioCtx;
+        }
+
+        function playSound(type, x, y) {
+            try {
+                let ac = getAudio();
+                if (ac.state === 'suspended') ac.resume();
+                let now = ac.currentTime;
+
+                if (type === 'pop') {
+                    // Soft bubble pop: short noise burst + pitch drop
+                    let osc = ac.createOscillator();
+                    let gain = ac.createGain();
+                    osc.connect(gain); gain.connect(ac.destination);
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(520, now);
+                    osc.frequency.exponentialRampToValueAtTime(120, now + 0.18);
+                    gain.gain.setValueAtTime(0.18, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+                    osc.start(now); osc.stop(now + 0.25);
+
+                } else if (type === 'merge') {
+                    // Pleasant chime: two tones, fast attack
+                    [440, 660].forEach((freq, i) => {
+                        let osc = ac.createOscillator();
+                        let gain = ac.createGain();
+                        osc.connect(gain); gain.connect(ac.destination);
+                        osc.type = 'triangle';
+                        osc.frequency.value = freq;
+                        gain.gain.setValueAtTime(0, now + i * 0.06);
+                        gain.gain.linearRampToValueAtTime(0.12, now + i * 0.06 + 0.03);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.06 + 0.4);
+                        osc.start(now + i * 0.06); osc.stop(now + i * 0.06 + 0.45);
+                    });
+
+                } else if (type === 'pen') {
+                    // Herding success: warm ascending arpeggio
+                    [330, 440, 550, 660].forEach((freq, i) => {
+                        let osc = ac.createOscillator();
+                        let gain = ac.createGain();
+                        osc.connect(gain); gain.connect(ac.destination);
+                        osc.type = 'sine';
+                        osc.frequency.value = freq;
+                        gain.gain.setValueAtTime(0, now + i * 0.08);
+                        gain.gain.linearRampToValueAtTime(0.1, now + i * 0.08 + 0.04);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.35);
+                        osc.start(now + i * 0.08); osc.stop(now + i * 0.08 + 0.4);
+                    });
+
+                } else if (type === 'life') {
+                    // Don't Pop: life lost thud
+                    let osc = ac.createOscillator();
+                    let gain = ac.createGain();
+                    osc.connect(gain); gain.connect(ac.destination);
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(200, now);
+                    osc.frequency.exponentialRampToValueAtTime(60, now + 0.3);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+                    osc.start(now); osc.stop(now + 0.38);
+                }
+            } catch (e) { /* Audio not available — silent fail */ }
+        }
+
         // --- Input Handling ---
         let pointer = { x: -1000, y: -1000, active: false, clicked: false, justClicked: false };
 
@@ -593,17 +661,28 @@
             },
             garden: {
                 bubbles: [],
+                sparkles: [],
+                trail: [],
                 ui: document.getElementById('garden-ui'),
                 messageAlpha: 0,
                 messageText: "",
+                lastInteractTime: 0,
+                boredomAlpha: 0,
+                playTime: 0,
+                pinGifted: false,
+                pin: null,
                 init() {
                     this.bubbles = [];
-                    this.sparkles = []; // ambient floating sparkles
-                    this.trail = [];    // cursor trail particles
+                    this.sparkles = [];
+                    this.trail = [];
                     this.ui.style.display = 'block';
                     this.welcomeAlpha = 1.0;
-                    this.mood = 0; // slowly cycling hue mood
-                    // Pre-seed a few bubbles so it doesn't feel empty at start
+                    this.mood = 0;
+                    this.lastInteractTime = timeState.current;
+                    this.boredomAlpha = 0;
+                    this.playTime = 0;
+                    this.pinGifted = false;
+                    this.pin = null;
                     for (let i = 0; i < 5; i++) {
                         this.bubbles.push({
                             x: Math.random() * width, y: Math.random() * height,
@@ -615,7 +694,6 @@
                             speedY: Math.random() * 0.003 + 0.001
                         });
                     }
-                    // Ambient sparkles
                     for (let i = 0; i < 30; i++) {
                         this.sparkles.push({
                             x: Math.random() * width, y: Math.random() * height,
@@ -632,17 +710,47 @@
                 },
                 update() {
                     const t = timeState.current;
+                    const gdt = this.lastUpdateT ? t - this.lastUpdateT : 16;
+                    this.lastUpdateT = t;
 
-                    this.mood = (t * 0.00004) % 1; // slowly cycles 0→1
+                    this.mood = (t * 0.00004) % 1;
+                    this.playTime += gdt;
 
-                    // Tap / click → spawn bubble
+                    // Tap / click → spawn bubble OR burst pin target
                     if (pointer.justClicked && pointer.y > 80) {
+                        // Check pin hit
+                        if (this.pin && this.pin.life > 0) {
+                            let pd = Math.hypot(pointer.x - this.pin.x, pointer.y - this.pin.y);
+                            if (pd < 36) {
+                                // Hit! burst the nearest big bubble
+                                let biggest = null, bigR = 0;
+                                for (let b of this.bubbles) if (b.r > bigR) { bigR = b.r; biggest = b; }
+                                if (biggest) {
+                                    // explode it
+                                    for (let p = 0; p < 18; p++) {
+                                        let a = (p / 18) * Math.PI * 2;
+                                        this.trail.push({
+                                            x: biggest.x, y: biggest.y,
+                                            r: Math.random() * 7 + 3,
+                                            alpha: 1.0,
+                                            hue: biggest.hue,
+                                            vy: Math.sin(a) * (Math.random() * 4 + 2),
+                                            vx: Math.cos(a) * (Math.random() * 4 + 2)
+                                        });
+                                    }
+                                    playSound('pop', biggest.x, biggest.y);
+                                    this.bubbles.splice(this.bubbles.indexOf(biggest), 1);
+                                }
+                                this.pin = null;
+                                return;
+                            }
+                        }
+                        this.lastInteractTime = t;
+                        this.boredomAlpha = 0;
                         this.bubbles.push({
-                            x: pointer.x,
-                            y: pointer.y,
+                            x: pointer.x, y: pointer.y,
                             r: Math.random() * 60 + 15,
-                            vx: (Math.random() - 0.5) * 3,
-                            vy: (Math.random() - 0.5) * 3,
+                            vx: (Math.random() - 0.5) * 3, vy: (Math.random() - 0.5) * 3,
                             hue: getSafeHue('garden'),
                             offset: Math.random() * 1000,
                             speedX: Math.random() * 0.003 + 0.001,
@@ -651,7 +759,33 @@
                         if (this.bubbles.length > 40) this.bubbles.shift();
                     }
 
-                    // Cursor trail — small sparkle at pointer
+                    // Boredom escape — after 60s no interaction, nudge the player
+                    let idleSecs = (t - this.lastInteractTime) / 1000;
+                    if (idleSecs > 60) {
+                        this.boredomAlpha = Math.min(0.9, this.boredomAlpha + 0.005);
+                    } else {
+                        this.boredomAlpha = Math.max(0, this.boredomAlpha - 0.02);
+                    }
+
+                    // Pin gift — after 60s of play, drop a pin to burst a bubble
+                    if (!this.pinGifted && this.playTime > 60000 && this.bubbles.length > 2) {
+                        this.pinGifted = true;
+                        this.pin = { x: Math.random() * (width * 0.6) + width * 0.2, y: Math.random() * (height * 0.5) + height * 0.25, life: 1.0 };
+                    }
+                    // Pin pulses and eventually fades if ignored
+                    if (this.pin) {
+                        this.pin.life -= 0.0008;
+                        if (this.pin.life <= 0) { this.pin = null; this.pinGifted = false; } // respawn next time
+                    }
+
+                    // Cursor trail — small sparkle at pointer (with vx now for pin burst)
+                    for (let i = this.trail.length - 1; i >= 0; i--) {
+                        let p = this.trail[i];
+                        p.y += p.vy;
+                        if (p.vx !== undefined) p.x += p.vx;
+                        p.alpha -= 0.04;
+                        if (p.alpha <= 0) this.trail.splice(i, 1);
+                    }
                     if (pointer.x !== -1000 && Math.random() < 0.4) {
                         this.trail.push({
                             x: pointer.x + (Math.random() - 0.5) * 10,
@@ -661,12 +795,6 @@
                             hue: (this.mood * 360 + Math.random() * 40) % 360,
                             vy: -Math.random() * 1.5 - 0.3
                         });
-                    }
-                    for (let i = this.trail.length - 1; i >= 0; i--) {
-                        let p = this.trail[i];
-                        p.y += p.vy;
-                        p.alpha -= 0.04;
-                        if (p.alpha <= 0) this.trail.splice(i, 1);
                     }
 
                     // Ambient sparkles float upward, recycle
@@ -807,13 +935,45 @@
                     }
 
                     this.bubbles.forEach(b => {
-                        // Extra shadow to make bubbles float above the background
                         ctx.save();
                         ctx.shadowColor = 'rgba(0,0,0,0.35)';
                         ctx.shadowBlur = 18;
                         drawBubble(ctx, b.x, b.y, b.r, b.hue, 1, t + b.offset, b.speedX, b.speedY);
                         ctx.restore();
                     });
+
+                    // Pin gift — pulsing needle icon
+                    if (this.pin && this.pin.life > 0) {
+                        let pinAlpha = this.pin.life * (0.6 + Math.sin(t * 0.008) * 0.4);
+                        ctx.save();
+                        ctx.globalAlpha = pinAlpha;
+                        ctx.font = `${28 + Math.sin(t * 0.006) * 4}px serif`;
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.shadowColor = 'rgba(255,80,80,0.8)';
+                        ctx.shadowBlur = 15;
+                        ctx.fillText('📍', this.pin.x, this.pin.y);
+                        ctx.font = "500 clamp(0.7rem, 2vw, 0.85rem) 'Outfit', sans-serif";
+                        ctx.fillStyle = `rgba(220,60,60,${pinAlpha})`;
+                        ctx.shadowColor = 'rgba(255,255,255,0.8)';
+                        ctx.shadowBlur = 8;
+                        ctx.fillText('Tap to burst! 🫧', this.pin.x, this.pin.y + 32);
+                        ctx.restore();
+                    }
+
+                    // Boredom escape nudge
+                    if (this.boredomAlpha > 0) {
+                        ctx.save();
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.font = "600 clamp(1rem, 3.5vw, 1.3rem) 'Outfit', sans-serif";
+                        let y = height * 0.78 + Math.sin(t * 0.003) * 8;
+                        ctx.fillStyle = `rgba(185,49,96,${this.boredomAlpha})`;
+                        ctx.shadowColor = 'rgba(255,255,255,0.9)';
+                        ctx.shadowBlur = 16;
+                        ctx.fillText('pssst… tap me 💭', width / 2, y);
+                        ctx.restore();
+                    }
                 }
             },
             herding: {
@@ -982,6 +1142,7 @@
 
                     if (allIn && this.bubbles.length > 0) {
                         this.state = 'won';
+                        playSound('pen');
                         // Update share link
                         let herdShare = document.getElementById('herding-share');
                         if (herdShare) {
@@ -1030,36 +1191,50 @@
 
                     if (this.winAlpha > 0) {
                         ctx.save();
+
+                        // Soft dark overlay
+                        ctx.fillStyle = `rgba(0,0,0,${this.winAlpha * 0.35})`;
+                        ctx.fillRect(0, 0, width, height);
+
                         // Draw Confetti
                         this.confetti.forEach(c => {
                             ctx.save();
                             ctx.translate(c.x, c.y);
                             ctx.rotate(c.angle);
                             ctx.fillStyle = c.color;
+                            ctx.globalAlpha = this.winAlpha;
                             ctx.fillRect(-c.size / 2, -c.size / 2, c.size, c.size);
                             ctx.restore();
                         });
 
+                        ctx.globalAlpha = this.winAlpha;
                         ctx.textAlign = "center";
                         ctx.textBaseline = "middle";
 
-                        ctx.shadowColor = "rgba(0, 0, 0, 0.4)";
-                        ctx.shadowBlur = 10;
-                        ctx.font = "800 6vw 'Outfit', sans-serif";
+                        // Emoji burst above headline
+                        ctx.font = `clamp(2rem, 8vw, 4rem) serif`;
+                        ctx.fillText('🐑✨🐑', width / 2, height / 2 - 90);
 
-                        // Strong edge text!
-                        ctx.lineWidth = 4;
-                        ctx.strokeStyle = `rgba(0, 0, 0, ${this.winAlpha})`;
-                        ctx.strokeText(`Flock ${this.round} Secured! 🐑`, width / 2, height / 2 - 20);
+                        // Main headline
+                        ctx.shadowColor = "rgba(255, 220, 80, 0.8)";
+                        ctx.shadowBlur = 24;
+                        ctx.font = "900 clamp(1.8rem, 6vw, 3.5rem) 'Outfit', sans-serif";
+                        ctx.fillStyle = `#fff`;
+                        ctx.fillText(`Flock ${this.round} Secured!`, width / 2, height / 2 - 20);
 
-                        ctx.fillStyle = `rgba(255, 255, 255, ${this.winAlpha})`;
-                        ctx.fillText(`Flock ${this.round} Secured! 🐑`, width / 2, height / 2 - 20);
+                        // Round number accent
+                        ctx.shadowBlur = 6;
+                        ctx.font = "700 clamp(0.9rem, 2.5vw, 1.4rem) 'Outfit', sans-serif";
+                        ctx.fillStyle = `rgba(255, 220, 100, 1)`;
+                        ctx.fillText(`${5 + this.round * 2} sheep herded • Round ${this.round} complete`, width / 2, height / 2 + 38);
 
-                        // Fun sub-font styling
-                        ctx.font = "italic 800 2.5vw 'Outfit', sans-serif";
-                        ctx.fillStyle = `rgba(255, 220, 100, ${this.winAlpha})`;
-                        ctx.shadowBlur = 4;
-                        ctx.fillText("Click anywhere to herd the next flock!", width / 2, height / 2 + 60);
+                        // Tap to continue
+                        ctx.shadowBlur = 0;
+                        ctx.font = "500 clamp(0.75rem, 1.8vw, 1rem) 'Outfit', sans-serif";
+                        ctx.fillStyle = `rgba(255,255,255,0.7)`;
+                        ctx.fillText("tap anywhere for the next flock →", width / 2, height / 2 + 80);
+
+                        ctx.globalAlpha = 1;
                         ctx.restore();
                     }
                 },
@@ -1255,12 +1430,15 @@
                         });
                     }
                     this.bubbles.splice(index, 1);
+                    playSound('pop', b.x, b.y);
                     this.lives--;
                     if (this.lives <= 0) {
                         this.state = 'gameover';
                         let shareBtn = document.getElementById('dontpop-share');
                         shareBtn.style.display = 'inline-block';
                         shareBtn.href = `mailto:?subject=I survived Dont Pop!&body=I survived for ${(this.scoreTime / 1000).toFixed(1)} seconds in Bubble Games! Can you beat my score?`;
+                    } else {
+                        playSound('life');
                     }
                 },
                 draw() {
@@ -1343,20 +1521,38 @@
                         ctx.save();
                         ctx.textAlign = "center";
                         ctx.textBaseline = "middle";
-                        ctx.fillStyle = `rgba(0, 0, 0, 0.6)`;
+                        ctx.fillStyle = `rgba(0, 0, 0, 0.72)`;
                         ctx.fillRect(0, 0, width, height);
 
-                        ctx.fillStyle = `rgba(255, 255, 255, 1)`;
-                        ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
-                        ctx.shadowBlur = 10;
-                        ctx.font = "800 6vw 'Outfit', sans-serif";
-                        ctx.fillText(`Game Over 💥`, width / 2, height / 2 - 30);
+                        // Big emoji
+                        ctx.font = `clamp(2.5rem, 10vw, 5rem) serif`;
+                        ctx.shadowColor = 'rgba(255,100,30,0.5)';
+                        ctx.shadowBlur = 30;
+                        ctx.fillText('🌵💥', width / 2, height / 2 - 90);
 
-                        ctx.font = "600 2.5vw 'Outfit', sans-serif";
-                        ctx.fillText(`You Survived: ${(this.scoreTime / 1000).toFixed(1)}s`, width / 2, height / 2 + 50);
+                        // Game Over headline
+                        ctx.shadowColor = 'rgba(255,60,0,0.6)';
+                        ctx.shadowBlur = 20;
+                        ctx.font = "900 clamp(1.8rem, 7vw, 3.5rem) 'Outfit', sans-serif";
+                        ctx.fillStyle = '#fff';
+                        ctx.fillText('Popped! 💥', width / 2, height / 2 - 18);
 
-                        ctx.font = "400 1.5vw 'Outfit', sans-serif";
-                        ctx.fillText("Click anywhere to restart", width / 2, height / 2 + 100);
+                        // Time survived — big and proud
+                        let secs = this.scoreTime / 1000;
+                        let mins = Math.floor(secs / 60);
+                        let secStr = (secs % 60).toFixed(1).padStart(4, '0');
+                        let timeStr = mins > 0 ? `${mins}m ${secStr}s` : `${secs.toFixed(1)}s`;
+                        ctx.shadowBlur = 8;
+                        ctx.font = "700 clamp(1.1rem, 3.5vw, 1.8rem) 'Outfit', sans-serif";
+                        ctx.fillStyle = 'rgba(255, 220, 100, 1)';
+                        ctx.fillText(`Survived ${timeStr} • Level ${this.level}`, width / 2, height / 2 + 42);
+
+                        // Tap to restart
+                        ctx.shadowBlur = 0;
+                        ctx.font = "500 clamp(0.75rem, 1.8vw, 1rem) 'Outfit', sans-serif";
+                        ctx.fillStyle = 'rgba(255,255,255,0.65)';
+                        ctx.fillText('tap anywhere to try again', width / 2, height / 2 + 88);
+
                         ctx.restore();
                     }
                 },
@@ -1383,6 +1579,7 @@
                     this.score = 0;
                     this.state = 'playing';
                     this.mergeFlashes = [];
+                    this.mergeFlashScreen = 0;
                     this.core = { x: width / 2, y: height / 2, r: 60, hue: 0 };
                     this.lastSpawnTargetTime = timeState.current;
                     this.lastTime = timeState.current;
@@ -1390,6 +1587,8 @@
                     this.idleAlpha = 0;
                     this.lastMoveX = -1;
                     this.lastMoveY = -1;
+                    this.pullEnergy = 1.0;   // 0 = exhausted, 1 = full
+                    this.energyDraining = false;
 
                     this.ui.style.display = 'block';
                     this.pressureMeter.style.display = 'block';
@@ -1441,7 +1640,18 @@
                     }
 
                     // Cursor feedback: swap emoji when holding
-                    this.setCursor(pointer.clicked);
+                    this.setCursor(pointer.clicked && this.pullEnergy > 0.05);
+
+                    // Pull energy: drains while holding, recharges when released
+                    // 2.5s full hold, 3s full recharge
+                    const isActivelyPulling = pointer.clicked && this.pullEnergy > 0;
+                    if (isActivelyPulling) {
+                        this.pullEnergy = Math.max(0, this.pullEnergy - dt / 2500);
+                        this.energyDraining = true;
+                    } else {
+                        this.pullEnergy = Math.min(1.0, this.pullEnergy + dt / 3000);
+                        if (this.pullEnergy >= 1.0) this.energyDraining = false;
+                    }
 
                     // IDLE PENALTY: staying still with cursor floods the system with new planets!
                     let orbitMoved = Math.abs(pointer.x - this.lastMoveX) > 10 || Math.abs(pointer.y - this.lastMoveY) > 10;
@@ -1475,7 +1685,7 @@
                             if (b.state !== 'orbiting') continue;
                             let pdx = this.core.x - b.x;
                             let pdy = this.core.y - b.y;
-                            let pd = Math.sqrt(pdx*pdx + pdy*pdy) || 1;
+                            let pd = Math.sqrt(pdx * pdx + pdy * pdy) || 1;
                             b.vx += (pdx / pd) * 0.3; // drift inward
                             b.vy += (pdy / pd) * 0.3;
                         }
@@ -1566,17 +1776,17 @@
                             if (dist < 300) {
                                 let force = Math.pow((300 - dist) / 300, 2);
                                 // If idle AND pulling: EXPLODE planets away (anti-camping!)
-                                let isIdlePull = pointer.clicked && this.idleTime > 3000;
+                                let isIdlePull = pointer.clicked && this.pullEnergy > 0 && this.idleTime > 3000;
                                 if (isIdlePull) {
-                                    // Forceful repulsion — camping with held click disperses everything
                                     b.vx += (dx / dist) * force * 12;
                                     b.vy += (dy / dist) * force * 12;
-                                } else if (pointer.clicked) {
-                                    // Normal PULL! Gravity
-                                    b.vx -= (dx / dist) * force * 5;
-                                    b.vy -= (dy / dist) * force * 5;
+                                } else if (pointer.clicked && this.pullEnergy > 0) {
+                                    // Pull scales with remaining energy!
+                                    let pullStrength = 5 * this.pullEnergy;
+                                    b.vx -= (dx / dist) * force * pullStrength;
+                                    b.vy -= (dy / dist) * force * pullStrength;
                                 } else {
-                                    // PUSH! Gentle repulse
+                                    // PUSH! Gentle repulse (always works)
                                     b.vx += (dx / dist) * force * 1.5;
                                     b.vy += (dy / dist) * force * 1.5;
                                 }
@@ -1624,8 +1834,10 @@
                                     b.vx = (b.vx + b2.vx) / 2;
                                     b.vy = (b.vy + b2.vy) / 2;
 
-                                    // Merge flash popup!
+                                    // Merge flash popup + brief screen flash!
                                     this.mergeFlashes.push({ x: b.x, y: b.y, text: `+${pts}`, alpha: 1.0, hue: b.hue });
+                                    this.mergeFlashScreen = Math.min(1.0, 0.3 + pts * 0.02);
+                                    playSound('merge', b.x, b.y);
 
                                     this.bubbles.splice(j, 1);
                                     i--;
@@ -1699,10 +1911,13 @@
                         ctx.restore();
                     }
 
-                    // Gravitational CONTOUR RINGS around cursor
+                    // Gravitational CONTOUR RINGS + pull energy arc around cursor
                     if (pointer.x !== -1000) {
-                        let isPulling = pointer.clicked;
+                        let isPulling = pointer.clicked && this.pullEnergy > 0.05;
                         ctx.save();
+                        ctx.setLineDash([]);
+
+                        // Contour rings
                         for (let r = 1; r <= 5; r++) {
                             let ringRadius = r * 55;
                             let alpha = (0.35 - r * 0.06) * (isPulling ? 1 : 0.5);
@@ -1711,10 +1926,50 @@
                             ctx.arc(pointer.x, pointer.y, ringRadius, 0, Math.PI * 2);
                             ctx.lineWidth = isPulling ? 2.5 - r * 0.3 : 1;
                             ctx.strokeStyle = isPulling
-                                ? `rgba(255, 140, 255, ${alpha})`   // pink/magenta on pull
-                                : `rgba(140, 200, 255, ${alpha})`; // soft blue on hover
+                                ? `rgba(255, 140, 255, ${alpha})`
+                                : `rgba(140, 200, 255, ${alpha})`;
                             ctx.stroke();
                         }
+
+                        // Pull energy arc — shows remaining charge when holding or recharging
+                        let showEnergy = pointer.clicked || this.energyDraining;
+                        if (showEnergy) {
+                            ctx.setLineDash([]);
+                            let arcR = 26;
+                            let energy = this.pullEnergy;
+
+                            // Background ring (grey)
+                            ctx.beginPath();
+                            ctx.arc(pointer.x, pointer.y, arcR, -Math.PI / 2, Math.PI * 1.5);
+                            ctx.lineWidth = 4;
+                            ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+                            ctx.stroke();
+
+                            // Foreground arc (energy left)
+                            if (energy > 0) {
+                                let endAngle = -Math.PI / 2 + (2 * Math.PI * energy);
+                                let hue = energy > 0.4 ? 280 : energy > 0.15 ? 40 : 0; // purple → amber → red
+                                ctx.beginPath();
+                                ctx.arc(pointer.x, pointer.y, arcR, -Math.PI / 2, endAngle);
+                                ctx.lineWidth = 4;
+                                ctx.strokeStyle = `hsl(${hue}, 100%, 65%)`;
+                                ctx.shadowColor = `hsl(${hue}, 100%, 65%)`;
+                                ctx.shadowBlur = 10;
+                                ctx.stroke();
+                            }
+
+                            // 'Exhausted' flash text
+                            if (energy < 0.03) {
+                                ctx.textAlign = 'center';
+                                ctx.textBaseline = 'middle';
+                                ctx.font = "700 clamp(0.7rem, 1.5vw, 0.9rem) 'Outfit', sans-serif";
+                                ctx.fillStyle = 'rgba(255,100,100,0.9)';
+                                ctx.shadowColor = '#f00';
+                                ctx.shadowBlur = 8;
+                                ctx.fillText('⚡ charging', pointer.x, pointer.y + arcR + 16);
+                            }
+                        }
+
                         ctx.restore();
                     }
 
@@ -1758,7 +2013,7 @@
                     ctx.beginPath();
                     ctx.ellipse(0, 0, this.core.r * 1.4, this.core.r * 0.28, 0, 0, Math.PI * 2);
                     let diskGrad = ctx.createLinearGradient(-this.core.r * 1.4, 0, this.core.r * 1.4, 0);
-                    diskGrad.addColorStop(0,   'rgba(255, 120, 40, 0)');
+                    diskGrad.addColorStop(0, 'rgba(255, 120, 40, 0)');
                     diskGrad.addColorStop(0.3, 'rgba(255, 160, 60, 0.55)');
                     diskGrad.addColorStop(0.5, 'rgba(255, 220, 100, 0.7)');
                     diskGrad.addColorStop(0.7, 'rgba(255, 160, 60, 0.55)');
@@ -1777,17 +2032,31 @@
 
                     ctx.restore();
 
-                    // Merge score popups 
+                    // Merge score popups — bigger and juicier
                     ctx.save();
                     ctx.textAlign = 'center';
                     this.mergeFlashes.forEach(f => {
-                        ctx.font = `900 1.8rem 'Outfit', sans-serif`;
+                        let scale = 1 + (1 - f.alpha) * 0.8; // grows as it fades
+                        ctx.save();
+                        ctx.translate(f.x, f.y);
+                        ctx.scale(scale, scale);
+                        ctx.font = `900 clamp(1.2rem, 3vw, 2.2rem) 'Outfit', sans-serif`;
                         ctx.shadowColor = `hsla(${f.hue}, 90%, 50%, ${f.alpha})`;
-                        ctx.shadowBlur = 12;
-                        ctx.fillStyle = `hsla(${f.hue}, 90%, 90%, ${f.alpha})`;
-                        ctx.fillText(f.text, f.x, f.y);
+                        ctx.shadowBlur = 20;
+                        ctx.fillStyle = `hsla(${f.hue}, 90%, 92%, ${f.alpha})`;
+                        ctx.fillText(f.text, 0, 0);
+                        ctx.restore();
                     });
                     ctx.restore();
+
+                    // Brief screen flash on big merge
+                    if (this.mergeFlashScreen > 0) {
+                        ctx.save();
+                        ctx.fillStyle = `rgba(255,255,255,${this.mergeFlashScreen * 0.18})`;
+                        ctx.fillRect(0, 0, width, height);
+                        this.mergeFlashScreen -= 0.06;
+                        ctx.restore();
+                    }
                 },
                 cleanup() {
                     this.ui.style.display = 'none';
