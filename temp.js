@@ -1,458 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🫧 Bubble Games</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --theme-color: #b93160;
-            --ocean-dark: #0a192f;
-            --ocean-teal: #172a45;
-            --ocean-light: #303C55;
-            --text-color: #ccd6f6;
-            --bubble-highlight: rgba(255, 255, 255, 0.9);
-        }
-
-        body {
-            margin: 0;
-            overflow: hidden;
-            width: 100vw;
-            height: 100vh;
-            background: url('assets/gallery/bubblegum_clouds.png') no-repeat center center / cover, #ffccd5;
-            background-blend-mode: screen;
-            /* Lighten it up slightly to keep it soft */
-            font-family: 'Outfit', sans-serif;
-            color: #d81b60;
-            user-select: none;
-            -webkit-user-select: none;
-            touch-action: none;
-        }
-
-        #gameCanvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
-
-        .screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 10;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            pointer-events: none;
-            /* Let clicks pass through to canvas when appropriate */
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.5s ease, visibility 0.5s;
-        }
-
-        .screen.active {
-            opacity: 1;
-            visibility: visible;
-            pointer-events: auto;
-        }
-
-        /* Lobby UI */
-        #lobby-ui {
-            z-index: 20;
-        }
-
-        h1 {
-            font-weight: 800;
-            font-size: 3.5rem;
-            margin-bottom: 1rem;
-            color: #fff;
-            text-shadow: 0 2px 30px rgba(0, 0, 0, 0.6), 0 0 60px rgba(255, 100, 180, 0.4);
-            pointer-events: none;
-            text-align: center;
-            letter-spacing: -1px;
-        }
-
-        .lobby-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1.2rem;
-            max-width: 680px;
-            width: 90vw;
-            padding: 0.5rem;
-        }
-
-        /* Rich card-style lobby buttons */
-        .lobby-bubble {
-            width: 100%;
-            height: 160px;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            box-shadow:
-                0 8px 32px rgba(0, 0, 0, 0.4),
-                inset 0 1px 0 rgba(255, 255, 255, 0.3);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-end;
-            padding-bottom: 18px;
-            cursor: pointer;
-            backdrop-filter: blur(8px);
-            position: relative;
-            overflow: hidden;
-            transform-origin: center;
-            will-change: transform;
-            pointer-events: auto;
-            text-align: center;
-            color: #fff;
-            text-decoration: none;
-            transition: transform 0.2s, box-shadow 0.2s;
-            background-size: cover;
-            background-position: center;
-        }
-
-        .lobby-bubble::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0.2) 50%, rgba(0, 0, 0, 0.05) 100%);
-            border-radius: inherit;
-            pointer-events: none;
-        }
-
-        .lobby-bubble:hover {
-            transform: scale(1.03);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.4);
-        }
-
-        .lobby-bubble span {
-            font-size: 2.8rem;
-            margin-bottom: 0.3rem;
-            pointer-events: none;
-            position: relative;
-            z-index: 1;
-            filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5));
-        }
-
-        .lobby-bubble p {
-            font-size: 1rem;
-            font-weight: 800;
-            margin: 0;
-            pointer-events: none;
-            position: relative;
-            z-index: 1;
-            text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
-
-        .lobby-bubble .card-desc {
-            font-size: 0.72rem;
-            font-weight: 400;
-            opacity: 0.85;
-            margin-top: 3px;
-            pointer-events: none;
-            position: relative;
-            z-index: 1;
-            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
-        }
-
-        /* Back button */
-        #back-btn {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 100;
-            background: rgba(255, 255, 255, 0.85);
-            /* Much higher opacity */
-            border: 2px solid rgba(255, 255, 255, 0.9);
-            color: var(--theme-color);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-family: inherit;
-            font-weight: 800;
-            font-size: 1rem;
-            cursor: pointer;
-            backdrop-filter: blur(5px);
-            display: none;
-            pointer-events: auto;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        #back-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .game-ui {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 100;
-            color: #fff;
-            font-weight: 800;
-            font-size: 1.5rem;
-            text-shadow: 0 2px 5px rgba(216, 27, 96, 0.4), 2px 2px 0px #ff6b81;
-            pointer-events: none;
-            display: none;
-            align-items: center;
-        }
-
-        .tooltip-container {
-            display: inline-block;
-            position: relative;
-            margin-left: 10px;
-            cursor: pointer;
-            pointer-events: auto;
-        }
-
-        .tooltip-icon {
-            background: rgba(255, 255, 255, 0.85);
-            color: var(--theme-color);
-            border-radius: 50%;
-            width: 28px;
-            height: 28px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            font-weight: 800;
-            border: 2px solid white;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            text-shadow: none;
-        }
-
-        .tooltip-text {
-            visibility: hidden;
-            width: 240px;
-            background-color: rgba(255, 255, 255, 0.95);
-            color: var(--theme-color);
-            text-align: center;
-            border-radius: 12px;
-            padding: 12px;
-            position: absolute;
-            z-index: 101;
-            top: 130%;
-            right: 0;
-            font-size: clamp(0.85rem, 3vw, 1rem);
-            font-weight: 600;
-            text-shadow: none;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-            opacity: 0;
-            transition: opacity 0.3s;
-            pointer-events: none;
-        }
-
-        .tooltip-text::after {
-            content: "";
-            position: absolute;
-            bottom: 100%;
-            right: 10px;
-            border-width: 6px;
-            border-style: solid;
-            border-color: transparent transparent rgba(255, 255, 255, 0.95) transparent;
-        }
-
-        .tooltip-container:hover .tooltip-text {
-            visibility: visible;
-            opacity: 1;
-        }
-
-        #music-toggle {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            font-size: 1.5rem;
-            cursor: pointer;
-            z-index: 100;
-            background: rgba(255, 255, 255, 0.85);
-            border-radius: 50%;
-            width: 45px;
-            height: 45px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 2px solid white;
-            transition: opacity 0.5s, transform 0.3s;
-            pointer-events: auto;
-        }
-
-        /* Auto Fade Class for UI buttons */
-        .fade-ui {
-            opacity: 0 !important;
-            pointer-events: none !important;
-        }
-
-        body.mouse-moving .fade-ui {
-            opacity: 1 !important;
-            pointer-events: auto !important;
-        }
-
-        body.mouse-moving #music-toggle {
-            opacity: 0.6;
-        }
-
-        #music-toggle:hover {
-            opacity: 1 !important;
-            transform: scale(1.1);
-        }
-
-        #music-toggle.playing {
-            background: rgba(255, 255, 255, 0.95);
-            border-color: var(--theme-color);
-        }
-    </style>
-</head>
-
-<body>
-
-    <audio id="bg-music" loop src="assets/audio/slowJamsRelax-y.m4a"></audio>
-    <div id="music-toggle" title="Toggle Music" class="fade-ui" style="transition: opacity 0.5s, transform 0.3s;">🎵
-    </div>
-
-    <canvas id="gameCanvas"></canvas>
-
-    <button id="back-btn" class="fade-ui" style="transition: opacity 0.5s, background 0.3s;">← Lobby</button>
-    <div id="garden-ui" class="game-ui" style="display:none;">
-        <button id="garden-clear" class="fade-ui"
-            style="transition: opacity 0.5s; margin-left: 15px; padding: 4px 12px; border-radius: 12px; background: rgba(255,255,255,0.85); border: 2px solid white; color: var(--theme-color); font-weight: 800; cursor: pointer; font-family: inherit; font-size: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); pointer-events: auto;">Clear</button>
-        <button id="garden-mode-toggle" class="fade-ui"
-            style="transition: opacity 0.5s; margin-left: 15px; padding: 4px 12px; border-radius: 12px; background: rgba(255,255,255,0.85); border: 2px solid white; color: var(--theme-color); font-weight: 800; cursor: pointer; font-family: inherit; font-size: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); pointer-events: auto;">Mode: Grow ✨</button>
-        <div class="tooltip-container fade-ui" style="transition: opacity 0.5s;">
-            <div class="tooltip-icon">?</div>
-            <div class="tooltip-text">Tap anywhere to grow a bubble. Hover near to push them. They remain until you
-                click Clear.</div>
-        </div>
-    </div>
-
-    <!-- Herding UI -->
-    <div id="herding-ui" class="game-ui" style="display:none;">
-        <div class="tooltip-container fade-ui" style="transition: opacity 0.5s;">
-            <div class="tooltip-icon">?</div>
-            <div class="tooltip-text">Push the sheep bubbles into the center pen using your cursor to clear the flock.
-            </div>
-        </div>
-        <a id="herding-share" class="fade-ui" href="#"
-            style="display:none; transition: opacity 0.5s; background: rgba(255,255,255,0.85); color: #2e7d32; font-weight: 800; padding: 6px 12px; border-radius: 20px; text-decoration: none; margin-left: 20px;">Share
-            Score 📧</a>
-    </div>
-
-    <!-- Lobby Screen -->
-    <div id="lobby-ui" class="screen active">
-        <h1>Bubble Games 🫧</h1>
-        <p
-            style="text-align: center; color: rgba(255,255,255,0.8); margin-top: -8px; margin-bottom: 24px; font-weight: 500; font-size: 0.9rem; letter-spacing: 0.3px;">
-            Tap any game · Click to enter Fullscreen · ESC to exit</p>
-        <div class="lobby-grid">
-            <div class="lobby-bubble" data-game="herding"
-                style="background-image: url('assets/game-assets/grass_bg_for_game.png'); animation: float2 5s ease-in-out infinite;">
-                <span>🐑</span>
-                <p>Herding</p>
-                <span class="card-desc">Round up the woolly crew</span>
-            </div>
-            <div class="lobby-bubble" data-game="dontpop"
-                style="background-image: url('assets/game-assets/block-print-fabric (6).png'); background-size: 200px; animation: float1 4.5s ease-in-out infinite;">
-                <span>🌵</span>
-                <p>Don't Pop</p>
-                <span class="card-desc">Survive the bubble swarm</span>
-            </div>
-            <div class="lobby-bubble" data-game="orbit"
-                style="background-image: url('assets/game-assets/abstract_dithering_purple.png'); animation: float2 5.5s ease-in-out infinite;">
-                <span>🪐</span>
-                <p>Orbit</p>
-                <span class="card-desc">Merge planets, grow your sun</span>
-            </div>
-            <div class="lobby-bubble" data-game="garden"
-                style="background-image: url('assets/gallery/bubblegum_clouds.png'); background-size: cover; animation: float1 4s ease-in-out infinite;">
-                <span>🌱</span>
-                <p>Garden</p>
-                <span class="card-desc">Play with bubbles, no rules</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Dont Pop UI -->
-    <div id="dontpop-ui" class="game-ui" style="display:none;">
-        <span id="dontpop-lives" style="margin-right:10px; font-size: 1.2rem;">❤️❤️❤️❤️❤️</span>
-        <span id="dontpop-score" style="margin-right:20px; font-family: monospace; font-size: 1.5rem;">0.0s</span>
-        <div class="tooltip-container fade-ui" style="transition: opacity 0.5s;">
-            <div class="tooltip-icon">?</div>
-            <div class="tooltip-text">Your cursor is a cactus! 🌵 The magical bubbles are attracted to you. Avoid
-                popping them to survive as long as you can!</div>
-        </div>
-        <a id="dontpop-share" class="fade-ui" href="#"
-            style="display:none; transition: opacity 0.5s; background: rgba(255,255,255,0.85); color: var(--theme-color); font-weight: 800; padding: 6px 12px; border-radius: 20px; text-decoration: none; margin-left: 20px;">Share
-            Score 📧</a>
-    </div>
-
-    <!-- Orbit UI -->
-    <div id="orbit-ui" class="game-ui" style="display:none; flex-direction:column; align-items:flex-end; top: 10px; right: 20px;">
-        <div style="display:flex; align-items:center; margin-bottom: 5px;">
-            <span id="orbit-score" style="margin-right:20px; font-family: monospace; font-size: 1.5rem; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.8);">Mass: 0</span>
-            <div class="tooltip-container fade-ui" style="transition: opacity 0.5s;">
-                <div class="tooltip-icon">?</div>
-                <div class="tooltip-text">Hover/swipe to nudge. Hold/long-press to pull! Merge planets of the SAME COLOR. Don't exceed 20 planets!</div>
-            </div>
-            <a id="orbit-share" class="fade-ui" href="#" style="display:none; transition: opacity 0.5s; background: rgba(255,255,255,0.85); color: #6200ea; font-weight: 800; padding: 6px 12px; border-radius: 20px; text-decoration: none; margin-left: 20px;">Share Score 📧</a>
-        </div>
-        <div id="orbit-planet-count" style="font-size: 1rem; letter-spacing: 2px; text-shadow: 0 1px 4px rgba(0,0,0,0.8);"></div>
-    </div>
-
-    <!-- Orbit Leaderboard Overlay -->
-    <div id="orbit-leaderboard" class="screen" style="display:none; z-index: 15; background: rgba(0,0,0,0.85); flex-direction:column; color:white;">
-        <h2 style="font-size:3rem; margin-bottom:10px;">System Overloaded! 💥</h2>
-        <h3 style="font-size:2rem; margin-bottom:30px; color:#ffb74d;">Final Mass: <span id="orbit-final-score"></span></h3>
-        
-        <div id="orbit-submit-section" style="margin-bottom:20px; display:flex; align-items:center;">
-            <input type="text" id="orbit-username" placeholder="Enter Username" maxlength="15" style="padding:10px; font-size:1.2rem; border-radius:10px; border:none; text-align:center;">
-            <button id="orbit-submit-btn" style="padding:10px 20px; font-size:1.2rem; font-weight:800; border-radius:10px; background:var(--theme-color); color:white; border:none; cursor:pointer; margin-left:10px;">Submit Score</button>
-        </div>
-        
-        <div id="orbit-scores-list" style="margin-bottom: 30px; text-align: left; font-size: 1.2rem; background: rgba(255,255,255,0.1); padding: 20px; border-radius: 15px; min-width: 300px;">
-            Loading global ranks...
-        </div>
-
-        <button id="orbit-restart-btn" style="padding:10px 20px; font-size:1.2rem; font-weight:800; border-radius:20px; background:white; color:black; border:none; cursor:pointer;">Play Again</button>
-    </div>
-
-
-    <!-- Removed Orbit Pressure Meter, using retro health squares in the top UI -->
-
-    <style>
-        @keyframes float1 {
-
-            0%,
-            100% {
-                transform: translateY(0) rotate(0deg);
-            }
-
-            50% {
-                transform: translateY(-15px) rotate(2deg);
-            }
-        }
-
-        @keyframes float2 {
-
-            0%,
-            100% {
-                transform: translateY(0) rotate(0deg);
-            }
-
-            50% {
-                transform: translateY(-10px) rotate(-2deg);
-            }
-        }
-    </style>
-
-    <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
@@ -1757,15 +1303,14 @@
                     }
 
                     // Loss Con
-                    activeOrbiters = this.bubbles.filter(b => b.state === 'orbiting').length;
+                    let activeOrbiters = this.bubbles.filter(b => b.state === 'orbiting').length;
                     if (activeOrbiters >= 20) {
                         this.state = 'gameover';
                         document.getElementById('orbit-final-score').innerText = this.score;
                         document.getElementById('orbit-submit-section').style.display = 'flex';
                         document.getElementById('orbit-submit-btn').disabled = false;
                         document.getElementById('orbit-submit-btn').innerText = "Submit Score";
-                        document.getElementById('orbit-leaderboard').style.display = 'flex';
-                        setTimeout(() => document.getElementById('orbit-leaderboard').classList.add('active'), 10);
+                        document.getElementById('orbit-leaderboard').classList.add('active');
                         fetchLeaderboard();
                         return;
                     }
@@ -2201,23 +1746,16 @@
         // Setup Lobby Links
         document.querySelectorAll('.lobby-bubble').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const bubble = e.target.closest('.lobby-bubble');
-                if (!bubble) return;
-                
-                const gameName = bubble.dataset.game;
-                console.log("Game selected:", gameName);
-                
                 // Request fullscreen gracefully
                 if (!document.fullscreenElement) {
-                    document.documentElement.requestFullscreen().catch(() => {});
+                    document.documentElement.requestFullscreen().catch(err => {
+                        console.log(`Fullscreen opt-in skipped: ${err.message}`);
+                    });
                 }
-
+                const gameName = e.currentTarget.dataset.game;
+                // Use an explicit 'implemented' flag instead of brittle .toString() comparison
                 if (games[gameName] && games[gameName].implemented !== false) {
-                    try {
-                        setGame(gameName);
-                    } catch (err) {
-                        console.error("Failed to set game:", err);
-                    }
+                    setGame(gameName);
                 } else {
                     alert('🫧 Coming soon! Building this next.');
                 }
@@ -2283,19 +1821,15 @@
 
         async function initLootLocker() {
             if (llSessionToken) return llSessionToken;
-            let playerId = null;
-            try { playerId = localStorage.getItem('ll_player_id'); } catch(e) {}
-            if (!playerId) playerId = Math.random().toString(36).substring(7);
-
             try {
                 let res = await fetch("https://api.lootlocker.io/game/v2/session/guest", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ game_key: LL_API_KEY, game_version: "1.0.0.0", player_identifier: playerId })
+                    body: JSON.stringify({ game_key: LL_API_KEY, game_version: "1.0.0.0", player_identifier: localStorage.getItem('ll_player_id') || Math.random().toString(36).substring(7) })
                 });
                 let data = await res.json();
                 llSessionToken = data.session_token;
-                try { if (data.player_identifier) localStorage.setItem('ll_player_id', data.player_identifier); } catch(e) {}
+                if (data.player_identifier) localStorage.setItem('ll_player_id', data.player_identifier);
                 return llSessionToken;
             } catch (e) {
                 console.error("Lootlocker init failed", e);
@@ -2363,9 +1897,6 @@
 
         document.getElementById('orbit-restart-btn').addEventListener('click', () => {
             document.getElementById('orbit-leaderboard').classList.remove('active');
-            setTimeout(() => {
-                document.getElementById('orbit-leaderboard').style.display = 'none';
-            }, 500);
             games.orbit.init();
         });
 
@@ -2385,7 +1916,4 @@
         games.lobby.init();
         loop();
 
-    </script>
-</body>
-
-</html>
+    
