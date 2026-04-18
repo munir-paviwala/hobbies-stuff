@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🫧 Bubble Games</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ocean-dark: #0a192f;
+            --ocean-teal: #172a45;
+            --ocean-light: #303C55;
+            --text-color: #ccd6f6;
+            --bubble-highlight: rgba(255, 255, 255, 0.9);
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            background: url('assets/gallery/bubblegum_clouds.png') no-repeat center center / cover, #ffccd5;
+            background-blend-mode: screen;
+            /* Lighten it up slightly to keep it soft */
+            font-family: 'Outfit', sans-serif;
+            color: #d81b60;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+        }
+
+        #gameCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            /* Let clicks pass through to canvas when appropriate */
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease, visibility 0.5s;
+        }
+
+        .screen.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        /* Lobby UI */
+        #lobby-ui {
+            z-index: 20;
+            /* Above canvas */
+        }
+
+        h1 {
+            font-weight: 800;
+            font-size: 4rem;
+            margin-bottom: 2rem;
+            color: #b93160; /* Darker more grounded color */
+            text-shadow: 0 4px 10px rgba(0, 0, 0, 0.2), 3px 3px 0px rgba(255,255,255,0.8), -1px -1px 0px rgba(255,255,255,0.4);
+            pointer-events: none;
+            text-align: center;
+        }
+
+        .lobby-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            max-width: 600px;
+            padding: 1rem;
+        }
+
+        /* Bubble Buttons for Lobby (HTML based to easily attach events/text) */
+        .lobby-bubble {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.05) 60%, rgba(255, 255, 255, 0.1) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow:
+                inset 0 0 20px rgba(255, 255, 255, 0.2),
+                0 4px 15px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            backdrop-filter: blur(2px);
+            position: relative;
+            transform-origin: center;
+            will-change: transform;
+            pointer-events: auto;
+            text-align: center;
+            color: #b93160;
+            text-decoration: none;
+        }
+
+        .lobby-bubble::before {
+            content: '';
+            position: absolute;
+            top: 15%;
+            left: 20%;
+            width: 30%;
+            height: 20%;
+            background: var(--bubble-highlight);
+            border-radius: 50%;
+            transform: rotate(-45deg);
+            filter: blur(2px);
+            opacity: 0.8;
+            pointer-events: none;
+        }
+
+        .lobby-bubble:hover {
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 60%, rgba(255, 255, 255, 0.2) 100%);
+            transform: scale(1.05);
+        }
+
+        .lobby-bubble span {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            pointer-events: none;
+        }
+
+        .lobby-bubble p {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin: 0;
+            pointer-events: none;
+        }
+
+        /* Back button */
+        #back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            color: #b93160;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-family: inherit;
+            font-weight: 800;
+            font-size: 1rem;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+            display: none;
+            pointer-events: auto;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .game-ui {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            color: #fff;
+            font-weight: 800;
+            font-size: 1.5rem;
+            text-shadow: 0 2px 5px rgba(216, 27, 96, 0.4), 2px 2px 0px #ff6b81;
+            pointer-events: none;
+            display: none;
+            align-items: center;
+        }
+
+        .tooltip-container {
+            display: inline-block;
+            position: relative;
+            margin-left: 10px;
+            cursor: pointer;
+            pointer-events: auto;
+        }
+
+        .tooltip-icon {
+            background: rgba(255, 255, 255, 0.4);
+            color: #b93160;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: 800;
+            border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            text-shadow: none;
+        }
+
+        .tooltip-text {
+            visibility: hidden;
+            width: 220px;
+            background-color: rgba(255, 255, 255, 0.95);
+            color: #d81b60;
+            text-align: center;
+            border-radius: 12px;
+            padding: 12px;
+            position: absolute;
+            z-index: 101;
+            top: 130%;
+            right: 0;
+            font-size: 1rem;
+            font-weight: 600;
+            text-shadow: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .tooltip-text::after {
+            content: "";
+            position: absolute;
+            bottom: 100%;
+            right: 10px;
+            border-width: 6px;
+            border-style: solid;
+            border-color: transparent transparent rgba(255, 255, 255, 0.95) transparent;
+        }
+
+        .tooltip-container:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        #music-toggle {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid white;
+            opacity: 0.1;
+            transition: opacity 0.5s, transform 0.3s;
+            pointer-events: auto;
+        }
+
+        body.mouse-moving #music-toggle {
+            opacity: 0.6;
+        }
+
+        #music-toggle:hover {
+            opacity: 1 !important;
+            transform: scale(1.1);
+        }
+
+        #music-toggle.playing {
+            background: rgba(255, 255, 255, 0.6);
+            border-color: #b93160;
+        }
+    </style>
+</head>
+
+<body>
+
+    <audio id="bg-music" loop src="assets/audio/slowJamsRelax-y.m4a"></audio>
+    <div id="music-toggle" title="Toggle Music">🎵</div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <button id="back-btn">← Lobby</button>
+    <div id="garden-ui" class="game-ui">
+        <button id="garden-clear"
+            style="margin-left: 15px; padding: 4px 12px; border-radius: 12px; background: rgba(255,255,255,0.4); border: 2px solid white; color: #b93160; font-weight: 800; cursor: pointer; font-family: inherit; font-size: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); pointer-events: auto;">Clear</button>
+        <div class="tooltip-container">
+            <div class="tooltip-icon">?</div>
+            <div class="tooltip-text">Tap anywhere to grow a bubble. Hover near to push them. They remain until you click Clear.</div>
+        </div>
+    </div>
+
+    <!-- Herding UI -->
+    <div id="herding-ui" class="game-ui">
+        <div class="tooltip-container">
+            <div class="tooltip-icon">?</div>
+            <div class="tooltip-text">Push the sheep bubbles into the center pen using your cursor to clear the flock.</div>
+        </div>
+    </div>
+
+    <!-- Lobby Screen -->
+    <div id="lobby-ui" class="screen active">
+        <h1>Bubble Games 🫧</h1>
+        <div class="lobby-grid">
+            <div class="lobby-bubble" data-game="garden" style="animation: float1 4s ease-in-out infinite;">
+                <span>🌱</span>
+                <p>Garden</p>
+            </div>
+            <div class="lobby-bubble" data-game="herding" style="animation: float2 5s ease-in-out infinite;">
+                <span>🐑</span>
+                <p>Herding</p>
+            </div>
+            <div class="lobby-bubble" data-game="dontpop" style="animation: float1 4.5s ease-in-out infinite;">
+                <span>📍</span>
+                <p>Don't Pop</p>
+            </div>
+            <div class="lobby-bubble" data-game="orbit" style="animation: float2 5.5s ease-in-out infinite;">
+                <span>🪐</span>
+                <p>Orbit</p>
+            </div>
+        </div>
+        <a href="index.html"
+            style="color: rgba(255,255,255,0.5); text-decoration: none; margin-top: 3rem;">Return
+            to Home</a>
+    </div>
+
+    <style>
+        @keyframes float1 {
+
+            0%,
+            100% {
+                transform: translateY(0) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-15px) rotate(2deg);
+            }
+        }
+
+        @keyframes float2 {
+
+            0%,
+            100% {
+                transform: translateY(0) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-10px) rotate(-2deg);
+            }
+        }
+    </style>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let width, height;
+        function resize() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // --- Input Handling ---
+        let pointer = { x: -1000, y: -1000, active: false, clicked: false, justClicked: false };
+
+        function updatePointer(e, active) {
+            if (e.touches && e.touches.length > 0) {
+                pointer.x = e.touches[0].clientX;
+                pointer.y = e.touches[0].clientY;
+            } else {
+                pointer.x = e.clientX;
+                pointer.y = e.clientY;
+            }
+            pointer.active = active;
+        }
+
+        window.addEventListener('mousemove', (e) => updatePointer(e, pointer.active));
+        window.addEventListener('mousedown', (e) => { updatePointer(e, true); pointer.clicked = true; pointer.justClicked = true; });
+        window.addEventListener('mouseup', () => { pointer.active = false; pointer.clicked = false; });
+
+        window.addEventListener('touchstart', (e) => { updatePointer(e, true); pointer.clicked = true; pointer.justClicked = true; }, { passive: false });
+        window.addEventListener('touchmove', (e) => { updatePointer(e, true); e.preventDefault(); }, { passive: false });
+        window.addEventListener('touchend', () => { pointer.active = false; pointer.clicked = false; pointer.x = -1000; pointer.y = -1000; });
+
+        // --- Shared Bubble Renderer ---
+        function drawBubble(ctx, x, y, radius, hueOffset = 0, opacity = 1, time = 0, speedX = 0.002, speedY = 0.003) {
+            ctx.save();
+            ctx.translate(x, y);
+
+            // Wobble — subtle squish, not a full deformation
+            const wobbleX = Math.sin(time * speedX) * (radius * 0.05);
+            const wobbleY = Math.cos(time * speedY) * (radius * 0.05);
+            ctx.scale(1 + wobbleX / radius, 1 + wobbleY / radius);
+
+            ctx.globalAlpha = opacity;
+
+            // Base Fill (soft tint - slightly more transparent for glass feel)
+            const gradient = ctx.createRadialGradient(
+                -radius * 0.2, -radius * 0.2, 0,
+                0, 0, radius
+            );
+            // If hueOffset is -1, render as fluffy white sheep bubble
+            if (hueOffset === -1) {
+                gradient.addColorStop(0, `rgba(255, 255, 255, 0.9)`);
+                gradient.addColorStop(0.8, `rgba(240, 240, 255, 0.7)`);
+                gradient.addColorStop(1, `rgba(200, 220, 255, 0.5)`);
+            } else {
+                gradient.addColorStop(0, `hsla(${hueOffset}, 90%, 90%, 0.4)`);
+                gradient.addColorStop(0.8, `hsla(${hueOffset}, 80%, 75%, 0.15)`);
+                gradient.addColorStop(1, `hsla(${hueOffset}, 80%, 65%, 0.3)`);
+            }
+
+            ctx.beginPath();
+            ctx.arc(0, 0, radius, 0, Math.PI * 2);
+            ctx.fillStyle = gradient;
+            ctx.fill();
+
+            // Draw wooly bumps if sheep!
+            if (hueOffset === -1) {
+                ctx.fillStyle = `rgba(255, 255, 255, ${opacity * 0.8})`;
+                const numBumps = 7;
+                for (let i = 0; i < numBumps; i++) {
+                    const angle = (i / numBumps) * Math.PI * 2 + (time * 0.0005);
+                    const bumpR = radius * 0.45;
+                    const bX = Math.cos(angle) * (radius * 0.85); 
+                    const bY = Math.sin(angle) * (radius * 0.85);
+
+                    ctx.beginPath();
+                    ctx.arc(bX, bY, bumpR, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            // Inner Glow / Stroke
+            ctx.lineWidth = 2.5;
+            ctx.strokeStyle = hueOffset === -1 ? `rgba(255, 255, 255, 0.95)` : `hsla(${hueOffset}, 90%, 85%, 0.8)`;
+            ctx.stroke();
+
+            // Glint (Highlight)
+            ctx.beginPath();
+            ctx.ellipse(-radius * 0.35, -radius * 0.35, radius * 0.25, radius * 0.15, -Math.PI / 4, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.filter = `blur(${radius * 0.05}px)`;
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        // --- Game Framework ---
+        let currentGame = "lobby";
+        let animationFrameId;
+        const timeState = { start: Date.now(), current: Date.now() };
+
+        const games = {
+            lobby: {
+                bubbles: [],
+                init() {
+                    this.bubbles = [];
+                    for (let i = 0; i < 15; i++) {
+                        this.bubbles.push({
+                            x: Math.random() * width,
+                            y: Math.random() * height,
+                            r: Math.random() * 20 + 10,
+                            vy: -Math.random() * 0.5 - 0.2,
+                            hue: getSafeHue('lobby'),
+                            offset: Math.random() * 1000,
+                            speedX: Math.random() * 0.003 + 0.001,
+                            speedY: Math.random() * 0.003 + 0.001
+                        });
+                    }
+                },
+                update() {
+                    const t = timeState.current;
+                    this.bubbles.forEach(b => {
+                        b.y += b.vy;
+                        b.x += Math.sin(t * 0.001 + b.offset) * 0.5;
+                        if (b.y + b.r < 0) b.y = height + b.r;
+                    });
+                },
+                draw() {
+                    const t = timeState.current;
+                    this.bubbles.forEach(b => {
+                        drawBubble(ctx, b.x, b.y, b.r, b.hue, 0.3, t + b.offset, b.speedX, b.speedY);
+                    });
+                }
+            },
+            garden: {
+                bubbles: [],
+                ui: document.getElementById('garden-ui'),
+                messageAlpha: 0,
+                messageText: "",
+                init() {
+                    this.bubbles = [];
+                    this.ui.style.display = 'block';
+                },
+                cleanup() {
+                    this.ui.style.display = 'none';
+                },
+                update() {
+                    const t = timeState.current;
+
+                    // Prevent spawning when clicking within UI bounds (top 80px)
+                    if (pointer.justClicked && pointer.y > 80) {
+                        this.bubbles.push({
+                            x: pointer.x,
+                            y: pointer.y,
+                            r: Math.random() * 60 + 15, // Great variability in size
+                            vx: (Math.random() - 0.5) * 3, // Start with lower energy
+                            vy: (Math.random() - 0.5) * 3, // Start with lower energy
+                            hue: getSafeHue('garden'),
+                            offset: Math.random() * 1000,
+                            speedX: Math.random() * 0.003 + 0.001,
+                            speedY: Math.random() * 0.003 + 0.001
+                        });
+                        // Hard limit to prevent browser memory explosions
+                        if (this.bubbles.length > 40) this.bubbles.shift();
+                    }
+
+                    // Zen Warnings State
+                    if (this.bubbles.length >= 40) {
+                        this.messageAlpha = Math.min(1, this.messageAlpha + 0.02);
+                        this.messageText = "The garden is full... softly let them be.";
+                    } else if (this.bubbles.length >= 25) {
+                        this.messageAlpha = Math.min(1, this.messageAlpha + 0.02);
+                        this.messageText = "Breathe... play with the bubbles you have.";
+                    } else {
+                        this.messageAlpha = Math.max(0, this.messageAlpha - 0.05);
+                    }
+
+                    for (let i = this.bubbles.length - 1; i >= 0; i--) {
+                        let b = this.bubbles[i];
+
+                        // Mild drift — subtle breathing motion, not steering
+                        b.vx += Math.sin(t * 0.002 + b.offset) * 0.04;
+                        b.vy += Math.cos(t * 0.002 + b.offset) * 0.04;
+                        b.vx *= 0.99;
+                        b.vy *= 0.99;
+
+                        // Mouse repulsion! Push bubbles away from the cursor
+                        if (pointer.x !== -1000) {
+                            let dx = b.x - pointer.x;
+                            let dy = b.y - pointer.y;
+                            let dist = Math.sqrt(dx * dx + dy * dy);
+
+                            // Prevent division by zero if bubble spawns exactly on pointer
+                            if (dist < 0.1) { dx = 1; dy = 1; dist = 1.414; }
+
+                            if (dist < 150 + b.r) {
+                                let force = Math.pow(((150 + b.r) - dist) / (150 + b.r), 2);
+                                b.vx += (dx / dist) * force * 3;
+                                b.vy += (dy / dist) * force * 3;
+                            }
+                        }
+
+                        // Apply velocity
+                        b.x += b.vx;
+                        b.y += b.vy;
+
+                        // Bounce off walls (damped to prevent infinite energy loops)
+                        if (b.x - b.r < 0) { b.x = b.r; b.vx *= -0.8; }
+                        if (b.x + b.r > width) { b.x = width - b.r; b.vx *= -0.8; }
+                        if (b.y - b.r < 0) { b.y = b.r; b.vy *= -0.8; }
+                        if (b.y + b.r > height) { b.y = height - b.r; b.vy *= -0.8; }
+
+                        // Enforce max speed — keep them floaty, not frantic
+                        const speed = Math.sqrt(b.vx * b.vx + b.vy * b.vy);
+                        if (speed > 12) {
+                            b.vx = (b.vx / speed) * 12;
+                            b.vy = (b.vy / speed) * 12;
+                        }
+                    }
+                },
+                draw() {
+                    const t = timeState.current;
+                    
+                    // Draw Zen Messages behind bubbles
+                    if (this.messageAlpha > 0) {
+                        ctx.save();
+                        ctx.textAlign = "center";
+                        ctx.textBaseline = "middle";
+                        ctx.font = "bold 5vw 'Outfit', sans-serif";
+                        ctx.fillStyle = `rgba(185, 49, 96, ${this.messageAlpha * 0.5})`; // Darker pink-red
+                        ctx.shadowColor = `rgba(185, 49, 96, ${this.messageAlpha * 0.2})`;
+                        ctx.shadowBlur = 10;
+                        ctx.fillText(this.messageText, width / 2, height / 2);
+                        ctx.restore();
+                    }
+
+                    this.bubbles.forEach(b => {
+                        drawBubble(ctx, b.x, b.y, b.r, b.hue, 1, t + b.offset, b.speedX, b.speedY);
+                    });
+                }
+            },
+            herding: { 
+                implemented: true, 
+                bubbles: [],
+                confetti: [], // Confetti array
+                round: 1,
+                state: 'playing',
+                winAlpha: 0,
+                ui: document.getElementById('herding-ui'),
+                init() { 
+                    this.ui.style.display = 'block';
+                    // Custom fun dog emoji cursor for the laptop players!
+                    document.body.style.cursor = `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='48' viewport='0 0 100 100' style='fill:black;font-size:24px;'><text y='50%'>🐶</text></svg>") 16 0, auto`;
+                    this.startRound(1);
+                },
+                startRound(roundNum) {
+                    this.round = roundNum;
+                    this.bubbles = [];
+                    this.confetti = [];
+                    this.state = 'playing';
+                    this.winAlpha = 0;
+                    const numSheep = 5 + (this.round * 2); 
+                    
+                    for (let i = 0; i < numSheep; i++) {
+                        let bx = Math.random() > 0.5 ? Math.random() * (width * 0.15) : width - Math.random() * (width * 0.15);
+                        let by = Math.random() * height;
+                        if (Math.random() > 0.5) {
+                            bx = Math.random() * width;
+                            by = Math.random() > 0.5 ? Math.random() * (height * 0.15) : height - Math.random() * (height * 0.15);
+                        }
+                        
+                        this.bubbles.push({
+                            x: bx,
+                            y: by,
+                            r: Math.random() * 15 + 25, 
+                            vx: (Math.random() - 0.5) * 2,
+                            vy: (Math.random() - 0.5) * 2,
+                            hue: -1, // Indicates sheep
+                            offset: Math.random() * 1000,
+                            speedX: 0.005,
+                            speedY: 0.006, 
+                            inPen: false
+                        });
+                    }
+                }, 
+                update() { 
+                    const t = timeState.current;
+
+                    if (this.state === 'won') {
+                        this.winAlpha = Math.min(1, this.winAlpha + 0.02);
+
+                        // Confetti physics
+                        this.confetti.forEach(c => {
+                            c.x += c.vx;
+                            c.y += c.vy;
+                            c.vy += 0.2; // gravity
+                            c.vx *= 0.98;
+                            c.angle += c.spin;
+                        });
+
+                        if (pointer.justClicked && pointer.y > 80) {
+                            this.startRound(this.round + 1);
+                        }
+                        return;
+                    }
+                    
+                    let allIn = true;
+                    // Later rounds the pen subtly floats around to be evasive!
+                    const penDriftX = this.round > 2 ? Math.sin(t * 0.001) * Math.min(this.round * 15, 100) : 0;
+                    const penDriftY = this.round > 2 ? Math.cos(t * 0.0013) * Math.min(this.round * 10, 80) : 0;
+                    const penX = (width / 2) + penDriftX;
+                    const penY = (height / 2) + penDriftY;
+                    // Shrink pen slightly every round! Min 40px radius.
+                    const penR = Math.max(Math.min(width, height) * 0.25 - (this.round - 1) * 20, 60);
+
+                    for (let i = 0; i < this.bubbles.length; i++) {
+                        let b = this.bubbles[i];
+
+                        if (b.inPen) continue; 
+
+                        b.vx += Math.sin(t * 0.002 + b.offset) * 0.05;
+                        b.vy += Math.cos(t * 0.002 + b.offset) * 0.05;
+                        b.vx *= 0.96; 
+                        b.vy *= 0.96;
+
+                        // Later rounds (Round 4+), the sheep hate each other and scatter!
+                        if (this.round > 3 && !b.inPen) {
+                            for (let j = 0; j < this.bubbles.length; j++) {
+                                if (i === j) continue;
+                                let b2 = this.bubbles[j];
+                                if (b2.inPen) continue;
+                                let dxAnnoy = b.x - b2.x; 
+                                let dyAnnoy = b.y - b2.y;
+                                let distAnnoy = Math.sqrt(dxAnnoy*dxAnnoy + dyAnnoy*dyAnnoy);
+                                if (distAnnoy < b.r + b2.r + 40) {
+                                    b.vx += (dxAnnoy/distAnnoy) * 0.4;
+                                    b.vy += (dyAnnoy/distAnnoy) * 0.4;
+                                }
+                            }
+                        }
+
+                        if (pointer.x !== -1000) {
+                            let dx = b.x - pointer.x;
+                            let dy = b.y - pointer.y;
+                            let dist = Math.sqrt(dx * dx + dy * dy);
+                            if (dist < 0.1) { dx = 1; dy = 1; dist = 1.414; }
+
+                            if (dist < 200 + b.r) { 
+                                let force = Math.pow(((200 + b.r) - dist) / (200 + b.r), 2);
+                                b.vx += (dx / dist) * force * 5; 
+                                b.vy += (dy / dist) * force * 5;
+                            }
+                        }
+
+                        b.x += b.vx;
+                        b.y += b.vy;
+
+                        if (b.x - b.r < 0) { b.x = b.r; b.vx *= -0.5; }
+                        if (b.x + b.r > width) { b.x = width - b.r; b.vx *= -0.5; }
+                        if (b.y - b.r < 0) { b.y = b.r; b.vy *= -0.5; }
+                        if (b.y + b.r > height) { b.y = height - b.r; b.vy *= -0.5; }
+
+                        const distToPen = Math.sqrt(Math.pow(b.x - penX, 2) + Math.pow(b.y - penY, 2));
+                        if (distToPen < penR - b.r) {
+                            b.inPen = true;
+                            b.vx = 0;
+                            b.vy = 0;
+                        } else {
+                            allIn = false;
+                        }
+                    }
+
+                    if (allIn && this.bubbles.length > 0) {
+                        this.state = 'won';
+                        // SPARTA CONFETTI!
+                        for (let i = 0; i < 80; i++) {
+                            this.confetti.push({
+                                x: penX, y: penY,
+                                vx: (Math.random() - 0.5) * 20,
+                                vy: (Math.random() - 0.5) * 20 - 5,
+                                size: Math.random() * 8 + 4,
+                                color: `hsl(${Math.random() * 360}, 90%, 65%)`,
+                                angle: Math.random() * Math.PI,
+                                spin: (Math.random() - 0.5) * 0.2
+                            });
+                        }
+                    }
+                }, 
+                draw() { 
+                    const t = timeState.current;
+                    const penDriftX = this.round > 2 ? Math.sin(t * 0.001) * Math.min(this.round * 15, 100) : 0;
+                    const penDriftY = this.round > 2 ? Math.cos(t * 0.0013) * Math.min(this.round * 10, 80) : 0;
+                    const penX = (width / 2) + penDriftX;
+                    const penY = (height / 2) + penDriftY;
+                    // Draw shrinking pen
+                    const penR = Math.max(Math.min(width, height) * 0.25 - (this.round - 1) * 20, 60);
+
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.setLineDash([15, 15]);
+                    ctx.arc(penX, penY, penR, 0, Math.PI * 2);
+                    ctx.lineWidth = 4;
+                    ctx.strokeStyle = "rgba(255, 255, 255, 0.6)";
+                    ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.restore();
+
+                    this.bubbles.forEach(b => {
+                        let opac = b.inPen ? 0.9 : 0.6;
+                        drawBubble(ctx, b.x, b.y, b.r, b.hue, opac, t + b.offset, b.speedX, b.speedY);
+                    });
+
+                    if (this.winAlpha > 0) {
+                        ctx.save();
+                        // Draw Confetti
+                        this.confetti.forEach(c => {
+                            ctx.save();
+                            ctx.translate(c.x, c.y);
+                            ctx.rotate(c.angle);
+                            ctx.fillStyle = c.color;
+                            ctx.fillRect(-c.size/2, -c.size/2, c.size, c.size);
+                            ctx.restore();
+                        });
+
+                        ctx.textAlign = "center";
+                        ctx.textBaseline = "middle";
+                        
+                        ctx.shadowColor = "rgba(0, 0, 0, 0.4)";
+                        ctx.shadowBlur = 10;
+                        ctx.font = "800 6vw 'Outfit', sans-serif";
+                        
+                        // Strong edge text!
+                        ctx.lineWidth = 4;
+                        ctx.strokeStyle = `rgba(0, 0, 0, ${this.winAlpha})`;
+                        ctx.strokeText(`Flock ${this.round} Secured! 🐑`, width / 2, height / 2 - 20);
+                        
+                        ctx.fillStyle = `rgba(255, 255, 255, ${this.winAlpha})`;
+                        ctx.fillText(`Flock ${this.round} Secured! 🐑`, width / 2, height / 2 - 20);
+                        
+                        ctx.font = "600 2vw 'Outfit', sans-serif";
+                        ctx.shadowBlur = 4;
+                        ctx.fillText("Click anywhere to herd the next flock", width / 2, height / 2 + 60);
+                        ctx.restore();
+                    }
+                }, 
+                cleanup() { 
+                    this.ui.style.display = 'none';
+                    document.body.style.cursor = 'default';
+                } 
+            },
+            dontpop: { implemented: false, init() { }, update() { }, draw() { }, cleanup() { } },
+            orbit: { implemented: false, init() { }, update() { }, draw() { }, cleanup() { } }
+        };
+
+        const bgMap = {
+            lobby: "url('assets/gallery/bubblegum_clouds.png') no-repeat center center / cover, #ffccd5",
+            garden: "url('assets/gallery/bubblegum_clouds.png') no-repeat center center / cover, #ffccd5",
+            herding: "url('assets/gallery/grass_bg.gif') no-repeat center center / cover, #000",
+            dontpop: "url('assets/gallery/night-sky-rainbow.gif') no-repeat center center / cover, #111",
+            orbit: "url('assets/gallery/industrial-sunsets-pixilart.png') no-repeat center center / cover, #ffdab9"
+        };
+
+        function getSafeHue(game) {
+            let hue = Math.random() * 360;
+            if (game === 'lobby' || game === 'garden') {
+                while ((hue > 300 && hue <= 360) || (hue >= 0 && hue < 20)) hue = Math.random() * 360;
+            } else if (game === 'herding') {
+                while (hue > 80 && hue < 150) hue = Math.random() * 360;
+            } else if (game === 'dontpop') {
+                while (hue > 200 && hue < 280) hue = Math.random() * 360;
+            } else if (game === 'orbit') {
+                while (hue > 0 && hue < 50) hue = Math.random() * 360;
+            }
+            return hue;
+        }
+
+        function setGame(newGame) {
+            if (games[currentGame].cleanup) games[currentGame].cleanup();
+            currentGame = newGame;
+
+            document.body.style.background = bgMap[newGame] || bgMap['lobby'];
+            if (newGame === "lobby" || newGame === "garden") {
+                document.body.style.backgroundBlendMode = 'screen';
+            } else {
+                document.body.style.backgroundBlendMode = 'normal'; // Let pixel art be naturally lit for Herding
+            }
+
+            if (newGame === "lobby") {
+                document.getElementById('lobby-ui').classList.add('active');
+                document.getElementById('back-btn').style.display = 'none';
+            } else {
+                document.getElementById('lobby-ui').classList.remove('active');
+                document.getElementById('back-btn').style.display = 'block';
+            }
+
+            if (games[currentGame].init) games[currentGame].init();
+        }
+
+        // Setup Lobby Links
+        document.querySelectorAll('.lobby-bubble').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const gameName = btn.getAttribute('data-game');
+                // Use an explicit 'implemented' flag instead of brittle .toString() comparison
+                if (games[gameName] && games[gameName].implemented !== false) {
+                    setGame(gameName);
+                } else {
+                    alert('🫧 Coming soon! Building this next.');
+                }
+            });
+        });
+
+        // Music Toggle Logic
+        const musicToggle = document.getElementById('music-toggle');
+        const bgMusic = document.getElementById('bg-music');
+        musicToggle.addEventListener('click', () => {
+            if (bgMusic.paused) {
+                bgMusic.play();
+                musicToggle.classList.add('playing');
+                musicToggle.innerText = "🔊";
+            } else {
+                bgMusic.pause();
+                musicToggle.classList.remove('playing');
+                musicToggle.innerText = "🎵";
+            }
+        });
+
+        // Hide UI on idle
+        let idleTimer;
+        // Start moving automatically so it shows up at first
+        document.body.classList.add('mouse-moving');
+        idleTimer = setTimeout(() => document.body.classList.remove('mouse-moving'), 3000);
+
+        window.addEventListener('mousemove', () => {
+            document.body.classList.add('mouse-moving');
+            clearTimeout(idleTimer);
+            idleTimer = setTimeout(() => {
+                document.body.classList.remove('mouse-moving');
+            }, 2000);
+        });
+
+        // Setup back button
+        document.getElementById('back-btn').addEventListener('click', () => {
+            setGame("lobby");
+        });
+
+        // Setup garden clear button
+        document.getElementById('garden-clear').addEventListener('click', () => {
+            games.garden.bubbles = [];
+        });
+
+        // Main Loop
+        function loop() {
+            timeState.current = Date.now();
+            ctx.clearRect(0, 0, width, height);
+
+            if (games[currentGame].update) games[currentGame].update();
+            if (games[currentGame].draw) games[currentGame].draw();
+
+            pointer.justClicked = false; // Reset single frame flag
+            animationFrameId = requestAnimationFrame(loop);
+        }
+
+        // Start
+        games.lobby.init();
+        loop();
+
+    </script>
+</body>
+
+</html>
