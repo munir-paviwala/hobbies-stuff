@@ -392,26 +392,20 @@
     </div>
 
     <!-- Orbit UI -->
-    <div id="orbit-ui" class="game-ui">
-        <span id="orbit-score" style="margin-right:20px; font-family: monospace; font-size: 1.5rem; color: #fff;">Mass:
-            0</span>
-        <div class="tooltip-container fade-ui" style="transition: opacity 0.5s;">
-            <div class="tooltip-icon">?</div>
-            <div class="tooltip-text">Hover/swipe to nudge. Hold/long-press to pull! Merge planets of the SAME COLOR.
-                Don't exceed 20 planets!</div>
+    <div id="orbit-ui" class="game-ui" style="display:flex; flex-direction:column; align-items:flex-end; top: 10px; right: 20px;">
+        <div style="display:flex; align-items:center; margin-bottom: 5px;">
+            <span id="orbit-score" style="margin-right:20px; font-family: monospace; font-size: 1.5rem; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.8);">Mass: 0</span>
+            <div class="tooltip-container fade-ui" style="transition: opacity 0.5s;">
+                <div class="tooltip-icon">?</div>
+                <div class="tooltip-text">Hover/swipe to nudge. Hold/long-press to pull! Merge planets of the SAME COLOR. Don't exceed 20 planets!</div>
+            </div>
+            <a id="orbit-share" class="fade-ui" href="#" style="display:none; transition: opacity 0.5s; background: rgba(255,255,255,0.85); color: #6200ea; font-weight: 800; padding: 6px 12px; border-radius: 20px; text-decoration: none; margin-left: 20px;">Share Score 📧</a>
         </div>
-        <a id="orbit-share" class="fade-ui" href="#"
-            style="display:none; transition: opacity 0.5s; background: rgba(255,255,255,0.85); color: #6200ea; font-weight: 800; padding: 6px 12px; border-radius: 20px; text-decoration: none; margin-left: 20px;">Share
-            Score 📧</a>
+        <div id="orbit-planet-count" style="font-size: 1rem; letter-spacing: 2px; text-shadow: 0 1px 4px rgba(0,0,0,0.8);"></div>
     </div>
 
-    <!-- Orbit Pressure Meter -->
-    <div id="orbit-pressure"
-        style="display:none; position:fixed; right:20px; top:50%; transform:translateY(-50%); width:14px; border-radius:8px; background: rgba(255,255,255,0.1); backdrop-filter:blur(4px); height:200px; border:1px solid rgba(255,255,255,0.2); overflow:hidden; z-index:100;">
-        <div id="orbit-pressure-fill"
-            style="position:absolute; bottom:0; width:100%; height:0%; background: linear-gradient(to top, #e53935, #ff9800, #66bb6a); border-radius:8px; transition: height 0.3s, background 0.3s;">
-        </div>
-    </div>
+
+    <!-- Removed Orbit Pressure Meter, using retro health squares in the top UI -->
 
     <style>
         @keyframes float1 {
@@ -839,19 +833,25 @@
                         b.vx *= 0.99;
                         b.vy *= 0.99;
 
-                        // Soft mutual attraction — bubbles gently drift toward their nearest neighbor
-                        let closestDist = Infinity;
-                        let closestB = null;
+                        // Soft elastic collision & mutual attraction
                         for (let j = 0; j < this.bubbles.length; j++) {
                             if (i === j) continue;
-                            let d = Math.hypot(b.x - this.bubbles[j].x, b.y - this.bubbles[j].y);
-                            if (d < closestDist) { closestDist = d; closestB = this.bubbles[j]; }
-                        }
-                        if (closestB && closestDist > (b.r + closestB.r) * 1.5 && closestDist < 300) {
-                            let adx = closestB.x - b.x;
-                            let ady = closestB.y - b.y;
-                            b.vx += (adx / closestDist) * 0.02;
-                            b.vy += (ady / closestDist) * 0.02;
+                            let b2 = this.bubbles[j];
+                            let dx = b.x - b2.x;
+                            let dy = b.y - b2.y;
+                            let dist = Math.hypot(dx, dy);
+                            let minDist = b.r + b2.r;
+                            
+                            if (dist < minDist) {
+                                // Overlap collision! Elastic split
+                                let force = (minDist - dist) * 0.05;
+                                b.vx += (dx / dist) * force;
+                                b.vy += (dy / dist) * force;
+                            } else if (dist < 300 && dist > minDist * 1.5) {
+                                // Gentle pull to group nicely, but they will bounce on contact
+                                b.vx -= (dx / dist) * 0.005;
+                                b.vy -= (dy / dist) * 0.005;
+                            }
                         }
 
                         // Cursor repulsion
@@ -888,10 +888,10 @@
                 draw() {
                     const t = timeState.current;
 
-                    // Very subtle warmth wash — barely perceptible
-                    let moodHue = (this.mood || 0) * 360;
+                    // Darker backing for the garden so bubbles pop out
                     ctx.save();
-                    ctx.fillStyle = `hsla(${moodHue}, 40%, 70%, 0.025)`; // much more subtle
+                    // Just clear the screen with an opaque deep color overlay
+                    ctx.fillStyle = `rgba(10, 5, 20, 0.25)`; 
                     ctx.fillRect(0, 0, width, height);
                     ctx.restore();
 
@@ -947,8 +947,8 @@
                         ctx.textAlign = "center";
                         ctx.textBaseline = "middle";
                         ctx.font = "bold 5vw 'Outfit', sans-serif";
-                        ctx.fillStyle = `rgba(185, 49, 96, ${this.messageAlpha * 0.5})`; // Darker pink-red
-                        ctx.shadowColor = `rgba(185, 49, 96, ${this.messageAlpha * 0.2})`;
+                        ctx.fillStyle = `rgba(255, 230, 240, ${this.messageAlpha * 0.8})`; // Lighter text
+                        ctx.shadowColor = `rgba(185, 49, 96, ${this.messageAlpha * 0.6})`;
                         ctx.shadowBlur = 10;
                         ctx.fillText(this.messageText, width / 2, height / 2);
                         ctx.restore();
@@ -1588,8 +1588,7 @@
                 implemented: true,
                 ui: document.getElementById('orbit-ui'),
                 scoreSpan: document.getElementById('orbit-score'),
-                pressureMeter: document.getElementById('orbit-pressure'),
-                pressureFill: document.getElementById('orbit-pressure-fill'),
+                planetCountSpan: document.getElementById('orbit-planet-count'),
                 bubbles: [],
                 core: null,
                 score: 0,
@@ -1613,8 +1612,7 @@
                     this.pullEnergy = 1.0;   // 0 = exhausted, 1 = full
                     this.energyDraining = false;
 
-                    this.ui.style.display = 'block';
-                    this.pressureMeter.style.display = 'block';
+                    this.ui.style.display = 'flex';
                     this.setCursor(false);
 
                     for (let i = 0; i < 3; i++) this.spawnOrbiter();
@@ -1691,11 +1689,14 @@
                         }
                     }
 
-                    // Spawn mechanic: 5x faster when idle to punish camping!
-                    // On phone: also spawn faster overall since edge-bounce keeps them visible
+                    // Spawn mechanic: speeds up dramatically as mass goes up, and faster if idle!
+                    let diffFactor = Math.min(3.0, 1.0 + this.score / 250);
                     let isPhoneOrbitSpawn = window.innerWidth <= 768 || ('ontouchstart' in window);
                     let isOrbIdle = this.idleTime > 3000;
-                    let spawnRate = isOrbIdle ? 800 : (isPhoneOrbitSpawn ? 2500 : 3500);
+                    
+                    let baseSpawn = isPhoneOrbitSpawn ? 1500 : 2500;
+                    let spawnRate = isOrbIdle ? (600 / diffFactor) : (baseSpawn / diffFactor);
+                    
                     if (t - this.lastSpawnTargetTime > spawnRate) {
                         this.lastSpawnTargetTime = t;
                         if (this.bubbles.length < 25) this.spawnOrbiter();
@@ -1718,17 +1719,21 @@
                     let activeOrbiters = this.bubbles.filter(b => b.state === 'orbiting').length;
                     if (activeOrbiters >= 20) {
                         this.state = 'gameover';
-                        this.pressureMeter.style.display = 'none';
                         return;
                     }
 
-                    // Update pressure meter
-                    let pct = Math.min(100, (activeOrbiters / 20) * 100);
-                    this.pressureFill.style.height = pct + '%';
-                    let dangerColor = pct > 75 ? 'linear-gradient(to top, #e53935, #e53935)' :
-                        pct > 50 ? 'linear-gradient(to top, #e53935, #ff9800, #ff9800)' :
-                            'linear-gradient(to top, #e53935, #ff9800, #66bb6a)';
-                    this.pressureFill.style.background = dangerColor;
+                    // Update Health Boxes (Retro squares)
+                    let boxStr = "";
+                    for(let i=0; i<20; i++) {
+                        if (i < activeOrbiters) {
+                            if (activeOrbiters > 16) boxStr += "🟥";
+                            else if (activeOrbiters > 11) boxStr += "🟧";
+                            else boxStr += "🟩";
+                        } else {
+                            boxStr += "⬜";
+                        }
+                    }
+                    this.planetCountSpan.innerText = boxStr;
 
                     this.scoreSpan.innerText = `Mass: ${this.score}`;
 
@@ -1878,6 +1883,20 @@
                 },
                 draw() {
                     const t = timeState.current;
+                    let activeOrbiters = this.bubbles.filter(b => b.state === 'orbiting').length;
+                    
+                    ctx.save();
+                    
+                    // Danger Anxious Effect Shake
+                    if (activeOrbiters > 15 && this.state !== 'gameover') {
+                        let shake = (activeOrbiters - 15) * 1.5;
+                        ctx.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake);
+                        
+                        // Red hot screen flash
+                        let hotAlpha = (activeOrbiters - 15) * 0.04;
+                        ctx.fillStyle = `rgba(255, 0, 0, ${hotAlpha})`;
+                        ctx.fillRect(0, 0, width, height);
+                    }
 
                     if (this.state === 'gameover') {
                         ctx.save();
@@ -2072,7 +2091,6 @@
                     });
                     ctx.restore();
 
-                    // Brief screen flash on big merge
                     if (this.mergeFlashScreen > 0) {
                         ctx.save();
                         ctx.fillStyle = `rgba(255,255,255,${this.mergeFlashScreen * 0.18})`;
@@ -2080,10 +2098,11 @@
                         this.mergeFlashScreen -= 0.06;
                         ctx.restore();
                     }
+                    
+                    ctx.restore(); // restore danger shake
                 },
                 cleanup() {
                     this.ui.style.display = 'none';
-                    this.pressureMeter.style.display = 'none';
                     document.body.style.cursor = 'default';
                 }
             }
@@ -2091,7 +2110,7 @@
 
         const bgMap = {
             lobby: "url('assets/gallery/bubblegum_clouds.png') no-repeat center center / cover",
-            garden: "url('assets/gallery/bubblegum_clouds.png') no-repeat center center / cover",
+            garden: "linear-gradient(rgba(10, 5, 20, 0.85), rgba(10, 5, 20, 0.85)), url('assets/gallery/bubblegum_clouds.png') no-repeat center center / cover, #000",
             herding: "url('assets/game-assets/grass_bg_for_game.png') no-repeat center center / cover, #000",
             dontpop: "linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url('assets/game-assets/block-print-fabric (6).png') repeat, #111",
             orbit: "linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('assets/game-assets/abstract_dithering_purple.png') repeat, #111"
@@ -2126,7 +2145,7 @@
             document.body.style.setProperty('--theme-color', themeColors[newGame] || '#b93160');
 
             document.body.style.background = bgMap[newGame] || bgMap['lobby'];
-            if (newGame === "lobby" || newGame === "garden") {
+            if (newGame === "lobby") {
                 document.body.style.backgroundBlendMode = 'screen';
             } else {
                 document.body.style.backgroundBlendMode = 'normal'; // Let pixel art be naturally lit for Herding
