@@ -324,6 +324,8 @@
     <div id="garden-ui" class="game-ui">
         <button id="garden-clear" class="fade-ui"
             style="transition: opacity 0.5s; margin-left: 15px; padding: 4px 12px; border-radius: 12px; background: rgba(255,255,255,0.85); border: 2px solid white; color: var(--theme-color); font-weight: 800; cursor: pointer; font-family: inherit; font-size: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); pointer-events: auto;">Clear</button>
+        <button id="garden-mode-toggle" class="fade-ui"
+            style="transition: opacity 0.5s; margin-left: 15px; padding: 4px 12px; border-radius: 12px; background: rgba(255,255,255,0.85); border: 2px solid white; color: var(--theme-color); font-weight: 800; cursor: pointer; font-family: inherit; font-size: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); pointer-events: auto;">Mode: Grow ✨</button>
         <div class="tooltip-container fade-ui" style="transition: opacity 0.5s;">
             <div class="tooltip-icon">?</div>
             <div class="tooltip-text">Tap anywhere to grow a bubble. Hover near to push them. They remain until you
@@ -392,7 +394,7 @@
     </div>
 
     <!-- Orbit UI -->
-    <div id="orbit-ui" class="game-ui" style="display:flex; flex-direction:column; align-items:flex-end; top: 10px; right: 20px;">
+    <div id="orbit-ui" class="game-ui" style="display:none; flex-direction:column; align-items:flex-end; top: 10px; right: 20px;">
         <div style="display:flex; align-items:center; margin-bottom: 5px;">
             <span id="orbit-score" style="margin-right:20px; font-family: monospace; font-size: 1.5rem; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.8);">Mass: 0</span>
             <div class="tooltip-container fade-ui" style="transition: opacity 0.5s;">
@@ -402,6 +404,23 @@
             <a id="orbit-share" class="fade-ui" href="#" style="display:none; transition: opacity 0.5s; background: rgba(255,255,255,0.85); color: #6200ea; font-weight: 800; padding: 6px 12px; border-radius: 20px; text-decoration: none; margin-left: 20px;">Share Score 📧</a>
         </div>
         <div id="orbit-planet-count" style="font-size: 1rem; letter-spacing: 2px; text-shadow: 0 1px 4px rgba(0,0,0,0.8);"></div>
+    </div>
+
+    <!-- Orbit Leaderboard Overlay -->
+    <div id="orbit-leaderboard" class="screen" style="z-index: 15; background: rgba(0,0,0,0.85); flex-direction:column; color:white;">
+        <h2 style="font-size:3rem; margin-bottom:10px;">System Overloaded! 💥</h2>
+        <h3 style="font-size:2rem; margin-bottom:30px; color:#ffb74d;">Final Mass: <span id="orbit-final-score"></span></h3>
+        
+        <div id="orbit-submit-section" style="margin-bottom:20px; display:flex; align-items:center;">
+            <input type="text" id="orbit-username" placeholder="Enter Username" maxlength="15" style="padding:10px; font-size:1.2rem; border-radius:10px; border:none; text-align:center;">
+            <button id="orbit-submit-btn" style="padding:10px 20px; font-size:1.2rem; font-weight:800; border-radius:10px; background:var(--theme-color); color:white; border:none; cursor:pointer; margin-left:10px;">Submit Score</button>
+        </div>
+        
+        <div id="orbit-scores-list" style="margin-bottom: 30px; text-align: left; font-size: 1.2rem; background: rgba(255,255,255,0.1); padding: 20px; border-radius: 15px; min-width: 300px;">
+            Loading global ranks...
+        </div>
+
+        <button id="orbit-restart-btn" style="padding:10px 20px; font-size:1.2rem; font-weight:800; border-radius:20px; background:white; color:black; border:none; cursor:pointer;">Play Again</button>
     </div>
 
 
@@ -687,6 +706,7 @@
                     this.lastInteractTime = timeState.current;
                     this.boredomAlpha = 0;
                     this.playTime = 0;
+                    this.mode = 'grow';
                     this.pinGifted = false;
                     this.pin = null;
                     for (let i = 0; i < 5; i++) {
@@ -722,8 +742,13 @@
                     this.mood = (t * 0.00004) % 1;
                     this.playTime += gdt;
 
-                    // Tap / click → spawn bubble OR burst pin target
+                    // Tap / click → spawn bubble OR burst pin target OR burst in Pop mode
                     if (pointer.justClicked && pointer.y > 80) {
+                        this.lastInteractTime = t;
+                        this.boredomAlpha = 0;
+
+                        let poppedBubble = false;
+
                         // Check pin hit
                         if (this.pin && this.pin.life > 0) {
                             let pd = Math.hypot(pointer.x - this.pin.x, pointer.y - this.pin.y);
@@ -751,19 +776,38 @@
                                 return;
                             }
                         }
-                        this.lastInteractTime = t;
-                        this.boredomAlpha = 0;
-                        this.bubbles.push({
-                            x: pointer.x, y: pointer.y,
-                            r: Math.random() * 60 + 15,
-                            vx: (Math.random() - 0.5) * 3, vy: (Math.random() - 0.5) * 3,
-                            hue: getSafeHue('garden'),
-                            offset: Math.random() * 1000,
-                            speedX: Math.random() * 0.003 + 0.001,
-                            speedY: Math.random() * 0.003 + 0.001
-                        });
-                        // Fewer bubbles max to help performance
-                        if (this.bubbles.length > 25) this.bubbles.shift();
+
+                        if (this.mode === 'pop') {
+                            // Find nearest bubble to pointer that is overlapping
+                            for (let i = this.bubbles.length - 1; i >= 0; i--) {
+                                let b = this.bubbles[i];
+                                let pd = Math.hypot(pointer.x - b.x, pointer.y - b.y);
+                                if (pd < b.r + 5) {
+                                    for (let p = 0; p < 18; p++) {
+                                        let a = (p / 18) * Math.PI * 2;
+                                        this.trail.push({ x: b.x, y: b.y, r: Math.random() * 7 + 3, alpha: 1.0, hue: b.hue, vy: Math.sin(a) * (Math.random() * 4 + 2), vx: Math.cos(a) * (Math.random() * 4 + 2) });
+                                    }
+                                    playSound('pop', b.x, b.y);
+                                    this.bubbles.splice(i, 1);
+                                    poppedBubble = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (this.mode === 'grow' && !poppedBubble) {
+                            this.bubbles.push({
+                                x: pointer.x, y: pointer.y,
+                                r: Math.random() * 60 + 15,
+                                vx: (Math.random() - 0.5) * 3, vy: (Math.random() - 0.5) * 3,
+                                hue: getSafeHue('garden'),
+                                offset: Math.random() * 1000,
+                                speedX: Math.random() * 0.003 + 0.001,
+                                speedY: Math.random() * 0.003 + 0.001
+                            });
+                            // Fewer bubbles max to help performance
+                            if (this.bubbles.length > 25) this.bubbles.shift();
+                        }
                     }
 
                     // Boredom escape — after 60s no interaction, nudge the player
@@ -1650,13 +1694,6 @@
                     this.lastTime = t;
 
                     if (this.state === 'gameover') {
-                        if (pointer.justClicked && pointer.y > 80) this.init();
-                        // Update orbit share btn
-                        let orbitShare = document.getElementById('orbit-share');
-                        if (orbitShare && orbitShare.style.display === 'none') {
-                            orbitShare.style.display = 'inline-block';
-                            orbitShare.href = `mailto:?subject=Orbit Score: Mass ${this.score}!&body=I reached Mass ${this.score} in Orbit on Bubble Games! Can you exceed my solar system?`;
-                        }
                         return;
                     }
 
@@ -1690,12 +1727,16 @@
                     }
 
                     // Spawn mechanic: speeds up dramatically as mass goes up, and faster if idle!
-                    let diffFactor = Math.min(3.0, 1.0 + this.score / 250);
+                    let diffFactor = Math.min(3.0, 1.0 + this.score / 400); // reduced from 250
                     let isPhoneOrbitSpawn = window.innerWidth <= 768 || ('ontouchstart' in window);
                     let isOrbIdle = this.idleTime > 3000;
                     
                     let baseSpawn = isPhoneOrbitSpawn ? 1500 : 2500;
                     let spawnRate = isOrbIdle ? (600 / diffFactor) : (baseSpawn / diffFactor);
+                    
+                    // Breather mechanism!
+                    let activeOrbiters = this.bubbles.filter(b => b.state === 'orbiting').length;
+                    if (activeOrbiters >= 17) spawnRate *= 2.5;
                     
                     if (t - this.lastSpawnTargetTime > spawnRate) {
                         this.lastSpawnTargetTime = t;
@@ -1719,6 +1760,12 @@
                     let activeOrbiters = this.bubbles.filter(b => b.state === 'orbiting').length;
                     if (activeOrbiters >= 20) {
                         this.state = 'gameover';
+                        document.getElementById('orbit-final-score').innerText = this.score;
+                        document.getElementById('orbit-submit-section').style.display = 'flex';
+                        document.getElementById('orbit-submit-btn').disabled = false;
+                        document.getElementById('orbit-submit-btn').innerText = "Submit Score";
+                        document.getElementById('orbit-leaderboard').classList.add('active');
+                        fetchLeaderboard();
                         return;
                     }
 
@@ -1888,12 +1935,12 @@
                     ctx.save();
                     
                     // Danger Anxious Effect Shake
-                    if (activeOrbiters > 15 && this.state !== 'gameover') {
-                        let shake = (activeOrbiters - 15) * 1.5;
+                    if (activeOrbiters >= 17 && this.state !== 'gameover') {
+                        let shake = (activeOrbiters - 16) * 1.0;
                         ctx.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake);
                         
-                        // Red hot screen flash
-                        let hotAlpha = (activeOrbiters - 15) * 0.04;
+                        // Red hot screen flash (toned down)
+                        let hotAlpha = (activeOrbiters - 16) * 0.02;
                         ctx.fillStyle = `rgba(255, 0, 0, ${hotAlpha})`;
                         ctx.fillRect(0, 0, width, height);
                     }
@@ -1904,18 +1951,6 @@
                         ctx.textBaseline = "middle";
                         ctx.fillStyle = `rgba(0, 0, 0, 0.6)`;
                         ctx.fillRect(0, 0, width, height);
-
-                        ctx.fillStyle = `rgba(255, 255, 255, 1)`;
-                        ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
-                        ctx.shadowBlur = 10;
-                        ctx.font = "800 6vw 'Outfit', sans-serif";
-                        ctx.fillText(`System Overloaded! 💥`, width / 2, height / 2 - 30);
-
-                        ctx.font = "600 2.5vw 'Outfit', sans-serif";
-                        ctx.fillText(`Final Mass: ${this.score}`, width / 2, height / 2 + 50);
-
-                        ctx.font = "400 1.5vw 'Outfit', sans-serif";
-                        ctx.fillText("Click anywhere to restart", width / 2, height / 2 + 100);
                         ctx.restore();
                         return;
                     }
@@ -2219,6 +2254,104 @@
         // Setup garden clear button
         document.getElementById('garden-clear').addEventListener('click', () => {
             games.garden.bubbles = [];
+        });
+
+        // Setup garden mode toggle button
+        document.getElementById('garden-mode-toggle').addEventListener('click', () => {
+            if (games.garden.mode === 'grow') {
+                games.garden.mode = 'pop';
+                document.getElementById('garden-mode-toggle').innerText = 'Mode: Pop 💥';
+                document.body.style.cursor = `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='48' viewport='0 0 100 100' style='fill:black;font-size:24px;'><text y='50%'>📌</text></svg>") 16 0, auto`;
+            } else {
+                games.garden.mode = 'grow';
+                document.getElementById('garden-mode-toggle').innerText = 'Mode: Grow ✨';
+                document.body.style.cursor = 'default';
+            }
+        });
+
+        const LL_API_KEY = "dev_e41a971ed8ca4ab599a22d0ac23db13f";
+        const LL_ORBIT_ID = "34115";
+        let llSessionToken = null;
+
+        async function initLootLocker() {
+            if (llSessionToken) return llSessionToken;
+            try {
+                let res = await fetch("https://api.lootlocker.io/game/v2/session/guest", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ game_key: LL_API_KEY, game_version: "1.0.0.0", player_identifier: localStorage.getItem('ll_player_id') || Math.random().toString(36).substring(7) })
+                });
+                let data = await res.json();
+                llSessionToken = data.session_token;
+                if (data.player_identifier) localStorage.setItem('ll_player_id', data.player_identifier);
+                return llSessionToken;
+            } catch (e) {
+                console.error("Lootlocker init failed", e);
+                return null;
+            }
+        }
+
+        async function fetchLeaderboard() {
+            let container = document.getElementById('orbit-scores-list');
+            container.innerHTML = "Loading global ranks...";
+            let token = await initLootLocker();
+            if (!token) { container.innerHTML = "Failed to connect to leaderboards."; return; }
+            
+            try {
+                let res = await fetch(`https://api.lootlocker.io/game/v2/leaderboards/${LL_ORBIT_ID}/list?count=5`, {
+                    headers: { "x-session-token": token }
+                });
+                let data = await res.json();
+                if (data.items && data.items.length > 0) {
+                    let html = "<div style='font-weight:800; margin-bottom:10px; text-align:center;'>🌍 GLOBAL TOP 5</div>";
+                    data.items.forEach((item, index) => {
+                        let name = item.player ? item.player.name : "Anonymous";
+                        if (!name || name === "") name = `Player #${item.player.id}`;
+                        html += `<div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                                    <span>${index + 1}. ${name}</span>
+                                    <span style="font-weight:bold; margin-left:20px; color:#ffb74d;">${item.score}</span>
+                                 </div>`;
+                    });
+                    container.innerHTML = html;
+                } else {
+                    container.innerHTML = "No scores yet. Be the first!";
+                }
+            } catch(e) {
+                container.innerHTML = "Failed to load scores.";
+            }
+        }
+
+        document.getElementById('orbit-submit-btn').addEventListener('click', async () => {
+            let name = document.getElementById('orbit-username').value.trim();
+            if (!name) return alert("Please enter a username!");
+            let btn = document.getElementById('orbit-submit-btn');
+            btn.disabled = true;
+            btn.innerText = "Submitting...";
+
+            let token = await initLootLocker();
+            if (!token) return;
+
+            // set name
+            await fetch("https://api.lootlocker.io/game/v1/player/name", {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json", "x-session-token": token },
+                body: JSON.stringify({ name: name })
+            });
+
+            // submit score
+            await fetch(`https://api.lootlocker.io/game/v2/leaderboards/${LL_ORBIT_ID}/submit`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "x-session-token": token },
+                body: JSON.stringify({ score: games.orbit.score })
+            });
+
+            document.getElementById('orbit-submit-section').style.display = 'none';
+            fetchLeaderboard(); // refresh list
+        });
+
+        document.getElementById('orbit-restart-btn').addEventListener('click', () => {
+            document.getElementById('orbit-leaderboard').classList.remove('active');
+            games.orbit.init();
         });
 
         // Main Loop
