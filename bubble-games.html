@@ -232,7 +232,7 @@
 
         .tooltip-text {
             visibility: hidden;
-            width: 220px;
+            width: 240px;
             background-color: rgba(255, 255, 255, 0.95);
             color: var(--theme-color);
             text-align: center;
@@ -242,7 +242,7 @@
             z-index: 101;
             top: 130%;
             right: 0;
-            font-size: 1rem;
+            font-size: clamp(0.85rem, 3vw, 1rem);
             font-weight: 600;
             text-shadow: none;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
@@ -598,8 +598,34 @@
                 messageText: "",
                 init() {
                     this.bubbles = [];
+                    this.sparkles = []; // ambient floating sparkles
+                    this.trail = [];    // cursor trail particles
                     this.ui.style.display = 'block';
-                    this.welcomeAlpha = 1.0; // Show welcome message on entry
+                    this.welcomeAlpha = 1.0;
+                    this.mood = 0; // slowly cycling hue mood
+                    // Pre-seed a few bubbles so it doesn't feel empty at start
+                    for (let i = 0; i < 5; i++) {
+                        this.bubbles.push({
+                            x: Math.random() * width, y: Math.random() * height,
+                            r: Math.random() * 45 + 15,
+                            vx: (Math.random() - 0.5) * 1.5, vy: (Math.random() - 0.5) * 1.5,
+                            hue: getSafeHue('garden'),
+                            offset: Math.random() * 1000,
+                            speedX: Math.random() * 0.003 + 0.001,
+                            speedY: Math.random() * 0.003 + 0.001
+                        });
+                    }
+                    // Ambient sparkles
+                    for (let i = 0; i < 30; i++) {
+                        this.sparkles.push({
+                            x: Math.random() * width, y: Math.random() * height,
+                            r: Math.random() * 3 + 1,
+                            vy: -(Math.random() * 0.4 + 0.1),
+                            alpha: Math.random(),
+                            hue: Math.random() * 360,
+                            offset: Math.random() * 1000
+                        });
+                    }
                 },
                 cleanup() {
                     this.ui.style.display = 'none';
@@ -607,21 +633,48 @@
                 update() {
                     const t = timeState.current;
 
-                    // Prevent spawning when clicking within UI bounds (top 80px)
+                    this.mood = (t * 0.00004) % 1; // slowly cycles 0→1
+
+                    // Tap / click → spawn bubble
                     if (pointer.justClicked && pointer.y > 80) {
                         this.bubbles.push({
                             x: pointer.x,
                             y: pointer.y,
-                            r: Math.random() * 60 + 15, // Great variability in size
-                            vx: (Math.random() - 0.5) * 3, // Start with lower energy
-                            vy: (Math.random() - 0.5) * 3, // Start with lower energy
+                            r: Math.random() * 60 + 15,
+                            vx: (Math.random() - 0.5) * 3,
+                            vy: (Math.random() - 0.5) * 3,
                             hue: getSafeHue('garden'),
                             offset: Math.random() * 1000,
                             speedX: Math.random() * 0.003 + 0.001,
                             speedY: Math.random() * 0.003 + 0.001
                         });
-                        // Hard limit to prevent browser memory explosions
                         if (this.bubbles.length > 40) this.bubbles.shift();
+                    }
+
+                    // Cursor trail — small sparkle at pointer
+                    if (pointer.x !== -1000 && Math.random() < 0.4) {
+                        this.trail.push({
+                            x: pointer.x + (Math.random() - 0.5) * 10,
+                            y: pointer.y + (Math.random() - 0.5) * 10,
+                            r: Math.random() * 4 + 2,
+                            alpha: 1.0,
+                            hue: (this.mood * 360 + Math.random() * 40) % 360,
+                            vy: -Math.random() * 1.5 - 0.3
+                        });
+                    }
+                    for (let i = this.trail.length - 1; i >= 0; i--) {
+                        let p = this.trail[i];
+                        p.y += p.vy;
+                        p.alpha -= 0.04;
+                        if (p.alpha <= 0) this.trail.splice(i, 1);
+                    }
+
+                    // Ambient sparkles float upward, recycle
+                    for (let s of this.sparkles) {
+                        s.y += s.vy;
+                        s.x += Math.sin(t * 0.001 + s.offset) * 0.3;
+                        s.alpha = 0.4 + Math.sin(t * 0.002 + s.offset) * 0.4;
+                        if (s.y < -10) { s.y = height + 10; s.x = Math.random() * width; }
                     }
 
                     // Zen Warnings State
@@ -638,21 +691,33 @@
                     for (let i = this.bubbles.length - 1; i >= 0; i--) {
                         let b = this.bubbles[i];
 
-                        // Mild drift — subtle breathing motion, not steering
+                        // Mild drift
                         b.vx += Math.sin(t * 0.002 + b.offset) * 0.04;
                         b.vy += Math.cos(t * 0.002 + b.offset) * 0.04;
                         b.vx *= 0.99;
                         b.vy *= 0.99;
 
-                        // Mouse repulsion! Push bubbles away from the cursor
+                        // Soft mutual attraction — bubbles gently drift toward their nearest neighbor
+                        let closestDist = Infinity;
+                        let closestB = null;
+                        for (let j = 0; j < this.bubbles.length; j++) {
+                            if (i === j) continue;
+                            let d = Math.hypot(b.x - this.bubbles[j].x, b.y - this.bubbles[j].y);
+                            if (d < closestDist) { closestDist = d; closestB = this.bubbles[j]; }
+                        }
+                        if (closestB && closestDist > (b.r + closestB.r) * 1.5 && closestDist < 300) {
+                            let adx = closestB.x - b.x;
+                            let ady = closestB.y - b.y;
+                            b.vx += (adx / closestDist) * 0.02;
+                            b.vy += (ady / closestDist) * 0.02;
+                        }
+
+                        // Cursor repulsion
                         if (pointer.x !== -1000) {
                             let dx = b.x - pointer.x;
                             let dy = b.y - pointer.y;
                             let dist = Math.sqrt(dx * dx + dy * dy);
-
-                            // Prevent division by zero if bubble spawns exactly on pointer
                             if (dist < 0.1) { dx = 1; dy = 1; dist = 1.414; }
-
                             if (dist < 150 + b.r) {
                                 let force = Math.pow(((150 + b.r) - dist) / (150 + b.r), 2);
                                 b.vx += (dx / dist) * force * 3;
@@ -660,39 +725,71 @@
                             }
                         }
 
-                        // Apply velocity
                         b.x += b.vx;
                         b.y += b.vy;
 
-                        // Bounce off walls (damped to prevent infinite energy loops)
                         if (b.x - b.r < 0) { b.x = b.r; b.vx *= -0.8; }
                         if (b.x + b.r > width) { b.x = width - b.r; b.vx *= -0.8; }
                         if (b.y - b.r < 0) { b.y = b.r; b.vy *= -0.8; }
                         if (b.y + b.r > height) { b.y = height - b.r; b.vy *= -0.8; }
 
-                        // Enforce max speed — keep them floaty, not frantic
                         const speed = Math.sqrt(b.vx * b.vx + b.vy * b.vy);
-                        if (speed > 12) {
-                            b.vx = (b.vx / speed) * 12;
-                            b.vy = (b.vy / speed) * 12;
-                        }
+                        if (speed > 12) { b.vx = (b.vx / speed) * 12; b.vy = (b.vy / speed) * 12; }
                     }
                 },
                 draw() {
                     const t = timeState.current;
 
+                    // Very subtle warmth wash — barely perceptible
+                    let moodHue = (this.mood || 0) * 360;
+                    ctx.save();
+                    ctx.fillStyle = `hsla(${moodHue}, 40%, 70%, 0.025)`; // much more subtle
+                    ctx.fillRect(0, 0, width, height);
+                    ctx.restore();
+
+                    // Draw ambient sparkles below bubbles
+                    if (this.sparkles) {
+                        ctx.save();
+                        for (let s of this.sparkles) {
+                            ctx.beginPath();
+                            ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                            ctx.fillStyle = `hsla(${s.hue}, 90%, 80%, ${s.alpha * 0.7})`;
+                            ctx.shadowColor = `hsla(${s.hue}, 100%, 70%, 0.5)`;
+                            ctx.shadowBlur = 6;
+                            ctx.fill();
+                        }
+                        ctx.restore();
+                    }
+
+                    // Cursor trail sparkles
+                    if (this.trail) {
+                        ctx.save();
+                        for (let p of this.trail) {
+                            ctx.beginPath();
+                            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                            ctx.fillStyle = `hsla(${p.hue}, 90%, 80%, ${p.alpha})`;
+                            ctx.shadowColor = `hsla(${p.hue}, 100%, 70%, ${p.alpha})`;
+                            ctx.shadowBlur = 8;
+                            ctx.fill();
+                        }
+                        ctx.restore();
+                    }
+
                     // Welcome message on entry
                     if (!this.welcomeAlpha) this.welcomeAlpha = 0;
                     if (this.welcomeAlpha > 0) {
-                        this.welcomeAlpha -= 0.004;
+                        this.welcomeAlpha -= 0.003;
                         ctx.save();
                         ctx.textAlign = "center";
                         ctx.textBaseline = "middle";
-                        ctx.font = "600 3vw 'Outfit', sans-serif";
+                        ctx.font = "600 clamp(1rem, 3vw, 1.4rem) 'Outfit', sans-serif";
                         ctx.fillStyle = `rgba(185, 49, 96, ${Math.min(1, this.welcomeAlpha)})`;
                         ctx.shadowColor = `rgba(255,255,255,0.8)`;
                         ctx.shadowBlur = 20;
-                        ctx.fillText("Relax here 🫧  Click to grow a bubble. Push them around for fun!", width / 2, height / 2);
+                        ctx.fillText("🫧 Tap anywhere to grow a bubble", width / 2, height / 2 - 20);
+                        ctx.font = "400 clamp(0.8rem, 2.2vw, 1.1rem) 'Outfit', sans-serif";
+                        ctx.fillStyle = `rgba(185, 49, 96, ${Math.min(0.8, this.welcomeAlpha)})`;
+                        ctx.fillText("Move your finger / cursor near them to push", width / 2, height / 2 + 20);
                         ctx.restore();
                     }
 
@@ -710,7 +807,12 @@
                     }
 
                     this.bubbles.forEach(b => {
+                        // Extra shadow to make bubbles float above the background
+                        ctx.save();
+                        ctx.shadowColor = 'rgba(0,0,0,0.35)';
+                        ctx.shadowBlur = 18;
                         drawBubble(ctx, b.x, b.y, b.r, b.hue, 1, t + b.offset, b.speedX, b.speedY);
+                        ctx.restore();
                     });
                 }
             },
@@ -797,8 +899,8 @@
                     const penDriftY = this.round > 1 ? Math.cos(t * (0.0013 + this.round * 0.00015)) * Math.min(this.round * 14, 100) : 0;
                     const penX = (width / 2) + penDriftX;
                     const penY = (height / 2) + penDriftY;
-                    // Shrink pen each round — moderate pace
-                    const penR = Math.max(Math.min(width, height) * 0.25 - (this.round - 1) * 22, 55);
+                    // Start a bit smaller on laptops, shrink moderately each round
+                    const penR = Math.max(Math.min(width, height) * 0.20 - (this.round - 1) * 22, 55);
 
                     for (let i = 0; i < this.bubbles.length; i++) {
                         let b = this.bubbles[i];
@@ -907,8 +1009,8 @@
                     const penDriftY = this.round > 1 ? Math.cos(t * (0.0013 + this.round * 0.00015)) * Math.min(this.round * 14, 100) : 0;
                     const penX = (width / 2) + penDriftX;
                     const penY = (height / 2) + penDriftY;
-                    // Must match update() shrink formula
-                    const penR = Math.max(Math.min(width, height) * 0.25 - (this.round - 1) * 22, 55);
+                    // Start smaller, must match update() formula
+                    const penR = Math.max(Math.min(width, height) * 0.20 - (this.round - 1) * 22, 55);
 
                     ctx.save();
                     ctx.beginPath();
@@ -1048,9 +1150,9 @@
                         if (this.flashAlpha > 0) this.flashAlpha -= 0.05;
 
                         let isPhone = window.innerWidth <= 768 || ('ontouchstart' in window);
-                        let pullMult = isPhone ? 0.25 : 1.2;
-                        pullMult *= 1.0 + (this.level * 0.22); // Ramp up moderately
-                        let maxBubbles = Math.min(20, 8 + Math.floor(this.level * 1.5));
+                        let pullMult = isPhone ? 0.18 : 1.4; // Laptop a bit more aggressive
+                        pullMult *= 1.0 + (this.level * 0.25); // Steeper per level on laptop
+                        let maxBubbles = isPhone ? Math.min(12, 6 + Math.floor(this.level)) : Math.min(22, 8 + Math.floor(this.level * 1.8));
 
                         if (this.bubbles.length < maxBubbles) {
                             if (Math.random() < 0.03 * this.level) this.spawnBubble();
@@ -1074,12 +1176,17 @@
                             }
                         }
 
-                        // Penalty for dropping thumb on phone
+                        // Penalty for dropping thumb on phone — with grace period of 1.5s
                         if (isPhone && pointer.x === -1000) {
-                            this.scoreTime -= dt * 3; // Drain time fast if cheating/resting!
-                            if (this.scoreTime < 0) this.scoreTime = 0;
-                            this.droppedThumb = true;
+                            if (!this.thumbDropTime) this.thumbDropTime = t;
+                            let thumbGrace = t - this.thumbDropTime;
+                            if (thumbGrace > 1500) { // 1.5s grace before drain kicks in
+                                this.scoreTime -= dt * 3;
+                                if (this.scoreTime < 0) this.scoreTime = 0;
+                            }
+                            this.droppedThumb = thumbGrace > 800; // show warning after 0.8s
                         } else {
+                            this.thumbDropTime = 0;
                             this.droppedThumb = false;
                         }
 
@@ -1351,12 +1458,27 @@
                         }
                     }
 
-                    // Spawn mechanic: 4x faster when idle to punish camping!
+                    // Spawn mechanic: 5x faster when idle to punish camping!
+                    // On phone: also spawn faster overall since edge-bounce keeps them visible
+                    let isPhoneOrbitSpawn = window.innerWidth <= 768 || ('ontouchstart' in window);
                     let isOrbIdle = this.idleTime > 3000;
-                    let spawnRate = isOrbIdle ? 1000 : 4000;
+                    let spawnRate = isOrbIdle ? 800 : (isPhoneOrbitSpawn ? 2500 : 3500);
                     if (t - this.lastSpawnTargetTime > spawnRate) {
                         this.lastSpawnTargetTime = t;
                         if (this.bubbles.length < 25) this.spawnOrbiter();
+                    }
+
+                    // On phone: also apply gentle inward drift to all planets when idle
+                    // so they don't just sit still in corners
+                    if (isPhoneOrbitSpawn && isOrbIdle) {
+                        for (let b of this.bubbles) {
+                            if (b.state !== 'orbiting') continue;
+                            let pdx = this.core.x - b.x;
+                            let pdy = this.core.y - b.y;
+                            let pd = Math.sqrt(pdx*pdx + pdy*pdy) || 1;
+                            b.vx += (pdx / pd) * 0.3; // drift inward
+                            b.vy += (pdy / pd) * 0.3;
+                        }
                     }
 
                     // Loss Con
@@ -1468,11 +1590,19 @@
                         b.x += b.vx;
                         b.y += b.vy;
 
-                        // Edge wrapping safety
-                        if (b.x < -100) b.x = width + 100;
-                        if (b.x > width + 100) b.x = -100;
-                        if (b.y < -100) b.y = height + 100;
-                        if (b.y > height + 100) b.y = -100;
+                        // Edge: bounce on phone, wrap on desktop!
+                        let isPhoneOrbit = window.innerWidth <= 768 || ('ontouchstart' in window);
+                        if (isPhoneOrbit) {
+                            if (b.x < b.r) { b.x = b.r; b.vx *= -0.7; }
+                            if (b.x > width - b.r) { b.x = width - b.r; b.vx *= -0.7; }
+                            if (b.y < b.r) { b.y = b.r; b.vy *= -0.7; }
+                            if (b.y > height - b.r) { b.y = height - b.r; b.vy *= -0.7; }
+                        } else {
+                            if (b.x < -100) b.x = width + 100;
+                            if (b.x > width + 100) b.x = -100;
+                            if (b.y < -100) b.y = height + 100;
+                            if (b.y > height + 100) b.y = -100;
+                        }
 
                         // Merge collision check
                         for (let j = i - 1; j >= 0; j--) {
@@ -1601,8 +1731,51 @@
                     // Draw Orbiters
                     this.bubbles.forEach(b => drawBubble(ctx, b.x, b.y, b.r, b.hue, 1.0, t + b.offset, b.speedX, b.speedY));
 
-                    // Draw Core over top
-                    drawBubble(ctx, this.core.x, this.core.y, this.core.r, this.core.hue, coreOp, t, 0.002, 0.003);
+                    // Draw Core — proper Black Hole
+                    ctx.save();
+                    ctx.translate(this.core.x, this.core.y);
+
+                    // Outer glow halos
+                    for (let h = 3; h >= 1; h--) {
+                        let glowR = this.core.r * (0.7 + h * 0.35);
+                        let glowAlpha = 0.08 - h * 0.015;
+                        ctx.beginPath();
+                        ctx.arc(0, 0, glowR + Math.sin(t * 0.002) * 4, 0, Math.PI * 2);
+                        ctx.fillStyle = `rgba(160, 80, 255, ${glowAlpha})`;
+                        ctx.fill();
+                    }
+
+                    // Event horizon ring (thin bright arc)
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.core.r * 0.72, 0, Math.PI * 2);
+                    ctx.lineWidth = 2;
+                    ctx.strokeStyle = `rgba(200, 140, 255, 0.6)`;
+                    ctx.stroke();
+
+                    // Accretion disk (rotating oval)
+                    ctx.save();
+                    ctx.rotate(t * 0.0008);
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, this.core.r * 1.4, this.core.r * 0.28, 0, 0, Math.PI * 2);
+                    let diskGrad = ctx.createLinearGradient(-this.core.r * 1.4, 0, this.core.r * 1.4, 0);
+                    diskGrad.addColorStop(0,   'rgba(255, 120, 40, 0)');
+                    diskGrad.addColorStop(0.3, 'rgba(255, 160, 60, 0.55)');
+                    diskGrad.addColorStop(0.5, 'rgba(255, 220, 100, 0.7)');
+                    diskGrad.addColorStop(0.7, 'rgba(255, 160, 60, 0.55)');
+                    diskGrad.addColorStop(1.0, 'rgba(255, 120, 40, 0)');
+                    ctx.fillStyle = diskGrad;
+                    ctx.fill();
+                    ctx.restore();
+
+                    // Singularity — pure black circle
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.core.r * 0.68, 0, Math.PI * 2);
+                    ctx.fillStyle = '#000';
+                    ctx.shadowColor = 'rgba(0,0,0,0.9)';
+                    ctx.shadowBlur = 18;
+                    ctx.fill();
+
+                    ctx.restore();
 
                     // Merge score popups 
                     ctx.save();
@@ -1625,8 +1798,8 @@
         };
 
         const bgMap = {
-            lobby: "url('assets/gallery/bubblegum_clouds.png') no-repeat center center",
-            garden: "url('assets/gallery/bubblegum_clouds.png') no-repeat center center / cover, #ffccd5",
+            lobby: "url('assets/gallery/bubblegum_clouds.png') no-repeat center center / cover",
+            garden: "url('assets/gallery/bubblegum_clouds.png') no-repeat center center / cover",
             herding: "url('assets/game-assets/grass_bg_for_game.png') no-repeat center center / cover, #000",
             dontpop: "linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url('assets/game-assets/block-print-fabric (6).png') repeat, #111",
             orbit: "linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('assets/game-assets/abstract_dithering_purple.png') repeat, #111"
