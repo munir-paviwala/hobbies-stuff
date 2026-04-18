@@ -69,84 +69,101 @@
         /* Lobby UI */
         #lobby-ui {
             z-index: 20;
-            /* Above canvas */
         }
 
         h1 {
             font-weight: 800;
-            font-size: 4rem;
-            margin-bottom: 2rem;
-            color: #b93160;
-            /* Darker more grounded color */
-            text-shadow: 0 4px 10px rgba(0, 0, 0, 0.2), 3px 3px 0px rgba(255, 255, 255, 0.8), -1px -1px 0px rgba(255, 255, 255, 0.4);
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            color: #fff;
+            text-shadow: 0 2px 30px rgba(0, 0, 0, 0.6), 0 0 60px rgba(255, 100, 180, 0.4);
             pointer-events: none;
             text-align: center;
+            letter-spacing: -1px;
         }
 
         .lobby-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 2rem;
-            max-width: 600px;
-            padding: 1rem;
+            gap: 1.2rem;
+            max-width: 680px;
+            width: 90vw;
+            padding: 0.5rem;
         }
 
-        /* Bubble Buttons for Lobby (HTML based to easily attach events/text) */
+        /* Rich card-style lobby buttons */
         .lobby-bubble {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.05) 60%, rgba(255, 255, 255, 0.1) 100%);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            width: 100%;
+            height: 160px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
             box-shadow:
-                inset 0 0 20px rgba(255, 255, 255, 0.2),
-                0 4px 15px rgba(0, 0, 0, 0.3);
+                0 8px 32px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-end;
+            padding-bottom: 18px;
             cursor: pointer;
-            backdrop-filter: blur(2px);
+            backdrop-filter: blur(8px);
             position: relative;
+            overflow: hidden;
             transform-origin: center;
             will-change: transform;
             pointer-events: auto;
             text-align: center;
-            color: var(--theme-color);
+            color: #fff;
             text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+            background-size: cover;
+            background-position: center;
         }
 
-        .lobby-bubble::before {
+        .lobby-bubble::after {
             content: '';
             position: absolute;
-            top: 15%;
-            left: 20%;
-            width: 30%;
-            height: 20%;
-            background: var(--bubble-highlight);
-            border-radius: 50%;
-            transform: rotate(-45deg);
-            filter: blur(2px);
-            opacity: 0.8;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0.2) 50%, rgba(0, 0, 0, 0.05) 100%);
+            border-radius: inherit;
             pointer-events: none;
         }
 
         .lobby-bubble:hover {
-            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 60%, rgba(255, 255, 255, 0.2) 100%);
-            transform: scale(1.05);
+            transform: scale(1.03);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.4);
         }
 
         .lobby-bubble span {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
+            font-size: 2.8rem;
+            margin-bottom: 0.3rem;
             pointer-events: none;
+            position: relative;
+            z-index: 1;
+            filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5));
         }
 
         .lobby-bubble p {
-            font-size: 0.9rem;
-            font-weight: 600;
+            font-size: 1rem;
+            font-weight: 800;
             margin: 0;
             pointer-events: none;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .lobby-bubble .card-desc {
+            font-size: 0.72rem;
+            font-weight: 400;
+            opacity: 0.85;
+            margin-top: 3px;
+            pointer-events: none;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
         }
 
         /* Back button */
@@ -156,6 +173,7 @@
             left: 20px;
             z-index: 100;
             background: rgba(255, 255, 255, 0.85);
+            /* Much higher opacity */
             border: 2px solid rgba(255, 255, 255, 0.9);
             color: var(--theme-color);
             padding: 8px 16px;
@@ -308,7 +326,8 @@
             style="transition: opacity 0.5s; margin-left: 15px; padding: 4px 12px; border-radius: 12px; background: rgba(255,255,255,0.85); border: 2px solid white; color: var(--theme-color); font-weight: 800; cursor: pointer; font-family: inherit; font-size: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); pointer-events: auto;">Clear</button>
         <div class="tooltip-container fade-ui" style="transition: opacity 0.5s;">
             <div class="tooltip-icon">?</div>
-            <div class="tooltip-text">Relax here with bubbles. Make bubbles by clicking, push them around for fun. They remain until you clear.</div>
+            <div class="tooltip-text">Tap anywhere to grow a bubble. Hover near to push them. They remain until you
+                click Clear.</div>
         </div>
     </div>
 
@@ -320,7 +339,7 @@
             </div>
         </div>
         <a id="herding-share" class="fade-ui" href="#"
-            style="display:none; transition: opacity 0.5s; background: rgba(255,255,255,0.85); color: var(--theme-color); font-weight: 800; padding: 6px 12px; border-radius: 20px; text-decoration: none; margin-left: 20px;">Share
+            style="display:none; transition: opacity 0.5s; background: rgba(255,255,255,0.85); color: #2e7d32; font-weight: 800; padding: 6px 12px; border-radius: 20px; text-decoration: none; margin-left: 20px;">Share
             Score 📧</a>
     </div>
 
@@ -328,25 +347,32 @@
     <div id="lobby-ui" class="screen active">
         <h1>Bubble Games 🫧</h1>
         <p
-            style="text-align: center; color: white; opacity: 0.9; margin-top: -25px; margin-bottom: 20px; font-weight: 600;">
-            For the best experience, click any game to enter Fullscreen mode (ESC to exit)</p>
+            style="text-align: center; color: rgba(255,255,255,0.8); margin-top: -8px; margin-bottom: 24px; font-weight: 500; font-size: 0.9rem; letter-spacing: 0.3px;">
+            Tap any game · Click to enter Fullscreen · ESC to exit</p>
         <div class="lobby-grid">
-
-            <div class="lobby-bubble" data-game="herding" style="animation: float2 5s ease-in-out infinite;">
+            <div class="lobby-bubble" data-game="herding"
+                style="background-image: url('assets/game-assets/grass_bg_for_game.png'); animation: float2 5s ease-in-out infinite;">
                 <span>🐑</span>
                 <p>Herding</p>
+                <span class="card-desc">Round up the woolly crew</span>
             </div>
-            <div class="lobby-bubble" data-game="dontpop" style="animation: float1 4.5s ease-in-out infinite;">
-                <span>📍</span>
+            <div class="lobby-bubble" data-game="dontpop"
+                style="background-image: url('assets/game-assets/block-print-fabric (6).png'); background-size: 200px; animation: float1 4.5s ease-in-out infinite;">
+                <span>🌵</span>
                 <p>Don't Pop</p>
+                <span class="card-desc">Survive the bubble swarm</span>
             </div>
-            <div class="lobby-bubble" data-game="orbit" style="animation: float2 5.5s ease-in-out infinite;">
+            <div class="lobby-bubble" data-game="orbit"
+                style="background-image: url('assets/game-assets/abstract_dithering_purple.png'); animation: float2 5.5s ease-in-out infinite;">
                 <span>🪐</span>
                 <p>Orbit</p>
+                <span class="card-desc">Merge planets, grow your sun</span>
             </div>
-            <div class="lobby-bubble" data-game="garden" style="animation: float1 4s ease-in-out infinite;">
+            <div class="lobby-bubble" data-game="garden"
+                style="background-image: url('assets/gallery/bubblegum_clouds.png'); background-size: cover; animation: float1 4s ease-in-out infinite;">
                 <span>🌱</span>
                 <p>Garden</p>
+                <span class="card-desc">Play with bubbles, no rules</span>
             </div>
         </div>
     </div>
@@ -371,11 +397,11 @@
             0</span>
         <div class="tooltip-container fade-ui" style="transition: opacity 0.5s;">
             <div class="tooltip-icon">?</div>
-            <div class="tooltip-text">Hover to nudge planets away. Click &amp; Hold to pull them together! Crash planets
-                of the SAME COLOR to merge them into Gas Giants. Don't let your solar system exceed 20 planets!</div>
+            <div class="tooltip-text">Hover/swipe to nudge. Hold/long-press to pull! Merge planets of the SAME COLOR.
+                Don't exceed 20 planets!</div>
         </div>
         <a id="orbit-share" class="fade-ui" href="#"
-            style="display:none; transition: opacity 0.5s; background: rgba(255,255,255,0.85); color: var(--theme-color); font-weight: 800; padding: 6px 12px; border-radius: 20px; text-decoration: none; margin-left: 20px;">Share
+            style="display:none; transition: opacity 0.5s; background: rgba(255,255,255,0.85); color: #6200ea; font-weight: 800; padding: 6px 12px; border-radius: 20px; text-decoration: none; margin-left: 20px;">Share
             Score 📧</a>
     </div>
 
@@ -428,10 +454,9 @@
         resize();
 
         // --- Input Handling ---
-        let pointer = { x: -1000, y: -1000, active: false, clicked: false, justClicked: false, lastMoveTime: 0 };
+        let pointer = { x: -1000, y: -1000, active: false, clicked: false, justClicked: false };
 
         function updatePointer(e, active) {
-            pointer.lastMoveTime = Date.now();
             if (e.touches && e.touches.length > 0) {
                 pointer.x = e.touches[0].clientX;
                 pointer.y = e.touches[0].clientY;
@@ -446,9 +471,23 @@
         window.addEventListener('mousedown', (e) => { updatePointer(e, true); pointer.clicked = true; pointer.justClicked = true; });
         window.addEventListener('mouseup', () => { pointer.active = false; pointer.clicked = false; });
 
-        window.addEventListener('touchstart', (e) => { updatePointer(e, true); pointer.clicked = true; pointer.justClicked = true; }, { passive: false });
+        // Touch: long-press (300ms+) counts as 'clicked' (pull mode for Orbit)
+        let touchHoldTimer = null;
+        window.addEventListener('touchstart', (e) => {
+            updatePointer(e, true);
+            pointer.justClicked = true;
+            pointer.clicked = false; // start as hover
+            clearTimeout(touchHoldTimer);
+            touchHoldTimer = setTimeout(() => { pointer.clicked = true; }, 300); // long press = pull
+        }, { passive: false });
         window.addEventListener('touchmove', (e) => { updatePointer(e, true); e.preventDefault(); }, { passive: false });
-        window.addEventListener('touchend', () => { pointer.active = false; pointer.clicked = false; pointer.x = -1000; pointer.y = -1000; });
+        window.addEventListener('touchend', () => {
+            clearTimeout(touchHoldTimer);
+            pointer.active = false;
+            pointer.clicked = false;
+            pointer.x = -1000;
+            pointer.y = -1000;
+        });
 
         // --- Shared Bubble Renderer ---
         function drawBubble(ctx, x, y, radius, hueOffset = 0, opacity = 1, time = 0, speedX = 0.002, speedY = 0.003) {
@@ -560,6 +599,7 @@
                 init() {
                     this.bubbles = [];
                     this.ui.style.display = 'block';
+                    this.welcomeAlpha = 1.0; // Show welcome message on entry
                 },
                 cleanup() {
                     this.ui.style.display = 'none';
@@ -641,6 +681,21 @@
                 draw() {
                     const t = timeState.current;
 
+                    // Welcome message on entry
+                    if (!this.welcomeAlpha) this.welcomeAlpha = 0;
+                    if (this.welcomeAlpha > 0) {
+                        this.welcomeAlpha -= 0.004;
+                        ctx.save();
+                        ctx.textAlign = "center";
+                        ctx.textBaseline = "middle";
+                        ctx.font = "600 3vw 'Outfit', sans-serif";
+                        ctx.fillStyle = `rgba(185, 49, 96, ${Math.min(1, this.welcomeAlpha)})`;
+                        ctx.shadowColor = `rgba(255,255,255,0.8)`;
+                        ctx.shadowBlur = 20;
+                        ctx.fillText("Relax here 🫧  Click to grow a bubble. Push them around for fun!", width / 2, height / 2);
+                        ctx.restore();
+                    }
+
                     // Draw Zen Messages behind bubbles
                     if (this.messageAlpha > 0) {
                         ctx.save();
@@ -679,7 +734,6 @@
                     this.confetti = [];
                     this.state = 'playing';
                     this.winAlpha = 0;
-                    document.getElementById('herding-share').style.display = 'none';
                     const numSheep = 5 + (this.round * 2);
 
                     for (let i = 0; i < numSheep; i++) {
@@ -738,13 +792,13 @@
                     }
 
                     let allIn = true;
-                    // Later rounds the pen subtly floats around to be evasive!
-                    const penDriftX = this.round > 2 ? Math.sin(t * 0.001) * Math.min(this.round * 15, 100) : 0;
-                    const penDriftY = this.round > 2 ? Math.cos(t * 0.0013) * Math.min(this.round * 10, 80) : 0;
+                    // Pen drifts from R2, more unpredictable each round but not wild
+                    const penDriftX = this.round > 1 ? Math.sin(t * (0.001 + this.round * 0.0002)) * Math.min(this.round * 18, 120) : 0;
+                    const penDriftY = this.round > 1 ? Math.cos(t * (0.0013 + this.round * 0.00015)) * Math.min(this.round * 14, 100) : 0;
                     const penX = (width / 2) + penDriftX;
                     const penY = (height / 2) + penDriftY;
-                    // Shrink pen slightly every round! Min 40px radius.
-                    const penR = Math.max(Math.min(width, height) * 0.25 - (this.round - 1) * 20, 60);
+                    // Shrink pen each round — moderate pace
+                    const penR = Math.max(Math.min(width, height) * 0.25 - (this.round - 1) * 22, 55);
 
                     for (let i = 0; i < this.bubbles.length; i++) {
                         let b = this.bubbles[i];
@@ -767,8 +821,10 @@
                         b.vx *= 0.96;
                         b.vy *= 0.96;
 
-                        // Later rounds (Round 4+), the sheep hate each other and scatter!
-                        if (this.round > 3 && !b.inPen) {
+                        // Scatter: starts gentle at R2, scaling but capped
+                        if (this.round > 1 && !b.inPen) {
+                            let scatterStr = Math.min(0.15 + (this.round - 2) * 0.12, 0.6); // gentler: 0.15 R2 → 0.6 R5+
+                            let scatterDist = 40 + (this.round * 10);
                             for (let j = 0; j < this.bubbles.length; j++) {
                                 if (i === j) continue;
                                 let b2 = this.bubbles[j];
@@ -776,28 +832,29 @@
                                 let dxAnnoy = b.x - b2.x;
                                 let dyAnnoy = b.y - b2.y;
                                 let distAnnoy = Math.sqrt(dxAnnoy * dxAnnoy + dyAnnoy * dyAnnoy);
-                                if (distAnnoy < b.r + b2.r + 40) {
-                                    b.vx += (dxAnnoy / distAnnoy) * 0.4;
-                                    b.vy += (dyAnnoy / distAnnoy) * 0.4;
+                                if (distAnnoy < b.r + b2.r + scatterDist) {
+                                    b.vx += (dxAnnoy / distAnnoy) * scatterStr;
+                                    b.vy += (dyAnnoy / distAnnoy) * scatterStr;
                                 }
                             }
                         }
 
+                        // Flee from cursor — distance and force scale with round (toned down)
                         if (pointer.x !== -1000) {
                             let dx = b.x - pointer.x;
                             let dy = b.y - pointer.y;
                             let dist = Math.sqrt(dx * dx + dy * dy);
-                            // If clicked perfectly on center, blast it a random direction
                             if (dist < 0.1) {
                                 dx = (Math.random() - 0.5) * 2;
                                 dy = (Math.random() - 0.5) * 2;
                                 dist = 1;
                             }
-
-                            if (dist < 200 + b.r) {
-                                let force = Math.pow(((200 + b.r) - dist) / (200 + b.r), 2);
-                                b.vx += (dx / dist) * force * 5;
-                                b.vy += (dy / dist) * force * 5;
+                            let fleeRange = 180 + (this.round * 12); // Grows per round
+                            let fleeForce = 4 + (this.round * 0.7);  // Gentler ramp-up
+                            if (dist < fleeRange + b.r) {
+                                let force = Math.pow(((fleeRange + b.r) - dist) / (fleeRange + b.r), 2);
+                                b.vx += (dx / dist) * force * fleeForce;
+                                b.vy += (dy / dist) * force * fleeForce;
                             }
                         }
 
@@ -823,9 +880,12 @@
 
                     if (allIn && this.bubbles.length > 0) {
                         this.state = 'won';
-                        let shareBtn = document.getElementById('herding-share');
-                        shareBtn.style.display = 'inline-block';
-                        shareBtn.href = `mailto:?subject=I herded ${this.round} flocks!&body=I herded ${this.round} flocks in Bubble Games! Can you beat my score?`;
+                        // Update share link
+                        let herdShare = document.getElementById('herding-share');
+                        if (herdShare) {
+                            herdShare.style.display = 'inline-block';
+                            herdShare.href = `mailto:?subject=I completed Herding Round ${this.round}!&body=I herded ${5 + this.round * 2} sheep in Round ${this.round} in Bubble Games! Can you beat my round?`;
+                        }
                         // SPARTA CONFETTI!
                         for (let i = 0; i < 80; i++) {
                             this.confetti.push({
@@ -842,12 +902,13 @@
                 },
                 draw() {
                     const t = timeState.current;
-                    const penDriftX = this.round > 2 ? Math.sin(t * 0.001) * Math.min(this.round * 15, 100) : 0;
-                    const penDriftY = this.round > 2 ? Math.cos(t * 0.0013) * Math.min(this.round * 10, 80) : 0;
+                    // MUST mirror the update() pen formula exactly!
+                    const penDriftX = this.round > 1 ? Math.sin(t * (0.001 + this.round * 0.0002)) * Math.min(this.round * 18, 120) : 0;
+                    const penDriftY = this.round > 1 ? Math.cos(t * (0.0013 + this.round * 0.00015)) * Math.min(this.round * 14, 100) : 0;
                     const penX = (width / 2) + penDriftX;
                     const penY = (height / 2) + penDriftY;
-                    // Draw shrinking pen
-                    const penR = Math.max(Math.min(width, height) * 0.25 - (this.round - 1) * 20, 60);
+                    // Must match update() shrink formula
+                    const penR = Math.max(Math.min(width, height) * 0.25 - (this.round - 1) * 22, 55);
 
                     ctx.save();
                     ctx.beginPath();
@@ -903,6 +964,8 @@
                 cleanup() {
                     this.ui.style.display = 'none';
                     document.body.style.cursor = 'default';
+                    let herdShare = document.getElementById('herding-share');
+                    if (herdShare) herdShare.style.display = 'none';
                 }
             },
             dontpop: {
@@ -928,6 +991,10 @@
                     this.flashAlpha = 0;
                     this.lastTime = timeState.current;
                     this.state = 'starting';
+                    this.idleTime = 0;
+                    this.idleAlpha = 0;
+                    this.lastMoveX = -1;
+                    this.lastMoveY = -1;
 
                     document.getElementById('dontpop-share').style.display = 'none';
 
@@ -972,8 +1039,8 @@
                     if (this.state === 'playing') {
                         this.scoreTime += dt;
 
-                        // Progressive Difficulty every 10s
-                        let newLevel = Math.floor(this.scoreTime / 10000) + 1;
+                        // Progressive Difficulty every 9s (manageable pace)
+                        let newLevel = Math.floor(this.scoreTime / 9000) + 1;
                         if (newLevel > this.level) {
                             this.level = newLevel;
                             this.flashAlpha = 1.0;
@@ -981,12 +1048,30 @@
                         if (this.flashAlpha > 0) this.flashAlpha -= 0.05;
 
                         let isPhone = window.innerWidth <= 768 || ('ontouchstart' in window);
-                        let pullMult = isPhone ? 0.25 : 1.2; // Heavily nerfed for phone!
-                        pullMult *= 1.0 + (this.level * 0.2); // Intensify!
-                        let maxBubbles = Math.min(15, 8 + this.level);
+                        let pullMult = isPhone ? 0.25 : 1.2;
+                        pullMult *= 1.0 + (this.level * 0.22); // Ramp up moderately
+                        let maxBubbles = Math.min(20, 8 + Math.floor(this.level * 1.5));
 
                         if (this.bubbles.length < maxBubbles) {
-                            if (Math.random() < 0.02 * this.level) this.spawnBubble();
+                            if (Math.random() < 0.03 * this.level) this.spawnBubble();
+                        }
+
+                        // IDLE PENALTY: if cursor hasn't moved >15px for 3s, heartbeat + boost gravity!
+                        let cactMoved = Math.abs(pointer.x - this.lastMoveX) > 15 || Math.abs(pointer.y - this.lastMoveY) > 15;
+                        if (cactMoved) {
+                            this.lastMoveX = pointer.x;
+                            this.lastMoveY = pointer.y;
+                            this.idleTime = 0;
+                            this.idleAlpha = Math.max(0, this.idleAlpha - 0.06);
+                        } else if (pointer.x !== -1000) {
+                            this.idleTime += dt;
+                            // Progressively boost pull the longer they're idle (caps at 4x)
+                            pullMult *= 1.0 + Math.min(3.0, this.idleTime / 1200);
+                            if (this.idleTime > 3000) {
+                                this.idleAlpha = Math.min(0.75, this.idleAlpha + Math.abs(Math.sin(t * 0.008)) * 0.12);
+                            } else {
+                                this.idleAlpha = Math.max(0, this.idleAlpha - 0.02);
+                            }
                         }
 
                         // Penalty for dropping thumb on phone
@@ -1113,6 +1198,26 @@
                         ctx.restore();
                     }
 
+                    // Idle heartbeat overlay
+                    if (this.idleAlpha > 0) {
+                        ctx.save();
+                        let idleGrad = ctx.createRadialGradient(width / 2, height / 2, height * 0.2, width / 2, height / 2, height * 0.8);
+                        idleGrad.addColorStop(0, `rgba(255, 60, 0, 0)`);
+                        idleGrad.addColorStop(1, `rgba(255, 60, 0, ${this.idleAlpha})`);
+                        ctx.fillStyle = idleGrad;
+                        ctx.fillRect(0, 0, width, height);
+                        if (this.idleTime > 3000) {
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+                            ctx.font = "900 4vw 'Outfit', sans-serif";
+                            ctx.fillStyle = `rgba(255,255,255,${this.idleAlpha})`;
+                            ctx.shadowColor = '#f00';
+                            ctx.shadowBlur = 20;
+                            ctx.fillText('MOVE! 🌵💨', width / 2, height * 0.15);
+                        }
+                        ctx.restore();
+                    }
+
                     // High contrast black shadow behind bubbles so they pop out from pink bg
                     ctx.save();
                     ctx.shadowColor = "rgba(0, 0, 0, 0.8)";
@@ -1162,9 +1267,6 @@
                 bubbles: [],
                 core: null,
                 score: 0,
-                level: 1,
-                energy: 100,
-                isPulling: false,
                 lastSpawnTargetTime: 0,
                 state: 'playing',
                 mergeFlashes: [], // {x, y, text, alpha, hue}
@@ -1172,15 +1274,16 @@
                 init() {
                     this.bubbles = [];
                     this.score = 0;
-                    this.level = 1;
-                    this.energy = 100;
                     this.state = 'playing';
                     this.mergeFlashes = [];
                     this.core = { x: width / 2, y: height / 2, r: 60, hue: 0 };
                     this.lastSpawnTargetTime = timeState.current;
                     this.lastTime = timeState.current;
+                    this.idleTime = 0;
+                    this.idleAlpha = 0;
+                    this.lastMoveX = -1;
+                    this.lastMoveY = -1;
 
-                    document.getElementById('orbit-share').style.display = 'none';
                     this.ui.style.display = 'block';
                     this.pressureMeter.style.display = 'block';
                     this.setCursor(false);
@@ -1195,7 +1298,7 @@
                 },
                 spawnOrbiter() {
                     let angle = Math.random() * Math.PI * 2;
-                    let dist = Math.min(width, height) * 0.45; // Fits on phone screens!
+                    let dist = Math.max(width, height) * 0.4;
 
                     // Simple palette for easier merging: Red, Blue, Green, Yellow, Purple (approximate)
                     const colors = [10, 200, 120, 50, 280];
@@ -1216,48 +1319,42 @@
                 },
                 update() {
                     const t = timeState.current;
-
-                    if (this.state === 'gameover') {
-                        if (pointer.justClicked && pointer.y > 80) this.init();
-                        return;
-                    }
-
-                    this.isPulling = pointer.clicked;
                     const dt = this.lastTime ? t - this.lastTime : 16;
                     this.lastTime = t;
 
-                    if (this.isPulling) {
-                        this.energy -= dt * 0.025; // Exhaust energy slower when pulling (~4 seconds max hold)
-                        if (this.energy <= 0) {
-                            this.energy = 0;
-                            this.isPulling = false; // Forced burnout!
+                    if (this.state === 'gameover') {
+                        if (pointer.justClicked && pointer.y > 80) this.init();
+                        // Update orbit share btn
+                        let orbitShare = document.getElementById('orbit-share');
+                        if (orbitShare && orbitShare.style.display === 'none') {
+                            orbitShare.style.display = 'inline-block';
+                            orbitShare.href = `mailto:?subject=Orbit Score: Mass ${this.score}!&body=I reached Mass ${this.score} in Orbit on Bubble Games! Can you exceed my solar system?`;
                         }
-                    } else {
-                        this.energy += dt * 0.05; // Recharge quickly when resting
-                        if (this.energy > 100) this.energy = 100;
+                        return;
                     }
 
                     // Cursor feedback: swap emoji when holding
-                    this.setCursor(this.isPulling);
+                    this.setCursor(pointer.clicked);
 
-                    // Difficulty scaling!!
-                    let requiredMassForLevel = this.level * 80;
-                    if (this.score >= requiredMassForLevel) {
-                        this.level++;
-                        // STRESS INDUCING GRAFFITI
-                        this.mergeFlashes.push({
-                            x: width/2, y: height/2 - 100, 
-                            text: `Level ${this.level}!`, 
-                            alpha: 2.5, hue: 10
-                        });
-                        // Visual shake for UI
-                        this.pressureMeter.style.transform = `translateY(-50%) translateX(${(Math.random() - 0.5) * 8}px)`;
-                    } else {
-                        this.pressureMeter.style.transform = `translateY(-50%)`;
+                    // IDLE PENALTY: staying still with cursor floods the system with new planets!
+                    let orbitMoved = Math.abs(pointer.x - this.lastMoveX) > 10 || Math.abs(pointer.y - this.lastMoveY) > 10;
+                    if (orbitMoved) {
+                        this.lastMoveX = pointer.x; this.lastMoveY = pointer.y;
+                        this.idleTime = 0;
+                        this.idleAlpha = Math.max(0, this.idleAlpha - 0.04);
+                    } else if (pointer.x !== -1000) {
+                        this.idleTime += dt;
+                        if (this.idleTime > 3000) {
+                            this.idleAlpha = Math.min(0.7, this.idleAlpha + Math.abs(Math.sin(t * 0.007)) * 0.12);
+                        } else {
+                            this.idleAlpha = Math.max(0, this.idleAlpha - 0.02);
+                        }
                     }
 
-                    // Spawn mechanic
-                    if (t - this.lastSpawnTargetTime > 4000) { // Slower spawning to not overwhelm
+                    // Spawn mechanic: 4x faster when idle to punish camping!
+                    let isOrbIdle = this.idleTime > 3000;
+                    let spawnRate = isOrbIdle ? 1000 : 4000;
+                    if (t - this.lastSpawnTargetTime > spawnRate) {
                         this.lastSpawnTargetTime = t;
                         if (this.bubbles.length < 25) this.spawnOrbiter();
                     }
@@ -1267,9 +1364,6 @@
                     if (activeOrbiters >= 20) {
                         this.state = 'gameover';
                         this.pressureMeter.style.display = 'none';
-                        let shareBtn = document.getElementById('orbit-share');
-                        shareBtn.style.display = 'inline-block';
-                        shareBtn.href = `mailto:?subject=I reached Mass ${this.score} in Orbit!&body=I built a galaxy of mass ${this.score} in Bubble Games! Can you beat my score?`;
                         return;
                     }
 
@@ -1349,8 +1443,14 @@
 
                             if (dist < 300) {
                                 let force = Math.pow((300 - dist) / 300, 2);
-                                if (this.isPulling) {
-                                    // PULL! Gravity
+                                // If idle AND pulling: EXPLODE planets away (anti-camping!)
+                                let isIdlePull = pointer.clicked && this.idleTime > 3000;
+                                if (isIdlePull) {
+                                    // Forceful repulsion — camping with held click disperses everything
+                                    b.vx += (dx / dist) * force * 12;
+                                    b.vy += (dy / dist) * force * 12;
+                                } else if (pointer.clicked) {
+                                    // Normal PULL! Gravity
                                     b.vx -= (dx / dist) * force * 5;
                                     b.vy -= (dy / dist) * force * 5;
                                 } else {
@@ -1449,30 +1549,42 @@
                     }
                     ctx.restore();
 
+                    // IDLE warning overlay — pulsing amber when cursor is stationary
+                    if (this.idleAlpha > 0) {
+                        ctx.save();
+                        let idleG = ctx.createRadialGradient(width / 2, height / 2, height * 0.15, width / 2, height / 2, height * 0.75);
+                        idleG.addColorStop(0, `rgba(255, 140, 0, 0)`);
+                        idleG.addColorStop(1, `rgba(255, 80, 0, ${this.idleAlpha * 0.7})`);
+                        ctx.fillStyle = idleG;
+                        ctx.fillRect(0, 0, width, height);
+                        if (this.idleTime > 3000) {
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+                            ctx.font = "900 3.5vw 'Outfit', sans-serif";
+                            ctx.fillStyle = `rgba(255,255,255,${this.idleAlpha})`;
+                            ctx.shadowColor = '#f80';
+                            ctx.shadowBlur = 20;
+                            ctx.fillText('KEEP MOVING! 🪐💨', width / 2, height * 0.12);
+                        }
+                        ctx.restore();
+                    }
+
                     // Gravitational CONTOUR RINGS around cursor
                     if (pointer.x !== -1000) {
-                        let pullRender = this.isPulling;
+                        let isPulling = pointer.clicked;
                         ctx.save();
                         for (let r = 1; r <= 5; r++) {
                             let ringRadius = r * 55;
-                            let alpha = (0.35 - r * 0.06) * (pullRender ? 1 : 0.5);
+                            let alpha = (0.35 - r * 0.06) * (isPulling ? 1 : 0.5);
                             ctx.beginPath();
-                            ctx.setLineDash(pullRender ? [] : [6, 10]);
+                            ctx.setLineDash(isPulling ? [] : [6, 10]);
                             ctx.arc(pointer.x, pointer.y, ringRadius, 0, Math.PI * 2);
-                            ctx.lineWidth = pullRender ? 2.5 - r * 0.3 : 1;
-                            ctx.strokeStyle = pullRender
+                            ctx.lineWidth = isPulling ? 2.5 - r * 0.3 : 1;
+                            ctx.strokeStyle = isPulling
                                 ? `rgba(255, 140, 255, ${alpha})`   // pink/magenta on pull
                                 : `rgba(140, 200, 255, ${alpha})`; // soft blue on hover
                             ctx.stroke();
                         }
-                        
-                        // Overheat Meter
-                        ctx.beginPath();
-                        ctx.arc(pointer.x, pointer.y, 45, -Math.PI/2, (-Math.PI/2) + (Math.PI * 2 * (this.energy / 100)));
-                        ctx.strokeStyle = this.energy < 25 ? '#ef5350' : 'rgba(255, 255, 255, 0.8)';
-                        ctx.lineWidth = 4;
-                        ctx.stroke();
-                        
                         ctx.restore();
                     }
 
@@ -1513,10 +1625,10 @@
         };
 
         const bgMap = {
-            lobby: "url('assets/gallery/bubblegum_clouds.png') no-repeat center center / cover, #ffccd5",
+            lobby: "url('assets/gallery/bubblegum_clouds.png') no-repeat center center",
             garden: "url('assets/gallery/bubblegum_clouds.png') no-repeat center center / cover, #ffccd5",
             herding: "url('assets/game-assets/grass_bg_for_game.png') no-repeat center center / cover, #000",
-            dontpop: "url('assets/game-assets/block-print-fabric (6).png') repeat, #111",
+            dontpop: "linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url('assets/game-assets/block-print-fabric (6).png') repeat, #111",
             orbit: "linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('assets/game-assets/abstract_dithering_purple.png') repeat, #111"
         };
 
