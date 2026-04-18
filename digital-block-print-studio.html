@@ -45,6 +45,10 @@
             min-height: 100vh;
         }
 
+        body:not(.advanced-mode-on) .advanced-tool {
+            display: none !important;
+        }
+
         /* ── Intro Overlay ── */
         .intro-overlay {
             position: fixed;
@@ -268,6 +272,48 @@
             color: var(--terra);
         }
 
+        /* ── Layout Mask ── */
+        .advanced-tool-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        #mask-editor-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        #mask-editor {
+            display: grid;
+            gap: 2px;
+            width: 100%;
+            background: #E8DDCA;
+            border: 2px solid rgba(26, 35, 126, 0.15);
+            border-radius: 4px;
+            padding: 6px;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .mask-cell {
+            background: #F6EDD8;
+            aspect-ratio: 1;
+            cursor: pointer;
+            border-radius: 2px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+            transition: all 0.15s;
+        }
+        .mask-cell:hover {
+            background: #FFFFFF;
+            transform: scale(1.08);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+            z-index: 2;
+        }
+        .mask-cell.masked {
+            background: rgba(191, 54, 12, 0.15);
+            box-shadow: inset 0 0 0 1.5px rgba(191, 54, 12, 0.4);
+            background-image: linear-gradient(45deg, rgba(191,54,12,0.12) 25%, transparent 25%, transparent 50%, rgba(191,54,12,0.12) 50%, rgba(191,54,12,0.12) 75%, transparent 75%, transparent);
+            background-size: 6px 6px;
+        }
+
         /* ── Palette ── */
         #palette {
             display: grid;
@@ -369,7 +415,7 @@
         }
 
         .switch-mode-label {
-            display: flex;
+            display: none;
             align-items: center;
             gap: 8px;
             cursor: pointer;
@@ -378,6 +424,10 @@
             color: var(--indigo);
             text-transform: uppercase;
             letter-spacing: 0.08em;
+        }
+
+        .switch-mode-label.unlocked {
+            display: flex;
         }
 
         .switch-mode-label input {
@@ -469,6 +519,28 @@
             background: rgba(255, 255, 255, 0.3);
         }
 
+        .action-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .utility-actions {
+            margin-left: auto;
+        }
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            margin: 0 4px;
+        }
+        .action-control label {
+            font-size: 0.72rem;
+            color: var(--indigo-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 500;
+        }
+
         .print-btn {
             background: var(--terra-deep);
             border: 1.5px solid var(--terra);
@@ -516,9 +588,9 @@
         }
 
         .action-btn {
-            background: rgba(0, 0, 0, 0.04);
-            border: 1.5px solid rgba(0, 0, 0, 0.12);
-            color: var(--text-muted);
+            background: rgba(26, 35, 126, 0.05);
+            border: 1.5px solid rgba(26, 35, 126, 0.15);
+            color: rgba(26, 35, 126, 0.7);
             padding: 10px 16px;
             border-radius: var(--radius);
             cursor: pointer;
@@ -526,36 +598,20 @@
             font-size: 0.9rem;
             font-weight: 500;
             transition: all 0.18s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .action-btn:hover {
-            background: rgba(0, 0, 0, 0.08);
-            border-color: rgba(0, 0, 0, 0.2);
-            color: var(--text);
+            background: rgba(26, 35, 126, 0.12);
+            border-color: rgba(26, 35, 126, 0.3);
+            color: var(--indigo);
         }
 
         #toggle-size-btn.large-active {
             border-color: var(--indigo-dim);
             color: var(--indigo);
-        }
-
-        .dl-print-btn {
-            margin-left: auto;
-            background: rgba(26, 35, 126, 0.07);
-            border: 1.5px solid rgba(26, 35, 126, 0.18);
-            color: rgba(26, 35, 126, 0.65);
-            padding: 10px 16px;
-            border-radius: var(--radius);
-            cursor: pointer;
-            font-family: 'Outfit', sans-serif;
-            font-size: 0.9rem;
-            transition: all 0.2s;
-        }
-
-        .dl-print-btn:hover {
-            background: rgba(26, 35, 126, 0.14);
-            color: var(--indigo);
-            border-color: var(--indigo-dim);
         }
 
         /* ── Fabric Canvas area ── */
@@ -579,6 +635,9 @@
 
         /* ── Mobile ── */
         @media (max-width: 680px) {
+            .utility-actions {
+                margin-left: 0;
+            }
             .studio-wrap {
                 flex-direction: column;
             }
@@ -643,7 +702,7 @@
         <aside class="stamp-panel">
 
             <div class="panel-top-row">
-                <span class="panel-title">Block Print Studio</span>
+                <span class="panel-title" id="secret-title" style="cursor: pointer; user-select: none;">Block Print Studio</span>
                 <button class="help-btn" id="help-btn" title="How to use this">?</button>
             </div>
 
@@ -663,6 +722,13 @@
 
             <div class="section-label">Colour Palette</div>
             <div id="palette" role="listbox" aria-label="Colour palette"></div>
+
+            <div class="section-label advanced-tool">Custom Layout Mask</div>
+            <div class="mode-desc advanced-tool" style="margin-top:-8px;">Click tiles to block patterns</div>
+            <div id="mask-editor-wrap" class="advanced-tool">
+                <div id="mask-editor" role="grid" aria-label="Pattern layout mask"></div>
+                <button class="action-btn" id="clear-mask-btn" style="width: 100%; font-size: 0.8rem; padding: 6px;">Reset Mask</button>
+            </div>
 
             <button class="dl-stamp-btn" id="dl-stamp-btn">⬇ Download Stamp</button>
 
@@ -700,10 +766,20 @@
             </div>
 
             <div class="action-bar">
-                <button class="print-btn" id="print-btn">Print to Fabric</button>
-                <button class="action-btn" id="clear-fabric-btn">Clear Fabric</button>
-                <button class="action-btn" id="toggle-size-btn">Large Canvas</button>
-                <button class="dl-print-btn" id="dl-fabric-btn">⬇ Download Print</button>
+                <div class="action-group creative-actions">
+                    <button class="print-btn" id="print-btn">Print to Fabric</button>
+                    <div class="action-control advanced-tool">
+                        <label>Spacing: <span id="density-val">1.0x</span></label>
+                        <input type="range" id="density-slider" min="0.5" max="2.0" step="0.1" value="1.0">
+                    </div>
+                    <button class="action-btn advanced-tool" id="bake-layer-btn" title="Lock the current design to the background canvas">✦ Bake Layer</button>
+                    <button class="action-btn advanced-tool" id="undo-canvas-btn">↺ Undo</button>
+                </div>
+                <div class="action-group utility-actions">
+                    <button class="action-btn" id="clear-fabric-btn">✕ Clear</button>
+                    <button class="action-btn" id="toggle-size-btn">⛶ Size</button>
+                    <button class="action-btn" id="dl-fabric-btn">⬇ Download Frame</button>
+                </div>
             </div>
 
             <div class="fabric-scroll">
@@ -937,18 +1013,27 @@
 
         document.getElementById('advanced-mode-toggle').addEventListener('change', (e) => {
             const isAdvanced = e.target.checked;
-            document.getElementById('classic-group').classList.toggle('active', !isAdvanced);
+            document.body.classList.toggle('advanced-mode-on', isAdvanced);
             document.getElementById('advanced-group').classList.toggle('active', isAdvanced);
-            document.querySelector('.mode-label').textContent = isAdvanced ? 'Magic Patterns' : 'Classic Patterns';
+            document.querySelector('.mode-label').textContent = isAdvanced ? 'All Patterns' : 'Classic Patterns';
             
-            const firstBtn = isAdvanced ? document.querySelector('#advanced-group .mode-btn') : document.querySelector('#classic-group .mode-btn');
-            firstBtn.click();
+            if (isAdvanced) {
+                document.querySelector('#advanced-group .mode-btn').click();
+            } else {
+                document.querySelector('#classic-group .mode-btn').click();
+            }
         });
 
         // ── Fabric Canvas ─────────────────────
         function setCanvasSize() {
-            fabricCanvas.width = grid.cols * STAMP_W * grid.px;
-            fabricCanvas.height = grid.rows * STAMP_H * grid.px;
+            const w = grid.cols * STAMP_W * grid.px;
+            const h = grid.rows * STAMP_H * grid.px;
+            if (fabricCanvas.width !== w || fabricCanvas.height !== h) {
+                fabricCanvas.width = w;
+                fabricCanvas.height = h;
+                return true;
+            }
+            return false;
         }
 
         function drawFabricBackground() {
@@ -1041,8 +1126,16 @@
         function renderFabric() {
             const { cols, rows, px: stampPx } = grid;
             const sw = STAMP_W * stampPx, sh = STAMP_H * stampPx;
-            setCanvasSize();
-            drawFabricBackground();
+            const sizeChanged = setCanvasSize();
+            if (sizeChanged) {
+                bakedBackground = null;
+            }
+
+            if (bakedBackground) {
+                fabricCtx.drawImage(bakedBackground, 0, 0);
+            } else {
+                drawFabricBackground();
+            }
 
             if (currentMode === 'mandala') {
                 renderMandala(stampPx, sw, sh);
@@ -1061,15 +1154,25 @@
             // To get rid of empty space around the Ogee wave, we need to loop through more rows
             // and squish them closer together (0.7x height) so the wave rows overlap continuously.
             let loopRows = (currentMode === 'ogee-wave') ? Math.ceil(rows * 1.5) + 1 : rows;
-            for (let row = 0; row < loopRows; row++) {
+            let loopColsAdj = Math.ceil(cols / density);
+            let loopRowsAdj = Math.ceil(loopRows / density);
+
+            for (let row = 0; row < loopRowsAdj; row++) {
                 let rowOffsetX = 0;
-                if (currentMode === 'brick' && row % 2 === 1) rowOffsetX = sw / 2;
-                if (currentMode === 'diagonal') rowOffsetX = (row % 4) * (sw / 4);
+                let spanX = sw * density;
+                let spanY = (currentMode === 'ogee-wave') ? sh * 0.7 * density : sh * density;
+
+                if (currentMode === 'brick' && row % 2 === 1) rowOffsetX = spanX / 2;
+                if (currentMode === 'diagonal') rowOffsetX = (row % 4) * (spanX / 4);
                 
                 const startCol = rowOffsetX > 0 ? -1 : 0;
-                for (let col = startCol; col <= cols; col++) {
-                    let x = col * sw + rowOffsetX;
-                    let y = (currentMode === 'ogee-wave') ? row * (sh * 0.7) : row * sh;
+                for (let col = startCol; col <= loopColsAdj; col++) {
+                    if (currentMode !== 'scatter' && currentMode !== 'vintage-scatter' && currentMode !== 'mandala') {
+                        if (maskSet.has(`${Math.floor(row)},${Math.floor(col)}`)) continue;
+                    }
+
+                    let x = col * spanX + rowOffsetX;
+                    let y = row * spanY;
 
                     if (x + sw < 0 || x >= fabricCanvas.width) continue;
                     
@@ -1103,7 +1206,7 @@
                     }
 
                     if (currentMode === 'ogee-wave') {
-                        y += Math.sin((col / cols) * Math.PI * 4) * (sh * 0.6);
+                        y += Math.sin((col / cols) * density * Math.PI * 4) * (spanY * (0.6 / 0.7));
                     }
                     if (y + sh < 0 && currentMode !== 'ogee-wave') continue;
                     if (y >= fabricCanvas.height && currentMode !== 'ogee-wave') continue;
@@ -1111,7 +1214,7 @@
                     if (currentMode === 'saree-border') {
                         const borderCols = IS_MOBILE ? 1 : 2;
                         const borderRows = IS_MOBILE ? 1 : 2;
-                        let isBorder = (col < borderCols) || (col >= cols - borderCols) || (row < borderRows) || (row >= rows - borderRows);
+                        let isBorder = (col < borderCols) || (col >= loopColsAdj - borderCols) || (row < borderRows) || (row >= loopRowsAdj - borderRows);
                         if (!isBorder) continue;
                         
                         if (col < borderCols) rotate = 90;
@@ -1134,15 +1237,117 @@
             renderFabric();
         });
         document.getElementById('clear-fabric-btn').addEventListener('click', () => {
-            setCanvasSize(); drawFabricBackground();
+            pushCanvasUndo();
+            bakedBackground = null;
+            const w = fabricCanvas.width, h = fabricCanvas.height;
+            fabricCtx.clearRect(0, 0, w, h);
+            drawFabricBackground();
         });
         document.getElementById('toggle-size-btn').addEventListener('click', () => {
+            pushCanvasUndo();
             isLarge = !isLarge;
             grid = isLarge ? GRIDS.large : GRIDS.small;
             const btn = document.getElementById('toggle-size-btn');
             btn.textContent = isLarge ? 'Small Canvas' : 'Large Canvas';
             btn.classList.toggle('large-active', isLarge);
-            setCanvasSize(); drawFabricBackground();
+            initMaskEditor();
+            renderFabric();
+        });
+
+        // ── New Magic Logic Configs ────────────────
+        let density = 1.0;
+        let maskSet = new Set();
+        let bakedBackground = null;
+        let canvasUndoStack = [];
+        
+        document.getElementById('density-slider').addEventListener('input', (e) => {
+            density = parseFloat(e.target.value);
+            document.getElementById('density-val').textContent = density.toFixed(1) + 'x';
+        });
+        document.getElementById('density-slider').addEventListener('change', renderFabric);
+        
+        function pushCanvasUndo() {
+            canvasUndoStack.push({
+                img: fabricCtx.getImageData(0, 0, fabricCanvas.width, fabricCanvas.height),
+                bg: bakedBackground,
+                isLarge: isLarge
+            });
+            if (canvasUndoStack.length > 20) canvasUndoStack.shift();
+        }
+
+        document.getElementById('undo-canvas-btn').addEventListener('click', () => {
+            if (!canvasUndoStack.length) return;
+            const state = canvasUndoStack.pop();
+            if (isLarge !== state.isLarge) {
+                isLarge = state.isLarge;
+                grid = isLarge ? GRIDS.large : GRIDS.small;
+                const btn = document.getElementById('toggle-size-btn');
+                btn.textContent = isLarge ? 'Small Canvas' : 'Large Canvas';
+                btn.classList.toggle('large-active', isLarge);
+                setCanvasSize();
+                initMaskEditor();
+            }
+            fabricCanvas.width = state.img.width;
+            fabricCanvas.height = state.img.height;
+            fabricCtx.putImageData(state.img, 0, 0);
+            bakedBackground = state.bg;
+        });
+
+        document.getElementById('bake-layer-btn').addEventListener('click', () => {
+            const btn = document.getElementById('bake-layer-btn');
+            btn.textContent = '✦ Baked!';
+            btn.style.background = 'var(--indigo-dim)';
+            btn.style.color = '#FFF';
+            setTimeout(() => {
+                btn.textContent = '✦ Bake to Canvas';
+                btn.style.background = '';
+                btn.style.color = '';
+            }, 800);
+            
+            pushCanvasUndo();
+            const off = document.createElement('canvas');
+            off.width = fabricCanvas.width;
+            off.height = fabricCanvas.height;
+            off.getContext('2d').drawImage(fabricCanvas, 0, 0);
+            bakedBackground = off;
+        });
+
+        function initMaskEditor() {
+            const maskEl = document.getElementById('mask-editor');
+            maskEl.innerHTML = '';
+            maskSet.clear(); // Reset mask on canvas size change
+            const maskCols = grid.cols;
+            const maskRows = grid.rows;
+            maskEl.style.gridTemplateColumns = `repeat(${maskCols}, 1fr)`;
+            
+            for (let r = 0; r < maskRows; r++) {
+                for (let c = 0; c < maskCols; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'mask-cell';
+                    const key = `${r},${c}`;
+                    
+                    const toggle = () => {
+                        if (maskSet.has(key)) { maskSet.delete(key); cell.classList.remove('masked'); }
+                        else { maskSet.add(key); cell.classList.add('masked'); }
+                    };
+                    cell.addEventListener('mousedown', (e) => {
+                        if (e.button !== 0) return;
+                        toggle();
+                        renderFabric();
+                    });
+                    // Simple hover toggle for quick dragging
+                    cell.addEventListener('mouseenter', (e) => {
+                        if (e.buttons === 1) { toggle(); renderFabric(); }
+                    });
+                    maskEl.appendChild(cell);
+                }
+            }
+        }
+
+        document.getElementById('clear-mask-btn').addEventListener('click', () => {
+            maskSet.clear();
+            document.querySelectorAll('.mask-cell').forEach(c => c.classList.remove('masked'));
+            renderFabric();
         });
 
         // ── Downloads ─────────────────────────
@@ -1213,9 +1418,25 @@
             updateAllCells();
         })();
 
+        // ── Secret Unlock Mechanism ────────────────
+        let secretTapCount = 0;
+        let secretTapTimer = null;
+        
+        document.getElementById('secret-title').addEventListener('click', () => {
+            secretTapCount++;
+            clearTimeout(secretTapTimer);
+            
+            if (secretTapCount >= 5) {
+                document.querySelector('.switch-mode-label').classList.add('unlocked');
+                secretTapCount = 0; // Reset
+            } else {
+                secretTapTimer = setTimeout(() => { secretTapCount = 0; }, 1200); // 1.2 second combo window
+            }
+        });
+
         // ── Init ──────────────────────────────
         setTool('pencil');
-        setCanvasSize();
+        initMaskEditor();
         renderFabric(); // Auto-print the starter pattern immediately
     </script>
 </body>
