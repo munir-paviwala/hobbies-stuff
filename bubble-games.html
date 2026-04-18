@@ -156,7 +156,6 @@
             left: 20px;
             z-index: 100;
             background: rgba(255, 255, 255, 0.85);
-            /* Much higher opacity */
             border: 2px solid rgba(255, 255, 255, 0.9);
             color: var(--theme-color);
             padding: 8px 16px;
@@ -309,8 +308,7 @@
             style="transition: opacity 0.5s; margin-left: 15px; padding: 4px 12px; border-radius: 12px; background: rgba(255,255,255,0.85); border: 2px solid white; color: var(--theme-color); font-weight: 800; cursor: pointer; font-family: inherit; font-size: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); pointer-events: auto;">Clear</button>
         <div class="tooltip-container fade-ui" style="transition: opacity 0.5s;">
             <div class="tooltip-icon">?</div>
-            <div class="tooltip-text">Tap anywhere to grow a bubble. Hover near to push them. They remain until you
-                click Clear.</div>
+            <div class="tooltip-text">Relax here with bubbles. Make bubbles by clicking, push them around for fun. They remain until you clear.</div>
         </div>
     </div>
 
@@ -321,6 +319,9 @@
             <div class="tooltip-text">Push the sheep bubbles into the center pen using your cursor to clear the flock.
             </div>
         </div>
+        <a id="herding-share" class="fade-ui" href="#"
+            style="display:none; transition: opacity 0.5s; background: rgba(255,255,255,0.85); color: var(--theme-color); font-weight: 800; padding: 6px 12px; border-radius: 20px; text-decoration: none; margin-left: 20px;">Share
+            Score 📧</a>
     </div>
 
     <!-- Lobby Screen -->
@@ -330,10 +331,7 @@
             style="text-align: center; color: white; opacity: 0.9; margin-top: -25px; margin-bottom: 20px; font-weight: 600;">
             For the best experience, click any game to enter Fullscreen mode (ESC to exit)</p>
         <div class="lobby-grid">
-            <div class="lobby-bubble" data-game="garden" style="animation: float1 4s ease-in-out infinite;">
-                <span>🌱</span>
-                <p>Garden</p>
-            </div>
+
             <div class="lobby-bubble" data-game="herding" style="animation: float2 5s ease-in-out infinite;">
                 <span>🐑</span>
                 <p>Herding</p>
@@ -346,10 +344,11 @@
                 <span>🪐</span>
                 <p>Orbit</p>
             </div>
+            <div class="lobby-bubble" data-game="garden" style="animation: float1 4s ease-in-out infinite;">
+                <span>🌱</span>
+                <p>Garden</p>
+            </div>
         </div>
-        <a href="index.html" class="fade-ui"
-            style="transition: opacity 0.5s; color: rgba(255,255,255,0.8); text-decoration: none; margin-top: 3rem; background: rgba(0,0,0,0.2); padding: 8px 16px; border-radius: 12px;">Return
-            to Home</a>
     </div>
 
     <!-- Dont Pop UI -->
@@ -375,6 +374,9 @@
             <div class="tooltip-text">Hover to nudge planets away. Click &amp; Hold to pull them together! Crash planets
                 of the SAME COLOR to merge them into Gas Giants. Don't let your solar system exceed 20 planets!</div>
         </div>
+        <a id="orbit-share" class="fade-ui" href="#"
+            style="display:none; transition: opacity 0.5s; background: rgba(255,255,255,0.85); color: var(--theme-color); font-weight: 800; padding: 6px 12px; border-radius: 20px; text-decoration: none; margin-left: 20px;">Share
+            Score 📧</a>
     </div>
 
     <!-- Orbit Pressure Meter -->
@@ -426,9 +428,10 @@
         resize();
 
         // --- Input Handling ---
-        let pointer = { x: -1000, y: -1000, active: false, clicked: false, justClicked: false };
+        let pointer = { x: -1000, y: -1000, active: false, clicked: false, justClicked: false, lastMoveTime: 0 };
 
         function updatePointer(e, active) {
+            pointer.lastMoveTime = Date.now();
             if (e.touches && e.touches.length > 0) {
                 pointer.x = e.touches[0].clientX;
                 pointer.y = e.touches[0].clientY;
@@ -676,6 +679,7 @@
                     this.confetti = [];
                     this.state = 'playing';
                     this.winAlpha = 0;
+                    document.getElementById('herding-share').style.display = 'none';
                     const numSheep = 5 + (this.round * 2);
 
                     for (let i = 0; i < numSheep; i++) {
@@ -734,13 +738,13 @@
                     }
 
                     let allIn = true;
-                    // Pen immediately starts floating around in Round 2+, and floats faster each round!
-                    const penDriftX = this.round > 1 ? Math.sin(t * 0.002) * Math.min(this.round * 45, 300) : 0;
-                    const penDriftY = this.round > 1 ? Math.cos(t * 0.0025) * Math.min(this.round * 35, 250) : 0;
+                    // Later rounds the pen subtly floats around to be evasive!
+                    const penDriftX = this.round > 2 ? Math.sin(t * 0.001) * Math.min(this.round * 15, 100) : 0;
+                    const penDriftY = this.round > 2 ? Math.cos(t * 0.0013) * Math.min(this.round * 10, 80) : 0;
                     const penX = (width / 2) + penDriftX;
                     const penY = (height / 2) + penDriftY;
-                    // Shrink pen aggressively every round! Min 40px radius.
-                    const penR = Math.max(Math.min(width, height) * (0.25 - (this.round - 1) * 0.05), 50);
+                    // Shrink pen slightly every round! Min 40px radius.
+                    const penR = Math.max(Math.min(width, height) * 0.25 - (this.round - 1) * 20, 60);
 
                     for (let i = 0; i < this.bubbles.length; i++) {
                         let b = this.bubbles[i];
@@ -763,8 +767,8 @@
                         b.vx *= 0.96;
                         b.vy *= 0.96;
 
-                        // Later rounds (Round 2+), the sheep hate each other and scatter hard!
-                        if (this.round > 1 && !b.inPen) {
+                        // Later rounds (Round 4+), the sheep hate each other and scatter!
+                        if (this.round > 3 && !b.inPen) {
                             for (let j = 0; j < this.bubbles.length; j++) {
                                 if (i === j) continue;
                                 let b2 = this.bubbles[j];
@@ -773,10 +777,8 @@
                                 let dyAnnoy = b.y - b2.y;
                                 let distAnnoy = Math.sqrt(dxAnnoy * dxAnnoy + dyAnnoy * dyAnnoy);
                                 if (distAnnoy < b.r + b2.r + 40) {
-                                    // Scales up with rounds
-                                    let scatterPower = 0.3 + (this.round * 0.15);
-                                    b.vx += (dxAnnoy / distAnnoy) * scatterPower;
-                                    b.vy += (dyAnnoy / distAnnoy) * scatterPower;
+                                    b.vx += (dxAnnoy / distAnnoy) * 0.4;
+                                    b.vy += (dyAnnoy / distAnnoy) * 0.4;
                                 }
                             }
                         }
@@ -821,6 +823,9 @@
 
                     if (allIn && this.bubbles.length > 0) {
                         this.state = 'won';
+                        let shareBtn = document.getElementById('herding-share');
+                        shareBtn.style.display = 'inline-block';
+                        shareBtn.href = `mailto:?subject=I herded ${this.round} flocks!&body=I herded ${this.round} flocks in Bubble Games! Can you beat my score?`;
                         // SPARTA CONFETTI!
                         for (let i = 0; i < 80; i++) {
                             this.confetti.push({
@@ -837,12 +842,12 @@
                 },
                 draw() {
                     const t = timeState.current;
-                    const penDriftX = this.round > 1 ? Math.sin(t * 0.002) * Math.min(this.round * 45, 300) : 0;
-                    const penDriftY = this.round > 1 ? Math.cos(t * 0.0025) * Math.min(this.round * 35, 250) : 0;
+                    const penDriftX = this.round > 2 ? Math.sin(t * 0.001) * Math.min(this.round * 15, 100) : 0;
+                    const penDriftY = this.round > 2 ? Math.cos(t * 0.0013) * Math.min(this.round * 10, 80) : 0;
                     const penX = (width / 2) + penDriftX;
                     const penY = (height / 2) + penDriftY;
                     // Draw shrinking pen
-                    const penR = Math.max(Math.min(width, height) * (0.25 - (this.round - 1) * 0.05), 50);
+                    const penR = Math.max(Math.min(width, height) * 0.25 - (this.round - 1) * 20, 60);
 
                     ctx.save();
                     ctx.beginPath();
@@ -913,9 +918,6 @@
                 level: 1,
                 flashAlpha: 0,
                 state: 'starting', // starting, playing, gameover
-                activeQuadrant: -1,
-                quadrantTimer: 0,
-                dangerAlpha: 0,
 
                 init() {
                     this.bubbles = [];
@@ -926,9 +928,6 @@
                     this.flashAlpha = 0;
                     this.lastTime = timeState.current;
                     this.state = 'starting';
-                    this.activeQuadrant = -1;
-                    this.quadrantTimer = 0;
-                    this.dangerAlpha = 0;
 
                     document.getElementById('dontpop-share').style.display = 'none';
 
@@ -983,42 +982,11 @@
 
                         let isPhone = window.innerWidth <= 768 || ('ontouchstart' in window);
                         let pullMult = isPhone ? 0.25 : 1.2; // Heavily nerfed for phone!
-                        pullMult *= 1.0 + (this.level * 0.35); // Intensify rapidly!
-                        let maxBubbles = Math.min(25, 8 + (this.level * 2));
+                        pullMult *= 1.0 + (this.level * 0.2); // Intensify!
+                        let maxBubbles = Math.min(15, 8 + this.level);
 
                         if (this.bubbles.length < maxBubbles) {
-                            if (Math.random() < 0.03 * this.level) this.spawnBubble();
-                        }
-
-                        // Quadrant logic!
-                        if (this.level >= 2) {
-                            this.quadrantTimer -= dt;
-                            if (this.quadrantTimer <= 0) {
-                                this.quadrantTimer = 10000;
-                                let oldQuadrant = this.activeQuadrant;
-                                while(this.activeQuadrant === oldQuadrant) {
-                                    this.activeQuadrant = Math.floor(Math.random() * 4); // 0: TL, 1: TR, 2: BL, 3: BR
-                                }
-                            }
-                            
-                            // Check if inside quadrant
-                            let inSafe = false;
-                            if (pointer.x !== -1000) {
-                                let qX = pointer.x > width / 2 ? 1 : 0;
-                                let qY = pointer.y > height / 2 ? 1 : 0;
-                                let pQuad = qY * 2 + qX; // 0, 1, 2, or 3
-                                if (pQuad === this.activeQuadrant) inSafe = true;
-                            }
-                            
-                            if (!inSafe && pointer.x !== -1000) {
-                                this.scoreTime -= dt * 4; // Heartbeat damage!
-                                if (this.scoreTime < 0) this.scoreTime = 0;
-                                this.dangerAlpha = Math.min(1.0, this.dangerAlpha + Math.sin(t * 0.01) * 0.2 + 0.1);
-                            } else {
-                                this.dangerAlpha = Math.max(0, this.dangerAlpha - 0.05);
-                            }
-                        } else {
-                            this.activeQuadrant = -1;
+                            if (Math.random() < 0.02 * this.level) this.spawnBubble();
                         }
 
                         // Penalty for dropping thumb on phone
@@ -1120,40 +1088,6 @@
                         ctx.restore();
                     }
 
-                    // Draw Quadrants
-                    if (this.activeQuadrant !== -1) {
-                        ctx.save();
-                        for (let i = 0; i < 4; i++) {
-                            let qX = (i % 2) * (width / 2);
-                            let qY = Math.floor(i / 2) * (height / 2);
-                            
-                            if (i === this.activeQuadrant) {
-                                // Safe Zone
-                                ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
-                                ctx.fillRect(qX, qY, width/2, height/2);
-                                ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
-                                ctx.lineWidth = 4;
-                                ctx.strokeRect(qX, qY, width/2, height/2);
-                            } else {
-                                // Danger Zone
-                                ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-                                ctx.fillRect(qX, qY, width/2, height/2);
-                            }
-                        }
-                        ctx.restore();
-                    }
-
-                    // Heartbeat Danger Overlay
-                    if (this.dangerAlpha > 0) {
-                        ctx.save();
-                        let grad = ctx.createRadialGradient(width/2, height/2, height*0.3, width/2, height/2, height*0.8);
-                        grad.addColorStop(0, `rgba(255, 0, 0, 0)`);
-                        grad.addColorStop(1, `rgba(255, 0, 0, ${this.dangerAlpha * 0.8})`);
-                        ctx.fillStyle = grad;
-                        ctx.fillRect(0, 0, width, height);
-                        ctx.restore();
-                    }
-
                     if (this.state === 'starting') {
                         let secLeft = 3 - Math.floor(this.scoreTime / 1000);
                         ctx.save();
@@ -1225,9 +1159,12 @@
                 scoreSpan: document.getElementById('orbit-score'),
                 pressureMeter: document.getElementById('orbit-pressure'),
                 pressureFill: document.getElementById('orbit-pressure-fill'),
-                bubbles: [], // Orbiters
+                bubbles: [],
+                core: null,
                 score: 0,
-                level: 1, // Gravity Stress Level!
+                level: 1,
+                energy: 100,
+                isPulling: false,
                 lastSpawnTargetTime: 0,
                 state: 'playing',
                 mergeFlashes: [], // {x, y, text, alpha, hue}
@@ -1236,11 +1173,14 @@
                     this.bubbles = [];
                     this.score = 0;
                     this.level = 1;
+                    this.energy = 100;
                     this.state = 'playing';
                     this.mergeFlashes = [];
                     this.core = { x: width / 2, y: height / 2, r: 60, hue: 0 };
                     this.lastSpawnTargetTime = timeState.current;
+                    this.lastTime = timeState.current;
 
+                    document.getElementById('orbit-share').style.display = 'none';
                     this.ui.style.display = 'block';
                     this.pressureMeter.style.display = 'block';
                     this.setCursor(false);
@@ -1255,7 +1195,7 @@
                 },
                 spawnOrbiter() {
                     let angle = Math.random() * Math.PI * 2;
-                    let dist = Math.max(width, height) * 0.4;
+                    let dist = Math.min(width, height) * 0.45; // Fits on phone screens!
 
                     // Simple palette for easier merging: Red, Blue, Green, Yellow, Purple (approximate)
                     const colors = [10, 200, 120, 50, 280];
@@ -1282,24 +1222,42 @@
                         return;
                     }
 
+                    this.isPulling = pointer.clicked;
+                    const dt = this.lastTime ? t - this.lastTime : 16;
+                    this.lastTime = t;
+
+                    if (this.isPulling) {
+                        this.energy -= dt * 0.025; // Exhaust energy slower when pulling (~4 seconds max hold)
+                        if (this.energy <= 0) {
+                            this.energy = 0;
+                            this.isPulling = false; // Forced burnout!
+                        }
+                    } else {
+                        this.energy += dt * 0.05; // Recharge quickly when resting
+                        if (this.energy > 100) this.energy = 100;
+                    }
+
                     // Cursor feedback: swap emoji when holding
-                    this.setCursor(pointer.clicked);
+                    this.setCursor(this.isPulling);
 
                     // Difficulty scaling!!
-                    let requiredMassForLevel = this.level * 40;
+                    let requiredMassForLevel = this.level * 80;
                     if (this.score >= requiredMassForLevel) {
                         this.level++;
                         // STRESS INDUCING GRAFFITI
                         this.mergeFlashes.push({
                             x: width/2, y: height/2 - 100, 
-                            text: `GRAVITY SHIFT! Level ${this.level} ⚠️`, 
+                            text: `Level ${this.level}!`, 
                             alpha: 2.5, hue: 10
                         });
+                        // Visual shake for UI
+                        this.pressureMeter.style.transform = `translateY(-50%) translateX(${(Math.random() - 0.5) * 8}px)`;
+                    } else {
+                        this.pressureMeter.style.transform = `translateY(-50%)`;
                     }
 
-                    // Spawn mechanic: Get's progressively faster as level increases!
-                    let spawnRate = Math.max(1200, 4000 - (this.level * 400));
-                    if (t - this.lastSpawnTargetTime > spawnRate) { 
+                    // Spawn mechanic
+                    if (t - this.lastSpawnTargetTime > 4000) { // Slower spawning to not overwhelm
                         this.lastSpawnTargetTime = t;
                         if (this.bubbles.length < 25) this.spawnOrbiter();
                     }
@@ -1309,6 +1267,9 @@
                     if (activeOrbiters >= 20) {
                         this.state = 'gameover';
                         this.pressureMeter.style.display = 'none';
+                        let shareBtn = document.getElementById('orbit-share');
+                        shareBtn.style.display = 'inline-block';
+                        shareBtn.href = `mailto:?subject=I reached Mass ${this.score} in Orbit!&body=I built a galaxy of mass ${this.score} in Bubble Games! Can you beat my score?`;
                         return;
                     }
 
@@ -1388,7 +1349,7 @@
 
                             if (dist < 300) {
                                 let force = Math.pow((300 - dist) / 300, 2);
-                                if (pointer.clicked) {
+                                if (this.isPulling) {
                                     // PULL! Gravity
                                     b.vx -= (dx / dist) * force * 5;
                                     b.vy -= (dy / dist) * force * 5;
@@ -1490,59 +1451,46 @@
 
                     // Gravitational CONTOUR RINGS around cursor
                     if (pointer.x !== -1000) {
-                        let isPulling = pointer.clicked;
+                        let pullRender = this.isPulling;
                         ctx.save();
                         for (let r = 1; r <= 5; r++) {
                             let ringRadius = r * 55;
-                            let alpha = (0.35 - r * 0.06) * (isPulling ? 1 : 0.5);
+                            let alpha = (0.35 - r * 0.06) * (pullRender ? 1 : 0.5);
                             ctx.beginPath();
-                            ctx.setLineDash(isPulling ? [] : [6, 10]);
+                            ctx.setLineDash(pullRender ? [] : [6, 10]);
                             ctx.arc(pointer.x, pointer.y, ringRadius, 0, Math.PI * 2);
-                            ctx.lineWidth = isPulling ? 2.5 - r * 0.3 : 1;
-                            ctx.strokeStyle = isPulling
+                            ctx.lineWidth = pullRender ? 2.5 - r * 0.3 : 1;
+                            ctx.strokeStyle = pullRender
                                 ? `rgba(255, 140, 255, ${alpha})`   // pink/magenta on pull
                                 : `rgba(140, 200, 255, ${alpha})`; // soft blue on hover
                             ctx.stroke();
                         }
+                        
+                        // Overheat Meter
+                        ctx.beginPath();
+                        ctx.arc(pointer.x, pointer.y, 45, -Math.PI/2, (-Math.PI/2) + (Math.PI * 2 * (this.energy / 100)));
+                        ctx.strokeStyle = this.energy < 25 ? '#ef5350' : 'rgba(255, 255, 255, 0.8)';
+                        ctx.lineWidth = 4;
+                        ctx.stroke();
+                        
                         ctx.restore();
                     }
 
-                    // Core Black Hole visuals!
-                    ctx.save();
-                    ctx.translate(this.core.x, this.core.y);
-                    
-                    // Singularity
-                    ctx.beginPath();
-                    ctx.arc(0, 0, this.core.r * 0.7, 0, Math.PI * 2);
-                    ctx.fillStyle = "#000"; // Pure black
-                    
-                    // Dynamic ominous glow around the black hole that intensifies with score
-                    let glowHue = this.score > 200 ? ((t * 0.05) % 360) : 260; // Deep purple initially, shifts on milestone!
-                    let glowIntensity = Math.min(100, 30 + (this.level * 10) + pulse);
-                    ctx.shadowColor = `hsl(${glowHue}, 100%, 60%)`;
-                    ctx.shadowBlur = glowIntensity;
-                    ctx.fill();
-                    
-                    // Event Horizon Line
-                    ctx.beginPath();
-                    ctx.arc(0, 0, this.core.r * 0.72, 0, Math.PI * 2);
-                    ctx.lineWidth = 3;
-                    ctx.strokeStyle = `hsl(${glowHue}, 100%, 70%)`;
-                    ctx.shadowBlur = 0; // Don't double blur
-                    ctx.stroke();
-
-                    // Accretion Disk (Rotates)
-                    ctx.rotate(t * 0.001);
-                    ctx.beginPath();
-                    ctx.ellipse(0, 0, this.core.r * 1.5, this.core.r * 0.4, 0, 0, Math.PI * 2);
-                    ctx.lineWidth = 1;
-                    ctx.strokeStyle = `rgba(255, 255, 255, 0.4)`;
-                    ctx.stroke();
-
-                    ctx.restore();
+                    // Core pulsing logic for hue.
+                    let coreOp = 1.0;
+                    if (this.score > 200) {
+                        this.core.hue = (t * 0.02) % 360;
+                        coreOp = 0.9 + Math.sin(t * 0.005) * 0.1;
+                    } else {
+                        this.core.hue = 20;
+                        coreOp = 0.95;
+                    }
 
                     // Draw Orbiters
                     this.bubbles.forEach(b => drawBubble(ctx, b.x, b.y, b.r, b.hue, 1.0, t + b.offset, b.speedX, b.speedY));
+
+                    // Draw Core over top
+                    drawBubble(ctx, this.core.x, this.core.y, this.core.r, this.core.hue, coreOp, t, 0.002, 0.003);
 
                     // Merge score popups 
                     ctx.save();
@@ -1568,7 +1516,7 @@
             lobby: "url('assets/gallery/bubblegum_clouds.png') no-repeat center center / cover, #ffccd5",
             garden: "url('assets/gallery/bubblegum_clouds.png') no-repeat center center / cover, #ffccd5",
             herding: "url('assets/game-assets/grass_bg_for_game.png') no-repeat center center / cover, #000",
-            dontpop: "linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('assets/game-assets/block-print-fabric (6).png') repeat, #111",
+            dontpop: "url('assets/game-assets/block-print-fabric (6).png') repeat, #111",
             orbit: "linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('assets/game-assets/abstract_dithering_purple.png') repeat, #111"
         };
 
