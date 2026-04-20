@@ -10,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/sunset.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Indie+Flower&display=swap" rel="stylesheet">
     <style>
         body {
             overflow: hidden;
@@ -127,6 +128,71 @@
                 white-space: normal;
             }
         }
+
+        /* --- Why? Balloon Styles --- */
+        #why-balloon-anchor {
+            position: fixed;
+            top: 5vh;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            text-decoration: none;
+            opacity: 0;
+            transition: opacity 1.5s ease, filter 0.3s ease;
+            pointer-events: none;
+            filter: drop-shadow(0 15px 35px rgba(0,0,0,0.2));
+        }
+
+        #why-balloon-anchor:hover {
+            filter: drop-shadow(0 20px 45px rgba(0,0,0,0.3)) brightness(1.1);
+        }
+
+        .balloon {
+            width: 80px;
+            height: 100px;
+            background: #ff6b81;
+            border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .balloon::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 20px solid #ff6b81;
+        }
+
+        .balloon-text {
+            color: white;
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.2rem;
+            pointer-events: none;
+        }
+
+        #balloon-string {
+            position: fixed;
+            pointer-events: none;
+            stroke: rgba(0,0,0,0.2);
+            stroke-width: 1.5;
+            fill: none;
+            z-index: 999;
+        }
+
+        .balloon-svg-text {
+            font-family: 'Indie Flower', cursive;
+            font-size: 24px;
+            fill: white;
+            pointer-events: none;
+        }
     </style>
 </head>
 
@@ -145,7 +211,7 @@
         <header class="header"
             style="background: rgba(255, 255, 255, 0.6); padding: 20px 30px; border-radius: 12px; display: inline-block; margin-bottom: 2rem; backdrop-filter: blur(8px); border: 1px solid rgba(0, 0, 0, 0.1);">
             <h1 style="margin: 0; padding-bottom: 5px; color: #111;">Munir's Hobbies Box</h1>
-            <p style="margin: 0; color: #333;">Welcome to my website-as-art collection of multimedia art.</p>
+            <p style="margin: 0; color: #333;">Welcome to my <span id="balloon-anchor-text" style="text-decoration: underline dotted rgba(0,0,0,0.2); cursor: help;">website-as-art</span> collection of multimedia art.</p>
         </header>
 
         <nav class="nav-grid">
@@ -178,11 +244,66 @@
             </a>
         </nav>
 
-        <footer class="footer">
+        <footer class="footer" style="opacity: 0; transition: opacity 0.5s ease;">
             <p>&copy; 2026 Munir Paviwala</p>
             <div class="credit-box">Background art by Munir Paviwala</div>
         </footer>
     </div>
+
+    <style>
+        /* Stealth UI - show footer only on hover */
+        .container:hover .footer, .footer:hover {
+            opacity: 1 !important;
+        }
+    </style>
+
+    <!-- The 'Why?' Balloon -->
+    <a href="essays.html" id="why-balloon-anchor">
+        <svg width="140" height="180" viewBox="0 0 140 180" style="overflow: visible;">
+            <defs>
+                <path id="balloon-curve" d="M 20,70 Q 70,20 120,70" />
+                <radialGradient id="balloonGradient" cx="40%" cy="40%" r="60%">
+                    <stop offset="0%" style="stop-color:#ff7675" />
+                    <stop offset="100%" style="stop-color:#d63031" />
+                </radialGradient>
+                <radialGradient id="confettiGradient" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" style="stop-color:#ffffff; stop-opacity:0.8" />
+                    <stop offset="100%" style="stop-color:#dfe6e9; stop-opacity:0.2" />
+                </radialGradient>
+            </defs>
+            
+            <!-- Confetti Particles -->
+            <circle class="confetti" cx="10" cy="150" r="4" fill="url(#confettiGradient)" />
+            <circle class="confetti" cx="130" cy="130" r="3" fill="url(#confettiGradient)" />
+            <circle class="confetti" cx="20" cy="40" r="5" fill="url(#confettiGradient)" />
+            <circle class="confetti" cx="120" cy="160" r="4" fill="url(#confettiGradient)" />
+
+            <path d="M 70,150 L 60,120 L 80,120 Z" fill="#d63031" /> <!-- Knot -->
+            <ellipse cx="70" cy="75" rx="60" ry="70" fill="url(#balloonGradient)" stroke="#c0392b" stroke-width="1.5" />
+            
+            <!-- Shiny Sheen/Highlight -->
+            <ellipse cx="50" cy="45" rx="15" ry="20" fill="rgba(255,255,255,0.3)" transform="rotate(-20, 50, 45)" />
+            
+            <text class="balloon-svg-text" style="font-weight: bold; painting-order: stroke; stroke: rgba(0,0,0,0.1); stroke-width: 1px;">
+                <textPath href="#balloon-curve" startOffset="50%" text-anchor="middle">why?</textPath>
+            </text>
+        </svg>
+    </a>
+    <style>
+        .confetti {
+            animation: confettiBob 3s ease-in-out infinite alternate;
+        }
+        @keyframes confettiBob {
+            0% { transform: translateY(0) rotate(0deg); }
+            100% { transform: translateY(-15px) rotate(10deg); }
+        }
+        .confetti:nth-child(2) { animation-delay: 0.5s; }
+        .confetti:nth-child(3) { animation-delay: 1.2s; }
+        .confetti:nth-child(4) { animation-delay: 0.8s; }
+    </style>
+    <svg id="balloon-svg" style="position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:999;">
+        <path id="balloon-string" d="" stroke-dasharray="4 2" />
+    </svg>
 
     <script>
         // The secret code
@@ -200,6 +321,12 @@
             container.style.pointerEvents = 'auto';
             document.body.classList.add('theme-sunset');
             document.getElementById('sunset-tint').style.opacity = '0.5';
+            
+            // Show the balloon too
+            const balloon = document.getElementById('why-balloon-anchor');
+            balloon.style.opacity = '1';
+            balloon.style.pointerEvents = 'auto';
+
             setTimeout(initPhysics, 100); // Start the physics engine immediately after revealing!
         }
 
@@ -339,6 +466,19 @@
                 });
             });
 
+            // The 'Why?' Balloon is extra buoyant and tethered
+            const balloonAnchor = document.getElementById('why-balloon-anchor');
+            physicsObjects.push({
+                el: balloonAnchor,
+                x: 0, y: 0, 
+                vx: 0, vy: 0,
+                jointX: 0, jointY: 0, // Double pendulum joint
+                jvx: 0, jvy: 0,
+                spring: 0.05, friction: 0.94,
+                randomOffset: Math.random() * 100,
+                isBalloon: true
+            });
+
             physicsEnabled = true;
             physicsLoop();
         }
@@ -382,6 +522,35 @@
 
                 // Apply the math to the DOM element instantly
                 obj.el.style.transform = `translate(${obj.x}px, ${obj.y + bobY}px) rotate(${rockRot}deg)`;
+
+                // Update the balloon string if this is the balloon
+                if (obj.isBalloon) {
+                    const stringPath = document.getElementById('balloon-string');
+                    const anchorEl = document.getElementById('balloon-anchor-text');
+                    const aRect = anchorEl.getBoundingClientRect();
+                    
+                    const anchorX = aRect.left + aRect.width / 2;
+                    const anchorY = aRect.top + aRect.height / 2;
+
+                    const bRect = obj.el.getBoundingClientRect();
+                    const balloonX = bRect.left + bRect.width / 2;
+                    const balloonY = bRect.top + bRect.height - 10; // Bottom of balloon
+
+                    // Double pendulum physics: The joint
+                    // We treat the "middle" of the string as a second mass
+                    const targetJointX = (anchorX + balloonX) / 2;
+                    const targetJointY = (anchorY + balloonY) / 2 + 30; // Droop
+
+                    obj.jvx += (targetJointX - obj.jointX) * 0.1;
+                    obj.jvy += (targetJointY - obj.jointY) * 0.1;
+                    obj.jvx *= 0.8;
+                    obj.jvy *= 0.8;
+                    obj.jointX += obj.jvx;
+                    obj.jointY += obj.jvy;
+
+                    // Draw the string as a multi-segment curve connecting Anchor -> Joint -> Balloon
+                    stringPath.setAttribute('d', `M ${anchorX} ${anchorY} Q ${obj.jointX} ${obj.jointY} ${balloonX} ${balloonY}`);
+                }
             });
 
             requestAnimationFrame(physicsLoop);
