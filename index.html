@@ -150,7 +150,7 @@
         .balloon {
             width: 80px;
             height: 100px;
-            background: #ff6b81;
+            background: #90306c;
             border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
             display: flex;
             align-items: center;
@@ -168,7 +168,7 @@
             transform: translateX(-50%);
             border-left: 10px solid transparent;
             border-right: 10px solid transparent;
-            border-bottom: 20px solid #ff6b81;
+            border-bottom: 20px solid #90306c;
         }
 
         .balloon-text {
@@ -181,10 +181,11 @@
         #balloon-string {
             position: fixed;
             pointer-events: none;
-            stroke: rgba(0,0,0,0.2);
-            stroke-width: 1.5;
+            stroke: #6d3f76; /* Purple string */
+            stroke-width: 5; /* Juicier, thicker string */
             fill: none;
             z-index: 999;
+            stroke-linecap: round;
         }
 
         .balloon-svg-text {
@@ -211,7 +212,7 @@
         <header class="header"
             style="background: rgba(255, 255, 255, 0.6); padding: 20px 30px; border-radius: 12px; display: inline-block; margin-bottom: 2rem; backdrop-filter: blur(8px); border: 1px solid rgba(0, 0, 0, 0.1);">
             <h1 style="margin: 0; padding-bottom: 5px; color: #111;">Munir's Hobbies Box</h1>
-            <p style="margin: 0; color: #333;">Welcome to my <span id="balloon-anchor-text" style="text-decoration: underline dotted rgba(0,0,0,0.2); cursor: help;">website-as-art</span> collection of multimedia art.</p>
+            <p style="margin: 0; color: #333;">Welcome to my <span id="balloon-anchor-text" style="color: #90306c; font-weight: bold; text-decoration: underline wavy #90306c; cursor: help; text-underline-offset: 4px;">website-as-art</span> collection of multimedia art.</p>
         </header>
 
         <nav class="nav-grid">
@@ -302,7 +303,7 @@
         .confetti:nth-child(4) { animation-delay: 0.8s; }
     </style>
     <svg id="balloon-svg" style="position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:999;">
-        <path id="balloon-string" d="" stroke-dasharray="4 2" />
+        <path id="balloon-string" d="" />
     </svg>
 
     <script>

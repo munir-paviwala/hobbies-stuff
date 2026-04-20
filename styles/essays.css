@@ -40,19 +40,58 @@ body {
 .workspace {
     display: flex;
     width: 100vw;
-    min-height: 100vh;
+    height: 100vh;
+    overflow: hidden;
 }
 
 .container-wrapper {
     flex: 1;
-    display: flex;
-    justify-content: center;
-    padding: 60px 20px;
+    overflow-y: auto;
+    scroll-snap-type: y mandatory; /* Enable smooth snap-to-page */
+    scroll-behavior: smooth;
+    background: var(--bg-color);
 }
 
 .container {
-    max-width: 800px;
+    max-width: 900px;
     width: 100%;
+    margin: 0 auto;
+}
+
+.slide {
+    min-height: 100vh;
+    width: 100%;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    padding: 10vh 2rem;
+    box-sizing: border-box;
+    transition: background 0.5s ease, color 0.5s ease;
+    border-bottom: 1px dashed var(--border-color); /* Separator indicator */
+}
+
+/* Slide Alignment */
+.slide[data-align="center"] { text-align: center; align-items: center; }
+.slide[data-align="right"] { text-align: right; align-items: flex-end; }
+.slide[data-align="left"] { text-align: left; align-items: flex-start; }
+
+/* Slide Themes */
+.slide[data-slide-theme="dark"] {
+    background: #111 !important;
+    color: #f0f0f0 !important;
+    --border-color: #333;
+}
+.slide[data-slide-theme="dark"] h1, 
+.slide[data-slide-theme="dark"] h2 {
+    color: #fff !important;
+}
+
+.slide-break {
+    height: 0;
+    margin: 0;
+    border: none;
+    visibility: hidden;
+    scroll-snap-align: start;
 }
 
 h1 { font-size: 2.2rem; margin-bottom: 2rem; }
@@ -200,27 +239,79 @@ body:hover #theme-switch, body:hover .nav-back { opacity: 1; }
     opacity: 0;
 }
 
+.toolbar-divider {
+    width: 1px;
+    height: 15px;
+    background: rgba(255,255,255,0.2);
+    align-self: center;
+    margin: 0 5px;
+}
+
 #editor-status {
     position: fixed;
-    bottom: 20px;
-    left: 20px;
+    bottom: 0;
+    left: 0;
+    width: 100%;
     background: var(--text-primary);
     color: var(--bg-color);
-    padding: 10px 20px;
-    border-radius: 4px;
-    font-size: 0.7rem;
-    display: none;
-    gap: 20px;
+    padding: 8px 30px;
+    font-size: 0.75rem;
+    display: flex;
+    gap: 25px;
     align-items: center;
-    z-index: 2000;
+    justify-content: center;
+    z-index: 5000;
+    border-top: 2px solid #6d3f76;
+    box-shadow: 0 -5px 15px rgba(109, 63, 118, 0.3);
+    font-family: var(--font-mono);
+}
+
+.editor-only {
+    display: none;
+}
+
+.editor-active .editor-only {
+    display: inline-block;
+}
+
+.slide-mark {
+    display: none;
+    border-top: 1px dashed var(--border-color);
+    margin: 60px auto;
+    padding: 20px 0;
+    text-align: center;
+    color: var(--accent-blue);
+    font-size: 0.8rem;
+    opacity: 0.8;
+    width: 100%;
+    pointer-events: all;
+    font-style: italic;
+}
+
+.editor-active .slide-mark {
+    display: block;
 }
 
 #editor-status button {
     background: transparent;
     border: 1px solid var(--bg-color);
     color: var(--bg-color);
-    padding: 3px 8px;
+    padding: 4px 12px;
+    border-radius: 4px;
     cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s ease;
+    opacity: 0.9;
+}
+
+#editor-status button:hover {
+    background: var(--bg-color);
+    color: var(--text-primary);
+    opacity: 1;
+}
+
+.status-divider {
+    opacity: 0.3;
 }
 
 /* Markdown Marks (Low Opacity) */
