@@ -259,6 +259,45 @@
             display: block;
         }
 
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            .container-wrapper {
+                scroll-snap-type: y proximity; /* More forgiving for long pages */
+            }
+
+            .slide {
+                padding: 12vh 1.5rem 5vh 1.5rem;
+                min-height: auto; /* Allow growth if content is long */
+                height: auto;
+            }
+
+            h1 { font-size: 1.8rem; line-height: 1.2; margin-bottom: 1.5rem; word-break: break-word; }
+            h2 { font-size: 1.3rem; }
+            p { font-size: 1rem; }
+
+            #theme-switch, .nav-back {
+                opacity: 0.8;
+                background: var(--bg-color);
+                box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+                padding: 10px;
+                border-radius: 8px;
+            }
+
+            #theme-switch { width: 44px; height: 44px; top: 15px; right: 15px; }
+            .nav-back { top: 15px; left: 15px; }
+
+            #editor-status {
+                flex-wrap: wrap;
+                padding: 15px;
+                gap: 10px;
+                font-size: 0.7rem;
+            }
+
+            .selection-toolbar {
+                transform: translate(-50%, -120%) scale(1.2); /* Bigger buttons for fingers */
+            }
+        }
+
         .art-modal {
             display: none;
             position: fixed;
@@ -642,6 +681,23 @@
             a.download = 'essays.html';
             a.click();
         }
+
+        // Mobile Unlock: 5 quick taps
+        let tapCount = 0;
+        let tapTimeout;
+        document.addEventListener('touchstart', (e) => {
+            if (isEditorEnabled) return;
+            tapCount++;
+            clearTimeout(tapTimeout);
+            if (tapCount >= 5) {
+                openModal("Access Code Required:", pass => {
+                    if (pass === 'art') enableEditor();
+                    else tapCount = 0;
+                }, 'password');
+                tapCount = 0;
+            }
+            tapTimeout = setTimeout(() => { tapCount = 0; }, 1000);
+        });
     </script>
 </body>
 
