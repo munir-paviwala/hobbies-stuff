@@ -140,11 +140,11 @@
             opacity: 0;
             transition: opacity 1.5s ease, filter 0.3s ease;
             pointer-events: none;
-            filter: drop-shadow(0 15px 35px rgba(0,0,0,0.2));
+            filter: drop-shadow(0 15px 35px rgba(0, 0, 0, 0.2));
         }
 
         #why-balloon-anchor:hover {
-            filter: drop-shadow(0 20px 45px rgba(0,0,0,0.3)) brightness(1.1);
+            filter: drop-shadow(0 20px 45px rgba(0, 0, 0, 0.3)) brightness(1.1);
         }
 
         .balloon {
@@ -181,8 +181,10 @@
         #balloon-string {
             position: fixed;
             pointer-events: none;
-            stroke: #6d3f76; /* Purple string */
-            stroke-width: 5; /* Juicier, thicker string */
+            stroke: #6d3f76;
+            /* Purple string */
+            stroke-width: 5;
+            /* Juicier, thicker string */
             fill: none;
             z-index: 999;
             stroke-linecap: round;
@@ -212,7 +214,9 @@
         <header class="header"
             style="background: rgba(255, 255, 255, 0.6); padding: 20px 30px; border-radius: 12px; display: inline-block; margin-bottom: 2rem; backdrop-filter: blur(8px); border: 1px solid rgba(0, 0, 0, 0.1);">
             <h1 style="margin: 0; padding-bottom: 5px; color: #111;">Munir's Hobbies Box</h1>
-            <p style="margin: 0; color: #333;">Welcome to my <span id="balloon-anchor-text" style="color: #90306c; font-weight: bold; text-decoration: underline wavy #90306c; cursor: help; text-underline-offset: 4px;">website-as-art</span> collection of multimedia art.</p>
+            <p style="margin: 0; color: #333;">Welcome to my <span id="balloon-anchor-text"
+                    style="color: #90306c; font-weight: bold; cursor: help;">website-as-art</span> collection of
+                multimedia art.</p>
         </header>
 
         <nav class="nav-grid">
@@ -253,14 +257,15 @@
 
     <style>
         /* Stealth UI - show footer only on hover */
-        .container:hover .footer, .footer:hover {
+        .container:hover .footer,
+        .footer:hover {
             opacity: 1 !important;
         }
     </style>
 
     <!-- The 'Why?' Balloon -->
-    <a href="essays.html" id="why-balloon-anchor">
-        <svg width="140" height="180" viewBox="0 0 140 180" style="overflow: visible;">
+    <a href="https://munir-paviwala.github.io/essays" id="why-balloon-anchor">
+        <svg width="80" height="103" viewBox="0 0 140 180" style="overflow: visible;">
             <defs>
                 <path id="balloon-curve" d="M 20,70 Q 70,20 120,70" />
                 <radialGradient id="balloonGradient" cx="40%" cy="40%" r="60%">
@@ -272,7 +277,7 @@
                     <stop offset="100%" style="stop-color:#dfe6e9; stop-opacity:0.2" />
                 </radialGradient>
             </defs>
-            
+
             <!-- Confetti Particles -->
             <circle class="confetti" cx="10" cy="150" r="4" fill="url(#confettiGradient)" />
             <circle class="confetti" cx="130" cy="130" r="3" fill="url(#confettiGradient)" />
@@ -281,11 +286,12 @@
 
             <path d="M 70,150 L 60,120 L 80,120 Z" fill="#d63031" /> <!-- Knot -->
             <ellipse cx="70" cy="75" rx="60" ry="70" fill="url(#balloonGradient)" stroke="#c0392b" stroke-width="1.5" />
-            
+
             <!-- Shiny Sheen/Highlight -->
             <ellipse cx="50" cy="45" rx="15" ry="20" fill="rgba(255,255,255,0.3)" transform="rotate(-20, 50, 45)" />
-            
-            <text class="balloon-svg-text" style="font-weight: bold; painting-order: stroke; stroke: rgba(0,0,0,0.1); stroke-width: 1px;">
+
+            <text class="balloon-svg-text"
+                style="font-weight: bold; painting-order: stroke; stroke: rgba(0,0,0,0.1); stroke-width: 1px;">
                 <textPath href="#balloon-curve" startOffset="50%" text-anchor="middle">why?</textPath>
             </text>
         </svg>
@@ -294,15 +300,31 @@
         .confetti {
             animation: confettiBob 3s ease-in-out infinite alternate;
         }
+
         @keyframes confettiBob {
-            0% { transform: translateY(0) rotate(0deg); }
-            100% { transform: translateY(-15px) rotate(10deg); }
+            0% {
+                transform: translateY(0) rotate(0deg);
+            }
+
+            100% {
+                transform: translateY(-15px) rotate(10deg);
+            }
         }
-        .confetti:nth-child(2) { animation-delay: 0.5s; }
-        .confetti:nth-child(3) { animation-delay: 1.2s; }
-        .confetti:nth-child(4) { animation-delay: 0.8s; }
+
+        .confetti:nth-child(2) {
+            animation-delay: 0.5s;
+        }
+
+        .confetti:nth-child(3) {
+            animation-delay: 1.2s;
+        }
+
+        .confetti:nth-child(4) {
+            animation-delay: 0.8s;
+        }
     </style>
-    <svg id="balloon-svg" style="position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:999;">
+    <svg id="balloon-svg"
+        style="position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:999;">
         <path id="balloon-string" d="" />
     </svg>
 
@@ -322,7 +344,7 @@
             container.style.pointerEvents = 'auto';
             document.body.classList.add('theme-sunset');
             document.getElementById('sunset-tint').style.opacity = '0.5';
-            
+
             // Show the balloon too
             const balloon = document.getElementById('why-balloon-anchor');
             balloon.style.opacity = '1';
@@ -471,7 +493,7 @@
             const balloonAnchor = document.getElementById('why-balloon-anchor');
             physicsObjects.push({
                 el: balloonAnchor,
-                x: 0, y: 0, 
+                x: 0, y: 0,
                 vx: 0, vy: 0,
                 jointX: 0, jointY: 0, // Double pendulum joint
                 jvx: 0, jvy: 0,
@@ -529,7 +551,7 @@
                     const stringPath = document.getElementById('balloon-string');
                     const anchorEl = document.getElementById('balloon-anchor-text');
                     const aRect = anchorEl.getBoundingClientRect();
-                    
+
                     const anchorX = aRect.left + aRect.width / 2;
                     const anchorY = aRect.top + aRect.height / 2;
 

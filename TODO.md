@@ -33,8 +33,5 @@ Our traditional grid weaves limit how tightly things can lock together. We want 
 Also, magic mode opens only certain patterns/layouts, when in Magic modes, can it show all the patterns/layouts?
 
 
-ESSAY PAGE TODO: 
 
-Need to make it such that I can edit the .md file in the browser and save it, without losing the CSS. 
-Also be able to deal with that page break thing much better than it does now. It's shit for now. Apart from that, it's pretty good. 
 
