@@ -248,7 +248,7 @@
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.5s ease;
-            font-family: sans-serif;
+            font-family: inherit;
             font-size: 1.1rem;
             line-height: 1.6;
             font-weight: bold;
@@ -309,10 +309,103 @@
             background: rgba(220, 220, 220, 0.9);
             filter: brightness(1.1);
         }
+
+        /* --- Lock Screen Styles --- */
+        #lock-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 15, 20, 0.98);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 1.5s ease, backdrop-filter 1.5s ease;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .hello-container {
+            display: flex;
+            gap: 15px;
+        }
+
+        .hello-letter {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 3.5rem;
+            color: #1a1a24;
+            text-shadow: 1px 1px 0px rgba(255,255,255,0.05);
+            background: #111118;
+            padding: 25px 20px;
+            border-radius: 4px 4px 0 0;
+            border: 4px solid #0a0a0f;
+            border-bottom: 8px solid #050508;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5), inset 0 8px 15px rgba(0,0,0,0.8);
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @media (max-width: 600px) {
+            .hello-letter {
+                font-size: 2rem;
+                padding: 15px 10px;
+                border-width: 3px;
+                border-bottom-width: 6px;
+            }
+            .hello-container {
+                gap: 8px;
+            }
+        }
+
+        .hello-letter.lit {
+            color: #fffde7;
+            background: #f59e0b;
+            border-color: #b45309;
+            border-bottom-color: #78350f;
+            text-shadow: 0 0 10px #fff, 0 0 20px #fde047;
+            box-shadow: 0 0 40px rgba(245, 158, 11, 0.6), inset 0 0 20px #fcd34d, 0 10px 20px rgba(0,0,0,0.3);
+            transform: translateY(-5px) scale(1.05);
+        }
+
+        .hello-subtitle {
+            color: rgba(255, 255, 255, 0.5);
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.7rem;
+            margin-top: 40px;
+            text-align: center;
+            line-height: 1.8;
+            max-width: 80%;
+            animation: pulseText 2s infinite alternate;
+        }
+
+        @keyframes pulseText {
+            0% { opacity: 0.3; }
+            100% { opacity: 0.8; }
+        }
     </style>
 </head>
 
 <body class="landing-page" style="transition: color 1.5s ease; background-color: #f6c9d2;">
+    <!-- New Lock Screen -->
+    <div id="lock-screen">
+        <div class="hello-container">
+            <div class="hello-letter">H</div>
+            <div class="hello-letter">E</div>
+            <div class="hello-letter">L</div>
+            <div class="hello-letter">L</div>
+            <div class="hello-letter">O</div>
+        </div>
+        <p class="hello-subtitle">Type or click above letters</p>
+    </div>
+
     <!-- Raw Image layer scaled slightly up to hide displacement edge bleed -->
     <div class="art-background"
         style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: url('assets/pattern-vibes/for_background_mar29.png'); background-size: cover; background-position: center; z-index: -2; pointer-events: none;">
@@ -456,17 +549,27 @@
     </svg>
 
     <script>
-        // The secret code
-        const secretCode = "hello";
-        let inputBuffer = "";
-
         const container = document.querySelector('.container');
         // Hide by default with a smooth fade in
         container.style.opacity = '0';
         container.style.pointerEvents = 'none';
         container.style.transition = 'opacity 1.5s ease';
 
+        const lockScreen = document.getElementById('lock-screen');
+        const helloLetters = document.querySelectorAll('.hello-letter');
+        const expectedWord = "hello";
+        let progress = 0;
+        let isUnlocked = false;
+
         function unlock() {
+            if (isUnlocked) return;
+            isUnlocked = true;
+            
+            // Fade out lock screen
+            lockScreen.style.opacity = '0';
+            lockScreen.style.pointerEvents = 'none';
+
+            // Reveal content
             container.style.opacity = '1';
             container.style.pointerEvents = 'auto';
             document.body.classList.add('theme-sunset');
@@ -478,39 +581,54 @@
             balloon.style.pointerEvents = 'auto';
 
             setTimeout(initPhysics, 100); // Start the physics engine immediately after revealing!
+            
+            // Fully remove lock screen from DOM after fade to prevent interactions
+            setTimeout(() => {
+                if (lockScreen.parentNode) {
+                    lockScreen.parentNode.removeChild(lockScreen);
+                }
+            }, 1500);
         }
 
-        // Desktop: Keyboard listener for "konami" style code
-        window.addEventListener('keydown', (e) => {
-            // only track characters
-            if (e.key.length === 1) {
-                inputBuffer += e.key.toLowerCase();
-                // Keep buffer length to secretCode length
-                if (inputBuffer.length > secretCode.length) {
-                    inputBuffer = inputBuffer.substring(inputBuffer.length - secretCode.length);
+        function advanceProgress() {
+            if (progress < 5) {
+                helloLetters[progress].classList.add('lit');
+                progress++;
+                if (progress === 5) {
+                    setTimeout(unlock, 500); // wait a moment to see the last letter lit
                 }
-                if (inputBuffer === secretCode) {
-                    unlock();
+            }
+        }
+
+        function resetProgress() {
+            progress = 0;
+            helloLetters.forEach(l => l.classList.remove('lit'));
+        }
+
+        // Desktop: Keyboard listener
+        window.addEventListener('keydown', (e) => {
+            if (isUnlocked) return;
+            
+            if (e.key.length === 1) {
+                const char = e.key.toLowerCase();
+                if (char === expectedWord[progress]) {
+                    advanceProgress();
+                } else {
+                    // Check if they typed 'h' to start over
+                    if (char === 'h') {
+                        resetProgress();
+                        advanceProgress(); 
+                    } else {
+                        resetProgress();
+                    }
                 }
             }
         });
 
-        // Mobile: 5 quick taps anywhere on the screen
-        let tapCount = 0;
-        let tapTimeout;
-        window.addEventListener('touchstart', (e) => {
-            // Only count taps if container is hidden
-            if (container.style.opacity === '0') {
-                tapCount++;
-                clearTimeout(tapTimeout);
-                if (tapCount >= 5) {
-                    unlock();
-                    tapCount = 0;
-                }
-                tapTimeout = setTimeout(() => {
-                    tapCount = 0;
-                }, 600); // 600ms timeframe to keep tapping
-            }
+        // Mobile / Mouse: Any click/tap on the lock screen advances it
+        lockScreen.addEventListener('pointerdown', (e) => {
+            if (isUnlocked) return;
+            advanceProgress();
         });
 
         // --- Custom Physics & Water Engine ---
