@@ -317,35 +317,34 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(15, 15, 20, 0.98);
+            background: rgba(35, 20, 30, 0.4); /* Darkish warm overlay */
             z-index: 2000;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             transition: opacity 1.5s ease, backdrop-filter 1.5s ease;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
         }
 
         .hello-container {
             display: flex;
-            gap: 15px;
+            gap: 12px;
         }
 
         .hello-letter {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 3.5rem;
-            color: #1a1a24;
-            text-shadow: 1px 1px 0px rgba(255,255,255,0.05);
-            background: #111118;
-            padding: 25px 20px;
-            border-radius: 4px 4px 0 0;
-            border: 4px solid #0a0a0f;
-            border-bottom: 8px solid #050508;
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.4rem;
+            color: rgba(255, 255, 255, 0.6);
+            background: rgba(255, 182, 193, 0.15); /* Very dim pastel pink */
+            width: 45px;
+            height: 45px;
+            border-radius: 16px; /* Squircle */
+            border: 2px solid rgba(255, 182, 193, 0.3);
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             cursor: pointer;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5), inset 0 8px 15px rgba(0,0,0,0.8);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15), inset 0 2px 4px rgba(255,255,255,0.1);
             user-select: none;
             -webkit-tap-highlight-color: transparent;
             display: flex;
@@ -355,10 +354,10 @@
 
         @media (max-width: 600px) {
             .hello-letter {
-                font-size: 2rem;
-                padding: 15px 10px;
-                border-width: 3px;
-                border-bottom-width: 6px;
+                font-size: 1.2rem;
+                width: 38px;
+                height: 38px;
+                border-radius: 12px;
             }
             .hello-container {
                 gap: 8px;
@@ -366,29 +365,29 @@
         }
 
         .hello-letter.lit {
-            color: #fffde7;
-            background: #f59e0b;
-            border-color: #b45309;
-            border-bottom-color: #78350f;
-            text-shadow: 0 0 10px #fff, 0 0 20px #fde047;
-            box-shadow: 0 0 40px rgba(245, 158, 11, 0.6), inset 0 0 20px #fcd34d, 0 10px 20px rgba(0,0,0,0.3);
-            transform: translateY(-5px) scale(1.05);
+            color: #ffffff;
+            background: #ff9a9e; /* Bright cotton candy pink */
+            border-color: #ffb7b2;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            box-shadow: 0 0 15px #ff9a9e, 0 0 25px #fecfef, inset 0 2px 5px rgba(255,255,255,0.8), 0 6px 12px rgba(0,0,0,0.2);
+            transform: translateY(-5px) scale(1.1);
         }
 
         .hello-subtitle {
-            color: rgba(255, 255, 255, 0.5);
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.7rem;
-            margin-top: 40px;
+            color: rgba(255, 255, 255, 0.85);
+            font-family: 'Fredoka One', cursive;
+            font-size: 0.9rem;
+            margin-top: 30px;
             text-align: center;
             line-height: 1.8;
             max-width: 80%;
             animation: pulseText 2s infinite alternate;
+            letter-spacing: 0.5px;
         }
 
         @keyframes pulseText {
-            0% { opacity: 0.3; }
-            100% { opacity: 0.8; }
+            0% { opacity: 0.5; }
+            100% { opacity: 1; }
         }
     </style>
 </head>
@@ -397,13 +396,13 @@
     <!-- New Lock Screen -->
     <div id="lock-screen">
         <div class="hello-container">
-            <div class="hello-letter">H</div>
-            <div class="hello-letter">E</div>
-            <div class="hello-letter">L</div>
-            <div class="hello-letter">L</div>
-            <div class="hello-letter">O</div>
+            <div class="hello-letter">h</div>
+            <div class="hello-letter">e</div>
+            <div class="hello-letter">l</div>
+            <div class="hello-letter">l</div>
+            <div class="hello-letter">o</div>
         </div>
-        <p class="hello-subtitle">Type or click above letters</p>
+        <p class="hello-subtitle">type or click above letters</p>
     </div>
 
     <!-- Raw Image layer scaled slightly up to hide displacement edge bleed -->
