@@ -196,6 +196,102 @@
             fill: white;
             pointer-events: none;
         }
+
+        /* --- Prototype Bin Styles --- */
+        .bin-toggle {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            font-size: 2rem;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, background 0.3s ease;
+            z-index: 1000;
+        }
+
+        .bin-toggle:hover {
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        body.prototype-mode .bin-toggle {
+            background: rgba(100, 100, 100, 0.8);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            filter: grayscale(100%);
+        }
+
+        .floating-card {
+            position: fixed;
+            top: 15vh;
+            left: 50%;
+            transform: translateX(-50%) scale(0.95);
+            background: rgba(255, 255, 255, 0.85);
+            color: #111;
+            padding: 20px 30px;
+            border-radius: 12px;
+            max-width: 80%;
+            width: 500px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            z-index: 999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            font-family: sans-serif;
+            font-size: 1.05rem;
+            line-height: 1.5;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        body.prototype-mode .floating-card {
+            opacity: 1;
+            transform: translateX(-50%) scale(1);
+        }
+
+        body.prototype-mode .header {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .prototype-item {
+            display: none !important;
+        }
+
+        body.prototype-mode .prototype-item {
+            display: inline-flex !important;
+        }
+
+        body.prototype-mode .normal-item {
+            display: none !important;
+        }
+
+        /* Grayscale Effect */
+        body.prototype-mode .art-background {
+            filter: grayscale(100%) brightness(0.6) !important;
+        }
+
+        body.prototype-mode #sunset-tint {
+            opacity: 0 !important;
+        }
+        
+        body.prototype-mode .nav-grid a.pool-pad {
+            background: rgba(200, 200, 200, 0.8);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: #333;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.5);
+        }
+        body.prototype-mode .nav-grid a.pool-pad:hover {
+            background: rgba(220, 220, 220, 0.9);
+            filter: brightness(1.1);
+        }
     </style>
 </head>
 
@@ -220,34 +316,48 @@
         </header>
 
         <nav class="nav-grid">
-            <a href="https://munir-paviwala.github.io/musicProject" class="nav-link pool-pad">
+            <a href="https://munir-paviwala.github.io/musicProject" class="nav-link pool-pad normal-item">
                 Walkable Music Gallery
             </a>
-            <a href="music-tapes.html" class="nav-link pool-pad">
+            <a href="music-tapes.html" class="nav-link pool-pad normal-item">
                 Munir's Music Tapes
             </a>
-            <a href="pixel-art.html" class="nav-link pool-pad">
+            <a href="pixel-art.html" class="nav-link pool-pad normal-item">
                 Pixel Art Collection
             </a>
-            <a href="margins.html" class="nav-link pool-pad">
+            <a href="margins.html" class="nav-link pool-pad prototype-item">
                 The Margins (Daily Art & Doodles)
             </a>
-            <a href="crush.html" class="nav-link pool-pad">
+            <a href="crush.html" class="nav-link pool-pad normal-item">
                 The Aesthetics of Crush (Tessa Violet)
             </a>
-            <a href="pentatonic-color-board.html" class="nav-link pool-pad">
+            <a href="pentatonic-color-board.html" class="nav-link pool-pad prototype-item">
                 Pentatonic Color Board
             </a>
-            <a href="tv-screensaver.html" class="nav-link pool-pad">
+            <a href="tv-screensaver.html" class="nav-link pool-pad normal-item">
                 TV Screensaver Pixel Art Gallery
             </a>
-            <a href="digital-block-print-studio.html" class="nav-link pool-pad">
+            <a href="digital-block-print-studio.html" class="nav-link pool-pad normal-item">
                 Digital Block Print Studio
             </a>
-            <a href="bubble-games.html" class="nav-link pool-pad">
+            <a href="bubble-games.html" class="nav-link pool-pad normal-item">
                 Bubble Games
             </a>
+            <a href="https://munir-paviwala.github.io/personal-tools" class="nav-link pool-pad normal-item">
+                Personal Tools
+            </a>
+            <a href="https://munir-paviwala.github.io/personal-tools/dangerous-writer.html" class="nav-link pool-pad normal-item">
+                Dangerous Writer
+            </a>
         </nav>
+
+        <div id="prototype-floating-card" class="floating-card">
+            A collection of experiments and 'learning moments'—pieces I've spent time on but have since outgrown. They live here as a digital paper trail.
+        </div>
+
+        <div id="prototype-bin-toggle" class="bin-toggle" title="Prototype Bin">
+            🗑️
+        </div>
 
         <footer class="footer" style="opacity: 0; transition: opacity 0.5s ease;">
             <p>&copy; 2026 Munir Paviwala</p>
@@ -577,6 +687,14 @@
             });
 
             requestAnimationFrame(physicsLoop);
+        }
+
+        // Prototype Bin Logic
+        const binToggle = document.getElementById('prototype-bin-toggle');
+        if (binToggle) {
+            binToggle.addEventListener('click', () => {
+                document.body.classList.toggle('prototype-mode');
+            });
         }
     </script>
 </body>

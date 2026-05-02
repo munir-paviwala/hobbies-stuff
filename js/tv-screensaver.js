@@ -316,17 +316,8 @@ function toggleGalleryMode() {
     }
 }
 
-document.addEventListener('keydown', (e) => {
-    if (/^[a-zA-Z]$/.test(e.key)) {
-        typedKeys += e.key.toLowerCase();
-        if (typedKeys.length > secretPasscode.length) {
-            typedKeys = typedKeys.slice(-secretPasscode.length);
-        }
-        if (typedKeys === secretPasscode) {
-            typedKeys = "";
-            toggleGalleryMode();
-        }
-    }
+document.getElementById('tv-mode-btn').addEventListener('click', () => {
+    toggleGalleryMode();
 });
 
 document.getElementById('gallery-exit-btn').addEventListener('click', () => {
